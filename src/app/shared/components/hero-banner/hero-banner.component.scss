@@ -255,7 +255,7 @@
   bottom: v.$space-4;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(18, 18, 18, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   border: 1px solid v.$color-surface-border;
   border-radius: v.$radius-full;
@@ -263,7 +263,7 @@
   display: flex;
   align-items: center;
   gap: v.$space-2;
-  box-shadow: v.$shadow-lg;
+  box-shadow: v.$shadow-md;
   white-space: nowrap;
 }
 
@@ -288,10 +288,11 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(22, 22, 22, 0.65);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid v.$color-surface-border;
   color: v.$color-text-primary;
+  box-shadow: v.$shadow-sm;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -335,11 +336,12 @@
   display: flex;
   align-items: center;
   gap: v.$space-2;
-  background: rgba(14, 14, 14, 0.7);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(12px);
   padding: v.$space-2 v.$space-3;
   border-radius: v.$radius-full;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid v.$color-surface-border;
+  box-shadow: v.$shadow-xs;
 }
 
 .hero-dot {
@@ -356,12 +358,12 @@
     width: 8px;
     height: 8px;
     border-radius: 4px;
-    background: rgba(255, 255, 255, 0.28);
+    background: #CBD5E1;
     transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   &:hover .dot-fill {
-    background: rgba(255, 255, 255, 0.65);
+    background: #94A3B8;
   }
 
   &.active .dot-fill {
@@ -377,10 +379,11 @@
   gap: 4px;
   font-size: v.$font-size-xs;
   color: v.$color-text-muted;
-  background: rgba(14, 14, 14, 0.75);
+  background: rgba(255, 255, 255, 0.88);
   padding: 3px 10px;
   border-radius: v.$radius-full;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid v.$color-surface-border;
+  box-shadow: v.$shadow-xs;
   backdrop-filter: blur(12px);
 
   .pause-icon {

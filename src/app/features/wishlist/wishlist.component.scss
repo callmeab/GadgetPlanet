@@ -171,10 +171,11 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: v.$space-6;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(20, 20, 20, 0.8) 100%);
+  background: v.$color-bg-card;
   border: 1px solid v.$color-surface-border;
   border-radius: v.$radius-xl;
   padding: v.$space-6;
+  box-shadow: v.$shadow-xs;
   margin-bottom: v.$space-16;
 
   @media (max-width: 768px) {

@@ -7,10 +7,11 @@
 
 .footer {
   position: relative;
-  background: #09090b;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: v.$color-bg-card;
+  border-top: 1px solid v.$color-surface-border;
   margin-top: v.$space-20;
   overflow: hidden;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .footer-ambient-glow {
@@ -94,8 +95,8 @@
   flex-direction: column;
   gap: v.$space-3;
   padding: v.$space-4;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: v.$color-bg-muted;
+  border: 1px solid v.$color-surface-border;
   border-radius: v.$radius-lg;
   max-width: 320px;
 }
@@ -139,11 +140,11 @@
   transition: color v.$transition-fast;
 
   &:hover {
-    color: v.$color-primary-light;
+    color: v.$color-primary;
   }
 }
 
-// ── Category Link Columns & Accordion Headers ─────────────────
+// ── Link Columns ──────────────────────────────────────────────
 .footer-col {
   display: flex;
   flex-direction: column;
@@ -153,34 +154,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  background: transparent;
-  border: none;
-  padding: 0 0 v.$space-4;
-  text-align: left;
-  cursor: default;
-  pointer-events: none;
-  font-family: inherit;
+  margin-bottom: v.$space-4;
 }
 
 .footer-col-title {
   font-size: v.$font-size-sm;
   font-weight: v.$font-weight-bold;
-  color: v.$color-text-primary;
   text-transform: uppercase;
-  letter-spacing: v.$letter-spacing-wider;
+  letter-spacing: 0.08em;
+  color: v.$color-text-primary;
   margin: 0;
-  transition: color v.$transition-fast;
 }
 
 .accordion-chevron {
-  display: none; // Hidden on desktop
+  display: none;
+  background: none;
+  border: none;
   color: v.$color-text-muted;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
-}
-
-.footer-col-body {
-  display: block;
+  cursor: pointer;
+  padding: 0;
+  transition: transform v.$transition-fast;
 }
 
 .footer-links-list {
@@ -190,11 +183,6 @@
   display: flex;
   flex-direction: column;
   gap: v.$space-3;
-}
-
-.footer-links-item {
-  display: flex;
-  align-items: center;
 }
 
 .footer-link {
@@ -226,7 +214,7 @@
 // ── Divider ───────────────────────────────────────────────────
 .footer-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.07);
+  background: v.$color-surface-border;
   margin: v.$space-12 0 v.$space-8;
 }
 
@@ -266,8 +254,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: v.$color-bg-muted;
+  border: 1px solid v.$color-surface-border;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -281,11 +269,11 @@
     box-shadow 0.25s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: v.$color-bg-hover;
     color: var(--hover-color, #{v.$color-primary});
     border-color: var(--hover-color, #{v.$color-primary});
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    box-shadow: v.$shadow-sm;
   }
 }
 
@@ -302,19 +290,19 @@
   align-items: center;
   gap: 6px;
   padding: 5px 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: v.$color-bg-muted;
+  border: 1px solid v.$color-surface-border;
   border-radius: v.$radius-sm;
   cursor: default;
   transition: border-color v.$transition-fast;
 
   &:hover {
-    border-color: rgba(255, 255, 255, 0.25);
+    border-color: v.$color-primary-light;
   }
 
   &--security {
-    background: rgba(10, 132, 255, 0.1);
-    border-color: rgba(10, 132, 255, 0.3);
+    background: rgba(10, 132, 255, 0.08);
+    border-color: rgba(10, 132, 255, 0.25);
     color: v.$color-primary-light;
   }
 
@@ -333,7 +321,7 @@
 // ── Bottom Bar: Copyright & Legal Links ───────────────────────
 .footer-bottom-bar {
   padding-top: v.$space-6;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid v.$color-surface-border;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -413,11 +401,11 @@
   .footer-brand-col {
     padding-bottom: v.$space-6;
     margin-bottom: v.$space-2;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid v.$color-surface-border;
   }
 
   .footer-col {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid v.$color-surface-border;
 
     &:last-child {
       border-bottom: none;

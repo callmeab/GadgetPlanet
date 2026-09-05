@@ -1,6 +1,6 @@
 // ============================================================
-// GadgetPlanet — Design Tokens
-// Electric Blue + Deep Black + Orange Accent
+// GadgetPlanet — Design Tokens (Light Mode Theme)
+// Electric Blue + Clean White/Slate + Burning Orange Accent
 // ============================================================
 
 @forward 'breakpoints';
@@ -9,31 +9,31 @@
 $color-primary:         #0A84FF;   // Electric Blue
 $color-primary-light:   #3DA0FF;
 $color-primary-dark:    #005FCC;
-$color-primary-glow:    rgba(10, 132, 255, 0.25);
+$color-primary-glow:    rgba(10, 132, 255, 0.15);
 
 $color-accent:          #FF6B00;   // Burning Orange
 $color-accent-light:    #FF8C33;
 $color-accent-dark:     #CC5500;
-$color-accent-glow:     rgba(255, 107, 0, 0.25);
+$color-accent-glow:     rgba(255, 107, 0, 0.15);
 
-$color-bg:              #0D0D0D;   // Deep Black
-$color-bg-elevated:     #141414;
-$color-bg-card:         #1A1A1A;
-$color-bg-muted:        #222222;
-$color-bg-hover:        #2A2A2A;
+$color-bg:              #F8F9FA;   // Crisp, Premium Light Surface
+$color-bg-elevated:     #FFFFFF;   // Pure White
+$color-bg-card:         #FFFFFF;   // Pure White Card
+$color-bg-muted:        #F1F3F5;   // Soft Gray
+$color-bg-hover:        #E9ECEF;   // Interactive Hover Gray
 
-$color-surface:         #1E1E1E;
-$color-surface-border:  #2E2E2E;
+$color-surface:         #FFFFFF;
+$color-surface-border:  #E2E8F0;   // Clean Crisp Border
 
-$color-text-primary:    #F5F5F5;
-$color-text-secondary:  #A0A0A0;
-$color-text-muted:      #666666;
-$color-text-inverse:    #0D0D0D;
+$color-text-primary:    #111827;   // Deep Charcoal Slate (Crisp readability)
+$color-text-secondary:  #4B5563;   // Medium Slate
+$color-text-muted:      #6B7280;   // Muted Slate
+$color-text-inverse:    #FFFFFF;
 
-$color-success:         #30D158;
-$color-warning:         #FFD60A;
-$color-error:           #FF453A;
-$color-info:            #64D2FF;
+$color-success:         #16A34A;   // Refined Green
+$color-warning:         #D97706;   // Refined Amber
+$color-error:           #DC2626;   // Refined Crimson
+$color-info:            #0284C7;   // Sky Info
 
 // Badge colours
 $color-badge-bestseller: $color-accent;
@@ -43,15 +43,15 @@ $color-badge-limited:    #BF5AF2;
 $color-badge-sale:       $color-success;
 
 // Stars
-$color-star-filled:      #FFD60A;
-$color-star-empty:       #3A3A3A;
+$color-star-filled:      #F59E0B;
+$color-star-empty:       #CBD5E1;
 
 // ── Gradients ──────────────────────────────────────────────
 $gradient-primary:    linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
 $gradient-accent:     linear-gradient(135deg, $color-accent 0%, $color-accent-dark 100%);
-$gradient-hero:       linear-gradient(135deg, #0A84FF 0%, #0D0D0D 60%, #FF6B00 100%);
-$gradient-card-hover: linear-gradient(180deg, transparent 0%, rgba(10,132,255,0.08) 100%);
-$gradient-dark:       linear-gradient(180deg, $color-bg-elevated 0%, $color-bg 100%);
+$gradient-hero:       linear-gradient(135deg, rgba(10, 132, 255, 0.08) 0%, #FFFFFF 60%, rgba(255, 107, 0, 0.08) 100%);
+$gradient-card-hover: linear-gradient(180deg, transparent 0%, rgba(10, 132, 255, 0.04) 100%);
+$gradient-dark:       linear-gradient(180deg, #FFFFFF 0%, #F8F9FA 100%);
 
 // ── Spacing Scale (4px base) ───────────────────────────────
 $space-0:    0;
@@ -110,15 +110,15 @@ $radius-2xl:  24px;
 $radius-full: 9999px;
 
 // ── Shadows ────────────────────────────────────────────────
-$shadow-xs:   0 1px 3px rgba(0,0,0,0.4);
-$shadow-sm:   0 2px 8px rgba(0,0,0,0.5);
-$shadow-md:   0 4px 16px rgba(0,0,0,0.6);
-$shadow-lg:   0 8px 32px rgba(0,0,0,0.7);
-$shadow-xl:   0 16px 48px rgba(0,0,0,0.8);
-$shadow-blue: 0 4px 20px rgba(10, 132, 255, 0.35);
-$shadow-orange: 0 4px 20px rgba(255, 107, 0, 0.35);
-$shadow-glow-blue:   0 0 24px rgba(10, 132, 255, 0.5);
-$shadow-glow-orange: 0 0 24px rgba(255, 107, 0, 0.5);
+$shadow-xs:   0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-sm:   0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+$shadow-md:   0 4px 12px rgba(0, 0, 0, 0.07);
+$shadow-lg:   0 10px 25px rgba(0, 0, 0, 0.08);
+$shadow-xl:   0 20px 35px rgba(0, 0, 0, 0.09);
+$shadow-blue: 0 4px 14px rgba(10, 132, 255, 0.25);
+$shadow-orange: 0 4px 14px rgba(255, 107, 0, 0.25);
+$shadow-glow-blue:   0 0 20px rgba(10, 132, 255, 0.35);
+$shadow-glow-orange: 0 0 20px rgba(255, 107, 0, 0.35);
 
 // ── Transitions ────────────────────────────────────────────
 $transition-fast:    150ms cubic-bezier(0.4, 0, 0.2, 1);

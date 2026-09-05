@@ -162,13 +162,14 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: rgba(22, 22, 22, 0.95);
+  background: v.$color-bg-card;
   border: 1.5px solid v.$color-surface-border;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  box-shadow: v.$shadow-sm;
+  color: v.$color-text-primary;
+  box-shadow: v.$shadow-xs;
   transition: transform 0.3s ease;
 }
 
