@@ -33,6 +33,22 @@ export const ADMIN_ROUTES: Routes = [
         title: 'Products — GadgetPlanet Admin',
       },
       {
+        path: 'products/new',
+        loadComponent: () =>
+          import(
+            './features/products/product-edit/admin-product-edit.component'
+          ).then(m => m.AdminProductEditComponent),
+        title: 'New Product — GadgetPlanet Admin',
+      },
+      {
+        path: 'products/:id/edit',
+        loadComponent: () =>
+          import(
+            './features/products/product-edit/admin-product-edit.component'
+          ).then(m => m.AdminProductEditComponent),
+        title: 'Edit Product — GadgetPlanet Admin',
+      },
+      {
         path: 'orders',
         loadComponent: () =>
           import('./features/dashboard/admin-dashboard.component').then(

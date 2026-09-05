@@ -34,16 +34,62 @@ export interface AdminOrder {
   items: AdminOrderItem[];
 }
 
+export interface ProductVariantOption {
+  name: string;
+  values: string[];
+}
+
+export interface ProductVariant {
+  id: string;
+  combination: string;
+  sku: string;
+  price: number;
+  stock: number;
+  imageUrl?: string;
+}
+
+export interface AdminProductMedia {
+  id: string;
+  url: string;
+  isPrimary: boolean;
+  altText?: string;
+}
+
 export interface AdminProduct {
   id: string;
   sku: string;
   name: string;
   category: string;
   price: number;
+  compareAtPrice?: number;
+  costPerItem?: number;
+  chargeTax?: boolean;
   stock: number;
+  lowStockThreshold?: number;
+  trackInventory?: boolean;
+  continueSellingWhenOutOfStock?: boolean;
   status: 'Active' | 'Draft' | 'Low Stock' | 'Out of Stock';
   salesCount: number;
   imageUrl?: string;
+  images?: AdminProductMedia[];
+  description?: string;
+  tags?: string[];
+  hasVariants?: boolean;
+  variantOptions?: ProductVariantOption[];
+  variants?: ProductVariant[];
+  weight?: number;
+  weightUnit?: string;
+  dimensions?: {
+    length: number;
+    width: number;
+    height: number;
+    unit: string;
+  };
+  seo?: {
+    title: string;
+    description: string;
+    slug: string;
+  };
 }
 
 export interface ChartDataPoint {
@@ -342,7 +388,47 @@ export class AdminMockDataService {
 
   // Products Mock Data (Diverse categories, statuses: Active, Draft, Low Stock, Out of Stock)
   readonly products = signal<AdminProduct[]>([
-    { id: 'p1', sku: 'SON-XM5-BLK', name: 'Sony WH-1000XM5 Wireless Headphones', category: 'Audio', price: 299.99, stock: 45, status: 'Active', salesCount: 230, imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&q=80' },
+    {
+      id: 'p1',
+      sku: 'SON-XM5-BLK',
+      name: 'Sony WH-1000XM5 Wireless Headphones',
+      category: 'Audio',
+      price: 299.99,
+      compareAtPrice: 349.99,
+      costPerItem: 175.00,
+      chargeTax: true,
+      stock: 45,
+      lowStockThreshold: 8,
+      trackInventory: true,
+      continueSellingWhenOutOfStock: false,
+      status: 'Active',
+      salesCount: 230,
+      imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80',
+      description: 'Experience industry-leading noise cancellation with two processors and 8 microphones. Enjoy up to 30 hours of battery life, ultra-comfortable lightweight design, and crystal-clear hands-free calling with precise voice pickup technology.',
+      tags: ['Wireless', 'Noise Canceling', 'Premium Audio', 'Bluetooth 5.2', 'Over-Ear'],
+      images: [
+        { id: 'm1', url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&q=80', isPrimary: true, altText: 'Sony WH-1000XM5 Black Front View' },
+        { id: 'm2', url: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=600&q=80', isPrimary: false, altText: 'Sony WH-1000XM5 Side Angle' },
+        { id: 'm3', url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&q=80', isPrimary: false, altText: 'Sony WH-1000XM5 Lifestyle Desk' },
+      ],
+      hasVariants: true,
+      variantOptions: [
+        { name: 'Color', values: ['Midnight Black', 'Platinum Silver', 'Smoky Navy'] },
+      ],
+      variants: [
+        { id: 'v1', combination: 'Midnight Black', sku: 'SON-XM5-BLK', price: 299.99, stock: 25 },
+        { id: 'v2', combination: 'Platinum Silver', sku: 'SON-XM5-SLV', price: 299.99, stock: 15 },
+        { id: 'v3', combination: 'Smoky Navy', sku: 'SON-XM5-NVY', price: 319.99, stock: 5 },
+      ],
+      weight: 0.25,
+      weightUnit: 'kg',
+      dimensions: { length: 22, width: 18, height: 7, unit: 'cm' },
+      seo: {
+        title: 'Sony WH-1000XM5 Wireless Noise-Canceling Headphones | GadgetPlanet',
+        description: 'Shop the Sony WH-1000XM5 Wireless Headphones with industry-leading active noise cancellation, 30hr battery life, and high-res audio on GadgetPlanet.',
+        slug: 'sony-wh-1000xm5-wireless-headphones',
+      },
+    },
     { id: 'p2', sku: 'ANK-65W-WHT', name: 'Anker 65W GaN Fast Charger', category: 'Accessories', price: 49.99, stock: 120, status: 'Active', salesCount: 540, imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=100&q=80' },
     { id: 'p3', sku: 'LOG-MX3S-GRY', name: 'Logitech MX Master 3S Wireless Mouse', category: 'Peripherals', price: 129.50, stock: 18, status: 'Active', salesCount: 312, imageUrl: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=100&q=80' },
     { id: 'p4', sku: 'KEY-Q1P-RGB', name: 'Keychron Q1 Pro Wireless Mechanical Keyboard', category: 'Peripherals', price: 199.00, stock: 4, status: 'Low Stock', salesCount: 145, imageUrl: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=100&q=80' },
@@ -362,6 +448,10 @@ export class AdminMockDataService {
 
   getOrderById(id: string): AdminOrder | undefined {
     return this.orders().find(o => o.id === id);
+  }
+
+  getProductById(id: string): AdminProduct | undefined {
+    return this.products().find(p => p.id === id);
   }
 
   updateOrderStatus(orderId: string, status: AdminOrder['fulfillmentStatus']): void {

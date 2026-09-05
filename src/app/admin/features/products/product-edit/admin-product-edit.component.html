@@ -1,0 +1,914 @@
+<div class="product-edit-page">
+  <!-- 1. Sticky Top Action Bar -->
+  <header class="sticky-save-bar" aria-label="Product actions header">
+    <div class="save-bar-left">
+      <a routerLink="/admin/products" class="back-link" title="Back to Products list">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="back-icon">
+          <path d="M12.5 15l-5-5 5-5"/>
+        </svg>
+        <span>Products</span>
+      </a>
+
+      <div class="title-status-wrap">
+        <h1 class="page-title">
+          {{ isEditMode() ? (form.get('name')?.value || 'Edit Product') : 'Add New Product' }}
+        </h1>
+        <gp-admin-status-pill [status]="form.get('status')?.value" size="sm"></gp-admin-status-pill>
+      </div>
+
+      <!-- Dirty / Saved Indicator -->
+      <div class="save-state-indicator">
+        @if (isDirty()) {
+          <span class="indicator-badge badge-unsaved">
+            <span class="pulsing-dot"></span>
+            Unsaved changes
+          </span>
+        } @else {
+          <span class="indicator-badge badge-saved">
+            <svg viewBox="0 0 16 16" fill="currentColor" class="saved-icon">
+              <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+            </svg>
+            All changes saved
+          </span>
+        }
+      </div>
+    </div>
+
+    <div class="save-bar-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="discardChanges()"
+      >
+        Discard
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="saveProduct('Draft')"
+        [disabled]="isSaving()"
+      >
+        Save as Draft
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="saveProduct()"
+        [disabled]="isSaving()"
+        id="saveProductBtn"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+          <path d="M4 13.5V16h12v-2.5M10 3.5v9m0 0l-3-3m3 3l3-3"/>
+        </svg>
+        <span>{{ isEditMode() ? 'Save Changes' : 'Publish Product' }}</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. Main Two-Column Layout -->
+  <form [formGroup]="form" (ngSubmit)="saveProduct()" class="product-form-layout">
+    <!-- Left Column (Main Form Sections) -->
+    <main class="form-main-column">
+
+      <!-- Section 1: Basic Information -->
+      <section class="form-section-card" id="basicInfoSection">
+        <h2 class="section-title">Basic Information</h2>
+        <p class="section-subtitle">General details regarding the gadget catalog entry.</p>
+
+        <!-- Product Title -->
+        <div class="form-group" [class.has-error]="form.get('name')?.invalid && form.get('name')?.touched">
+          <label class="form-label" for="productTitle">
+            Product Title <span class="required-star">*</span>
+          </label>
+          <input
+            id="productTitle"
+            type="text"
+            class="form-control form-control-lg"
+            placeholder="e.g. Sony WH-1000XM5 Wireless Headphones"
+            formControlName="name"
+          />
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <span class="field-error">Product title is required (min 3 characters).</span>
+          }
+        </div>
+
+        <!-- Description with Rich Text Toolbar -->
+        <div class="form-group">
+          <label class="form-label" for="productDescription">Description</label>
+
+          <div class="rich-toolbar">
+            <button type="button" class="toolbar-btn" (click)="insertFormat('bold')" title="Bold">
+              <strong>B</strong>
+            </button>
+            <button type="button" class="toolbar-btn" (click)="insertFormat('italic')" title="Italic">
+              <em>I</em>
+            </button>
+            <button type="button" class="toolbar-btn" (click)="insertFormat('h2')" title="Heading 2">
+              H2
+            </button>
+            <button type="button" class="toolbar-btn" (click)="insertFormat('h3')" title="Heading 3">
+              H3
+            </button>
+            <button type="button" class="toolbar-btn" (click)="insertFormat('bullet')" title="Bullet List">
+              • List
+            </button>
+            <button type="button" class="toolbar-btn" (click)="insertFormat('link')" title="Insert Link">
+              🔗 Link
+            </button>
+          </div>
+
+          <textarea
+            id="productDescription"
+            class="form-control rich-textarea"
+            rows="5"
+            placeholder="Write a comprehensive description with product specifications, features, and package contents..."
+            formControlName="description"
+          ></textarea>
+        </div>
+
+        <!-- Category & Tags Input -->
+        <div class="form-row-2">
+          <!-- Category -->
+          <div class="form-group">
+            <label class="form-label" for="productCategory">Category <span class="required-star">*</span></label>
+            <select id="productCategory" class="form-control" formControlName="category">
+              @for (cat of categories; track cat) {
+                <option [value]="cat">{{ cat }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Tags Input -->
+          <div class="form-group">
+            <label class="form-label" for="productTags">Product Tags</label>
+            <div class="tags-input-container">
+              <input
+                #tagInputRef
+                id="productTags"
+                type="text"
+                class="tag-inline-input"
+                placeholder="Add a tag and press Enter..."
+                (keydown.enter)="$event.preventDefault(); addTag(tagInputRef)"
+                (keydown.comma)="$event.preventDefault(); addTag(tagInputRef)"
+              />
+              <button
+                type="button"
+                class="tag-add-btn"
+                (click)="addTag(tagInputRef)"
+              >
+                + Add
+              </button>
+            </div>
+
+            <!-- Tag Chips -->
+            <div class="tag-chips-list">
+              @for (t of tags(); track t) {
+                <span class="tag-chip">
+                  {{ t }}
+                  <button type="button" class="remove-chip-btn" (click)="removeTag(t)">&times;</button>
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 2: Media (Drag-and-Drop & Reorderable Grid) -->
+      <section class="form-section-card" id="mediaSection">
+        <div class="section-header-flex">
+          <div>
+            <h2 class="section-title">Media & Images</h2>
+            <p class="section-subtitle">Upload high-resolution gadget photos. The primary image is shown in catalogs.</p>
+          </div>
+          <button
+            type="button"
+            class="btn-text-link"
+            (click)="isUrlInputVisible.set(!isUrlInputVisible())"
+          >
+            {{ isUrlInputVisible() ? 'Hide URL Import' : '+ Add Image URL' }}
+          </button>
+        </div>
+
+        <!-- Add Image URL Box -->
+        @if (isUrlInputVisible()) {
+          <div class="url-input-box">
+            <input
+              type="url"
+              class="form-control"
+              placeholder="Paste direct image URL (https://...)"
+              [value]="newImageUrlInput()"
+              (input)="newImageUrlInput.set($any($event.target).value)"
+              (keydown.enter)="$event.preventDefault(); addMediaByUrl()"
+            />
+            <button type="button" class="btn btn-secondary btn-sm" (click)="addMediaByUrl()">
+              Add URL
+            </button>
+          </div>
+        }
+
+        <!-- Drag & Drop Dropzone -->
+        <div
+          class="media-dropzone"
+          [class.dropzone-active]="isDraggingMedia()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+        >
+          <div class="dropzone-content">
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <p class="dropzone-text">
+              <strong>Drag & drop gadget images here</strong>, or
+              <label class="file-browse-label">
+                browse files
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  class="hidden-file-input"
+                  (change)="onFileSelected($event)"
+                />
+              </label>
+            </p>
+            <span class="dropzone-hint">Supports PNG, JPG, WebP, SVG up to 10MB</span>
+          </div>
+        </div>
+
+        <!-- Media Gallery Thumbnails Grid -->
+        @if (mediaList().length > 0) {
+          <div class="media-thumbnails-grid">
+            @for (media of mediaList(); track media.id; let idx = $index) {
+              <div class="media-card" [class.is-primary]="media.isPrimary">
+                <div class="media-preview">
+                  <img [src]="media.url" [alt]="media.altText || 'Product image'" loading="lazy" />
+                  @if (media.isPrimary) {
+                    <span class="primary-badge">Primary</span>
+                  }
+                </div>
+
+                <div class="media-actions">
+                  <!-- Reorder Left -->
+                  <button
+                    type="button"
+                    class="media-icon-btn"
+                    [disabled]="idx === 0"
+                    (click)="moveMedia(idx, 'prev')"
+                    title="Move Left"
+                  >
+                    ←
+                  </button>
+
+                  <!-- Reorder Right -->
+                  <button
+                    type="button"
+                    class="media-icon-btn"
+                    [disabled]="idx === mediaList().length - 1"
+                    (click)="moveMedia(idx, 'next')"
+                    title="Move Right"
+                  >
+                    →
+                  </button>
+
+                  <!-- Set Primary -->
+                  @if (!media.isPrimary) {
+                    <button
+                      type="button"
+                      class="media-text-btn"
+                      (click)="setPrimaryMedia(media.id)"
+                      title="Set as primary thumbnail"
+                    >
+                      Make Primary
+                    </button>
+                  }
+
+                  <!-- Delete -->
+                  <button
+                    type="button"
+                    class="media-icon-btn btn-danger-icon"
+                    (click)="removeMedia(media.id)"
+                    title="Delete image"
+                  >
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M4 6h12M8 6V4a2 2 0 012-2h0a2 2 0 012 2v2M5 6l1 11a2 2 0 002 2h4a2 2 0 002-2l1-11"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- Section 3: Pricing -->
+      <section class="form-section-card" id="pricingSection">
+        <h2 class="section-title">Pricing</h2>
+        <p class="section-subtitle">Set retail pricing, discount comparisons, and cost analysis.</p>
+
+        <div class="form-row-3">
+          <!-- Price -->
+          <div class="form-group" [class.has-error]="form.get('price')?.invalid && form.get('price')?.touched">
+            <label class="form-label" for="productPrice">
+              Price (USD) <span class="required-star">*</span>
+            </label>
+            <div class="input-prefix-wrap">
+              <span class="input-prefix">$</span>
+              <input
+                id="productPrice"
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control has-prefix"
+                placeholder="0.00"
+                formControlName="price"
+              />
+            </div>
+            @if (form.get('price')?.invalid && form.get('price')?.touched) {
+              <span class="field-error">Valid positive price is required.</span>
+            }
+          </div>
+
+          <!-- Compare-At Price -->
+          <div class="form-group">
+            <label class="form-label" for="compareAtPrice">
+              Compare-at Price
+              <span class="label-hint">(Original/Strikethrough)</span>
+            </label>
+            <div class="input-prefix-wrap">
+              <span class="input-prefix">$</span>
+              <input
+                id="compareAtPrice"
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control has-prefix"
+                placeholder="0.00"
+                formControlName="compareAtPrice"
+              />
+            </div>
+          </div>
+
+          <!-- Cost Per Item -->
+          <div class="form-group">
+            <label class="form-label" for="costPerItem">
+              Cost per Item
+              <span class="label-hint">(Wholesale/COGS)</span>
+            </label>
+            <div class="input-prefix-wrap">
+              <span class="input-prefix">$</span>
+              <input
+                id="costPerItem"
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control has-prefix"
+                placeholder="0.00"
+                formControlName="costPerItem"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Profit & Margin Calculation Display -->
+        @if (calculatedProfit() !== null) {
+          <div class="profit-calculation-banner">
+            <div class="calc-metric">
+              <span class="metric-label">Estimated Profit per Unit:</span>
+              <strong class="metric-value">{{ calculatedProfit() | currency:'USD':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="calc-divider"></div>
+            <div class="calc-metric">
+              <span class="metric-label">Gross Margin:</span>
+              <strong class="metric-value">{{ calculatedMargin() }}%</strong>
+            </div>
+          </div>
+        }
+
+        <!-- Charge Tax Toggle -->
+        <div class="checkbox-toggle-wrap">
+          <input
+            type="checkbox"
+            id="chargeTaxCheck"
+            class="custom-checkbox"
+            formControlName="chargeTax"
+          />
+          <label for="chargeTaxCheck" class="checkbox-label">
+            <strong>Charge tax on this product</strong>
+            <span class="checkbox-subtext">Sales tax will be calculated automatically at customer checkout.</span>
+          </label>
+        </div>
+      </section>
+
+      <!-- Section 4: Inventory -->
+      <section class="form-section-card" id="inventorySection">
+        <h2 class="section-title">Inventory</h2>
+        <p class="section-subtitle">Manage stock availability and inventory tracking thresholds.</p>
+
+        <div class="form-row-2">
+          <!-- SKU -->
+          <div class="form-group" [class.has-error]="form.get('sku')?.invalid && form.get('sku')?.touched">
+            <label class="form-label" for="productSku">
+              SKU (Stock Keeping Unit) <span class="required-star">*</span>
+            </label>
+            <input
+              id="productSku"
+              type="text"
+              class="form-control font-mono"
+              placeholder="e.g. SON-XM5-BLK"
+              formControlName="sku"
+            />
+            @if (form.get('sku')?.invalid && form.get('sku')?.touched) {
+              <span class="field-error">SKU is required.</span>
+            }
+          </div>
+
+          <!-- Quantity in Stock -->
+          <div class="form-group" [class.has-error]="form.get('stock')?.invalid && form.get('stock')?.touched">
+            <label class="form-label" for="productStock">
+              Quantity Available <span class="required-star">*</span>
+            </label>
+            <input
+              id="productStock"
+              type="number"
+              step="1"
+              min="0"
+              class="form-control"
+              placeholder="0"
+              formControlName="stock"
+            />
+            @if (form.get('stock')?.invalid && form.get('stock')?.touched) {
+              <span class="field-error">Stock quantity is required.</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <!-- Low Stock Threshold -->
+          <div class="form-group">
+            <label class="form-label" for="lowStockThreshold">Low-Stock Alert Threshold</label>
+            <input
+              id="lowStockThreshold"
+              type="number"
+              step="1"
+              min="1"
+              class="form-control"
+              placeholder="5"
+              formControlName="lowStockThreshold"
+            />
+            <span class="field-hint">Triggers low stock badge when quantity falls below this number.</span>
+          </div>
+
+          <!-- Track Inventory & Continue Selling Toggles -->
+          <div class="toggles-group">
+            <div class="checkbox-toggle-wrap">
+              <input
+                type="checkbox"
+                id="trackInventoryCheck"
+                class="custom-checkbox"
+                formControlName="trackInventory"
+              />
+              <label for="trackInventoryCheck" class="checkbox-label">
+                <strong>Track quantity</strong>
+                <span class="checkbox-subtext">Automatically reduce stock on successful orders.</span>
+              </label>
+            </div>
+
+            <div class="checkbox-toggle-wrap">
+              <input
+                type="checkbox"
+                id="continueSellingCheck"
+                class="custom-checkbox"
+                formControlName="continueSellingWhenOutOfStock"
+              />
+              <label for="continueSellingCheck" class="checkbox-label">
+                <strong>Continue selling when out of stock</strong>
+                <span class="checkbox-subtext">Allow customers to backorder items when quantity reaches 0.</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Variants (Dynamic Combination Matrix) -->
+      <section class="form-section-card" id="variantsSection">
+        <div class="section-header-flex">
+          <div>
+            <h2 class="section-title">Product Variants</h2>
+            <p class="section-subtitle">Add variations such as Color, Storage capacity, or Size.</p>
+          </div>
+
+          <div class="checkbox-toggle-wrap no-margin">
+            <input
+              type="checkbox"
+              id="hasVariantsCheck"
+              class="custom-checkbox"
+              [checked]="form.get('hasVariants')?.value"
+              (change)="toggleVariants($event)"
+            />
+            <label for="hasVariantsCheck" class="checkbox-label">
+              <strong>This product has options</strong>
+            </label>
+          </div>
+        </div>
+
+        @if (form.get('hasVariants')?.value) {
+          <!-- Variant Options Configuration -->
+          <div class="variants-options-builder">
+            @for (opt of variantOptions(); track opt.name; let optIdx = $index) {
+              <div class="option-row-card">
+                <div class="option-header">
+                  <span class="option-badge">Option {{ optIdx + 1 }}</span>
+                  <input
+                    type="text"
+                    class="form-control option-name-input"
+                    [value]="opt.name"
+                    (input)="opt.name = $any($event.target).value; regenerateVariantCombinations()"
+                    placeholder="Option name (e.g. Color, Storage)"
+                  />
+                  <button
+                    type="button"
+                    class="btn-danger-icon"
+                    (click)="removeVariantOption(optIdx)"
+                    title="Remove this option"
+                  >
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                      <path d="M4 6h12M8 6V4a2 2 0 012-2h0a2 2 0 012 2v2M5 6l1 11a2 2 0 002 2h4a2 2 0 002-2l1-11"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Option Values Pills & Add Input -->
+                <div class="option-values-container">
+                  <div class="values-pills-list">
+                    @for (val of opt.values; track val; let valIdx = $index) {
+                      <span class="value-pill">
+                        {{ val }}
+                        <button
+                          type="button"
+                          class="remove-pill-btn"
+                          (click)="removeOptionValue(optIdx, valIdx)"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    }
+                  </div>
+
+                  <div class="add-value-field">
+                    <input
+                      #valInputRef
+                      type="text"
+                      class="form-control form-control-sm"
+                      placeholder="Add value (e.g. Black) and press Enter..."
+                      (keydown.enter)="$event.preventDefault(); addOptionValue(optIdx, valInputRef)"
+                    />
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-sm"
+                      (click)="addOptionValue(optIdx, valInputRef)"
+                    >
+                      + Add
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm btn-add-option"
+              (click)="addVariantOption('Storage', ['128GB', '256GB'])"
+            >
+              + Add another option
+            </button>
+          </div>
+
+          <!-- Generated Variants Combination Table -->
+          @if (generatedVariants().length > 0) {
+            <div class="variants-table-container">
+              <h3 class="subsection-title">
+                Generated Combinations ({{ generatedVariants().length }} variants)
+              </h3>
+
+              <table class="variants-matrix-table" aria-label="Generated variants matrix">
+                <thead>
+                  <tr>
+                    <th>Variant</th>
+                    <th>SKU</th>
+                    <th>Price ($)</th>
+                    <th>Stock</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (variant of generatedVariants(); track variant.id) {
+                    <tr>
+                      <td class="col-combo-name">
+                        <strong>{{ variant.combination }}</strong>
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          class="form-control form-control-sm font-mono"
+                          [value]="variant.sku"
+                          (input)="updateVariantRow(variant.id, 'sku', $any($event.target).value)"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          class="form-control form-control-sm"
+                          [value]="variant.price"
+                          (input)="updateVariantRow(variant.id, 'price', $any($event.target).value)"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          class="form-control form-control-sm"
+                          [value]="variant.stock"
+                          (input)="updateVariantRow(variant.id, 'stock', $any($event.target).value)"
+                        />
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        }
+      </section>
+
+      <!-- Section 6: Shipping -->
+      <section class="form-section-card" id="shippingSection">
+        <h2 class="section-title">Shipping & Logistics</h2>
+        <p class="section-subtitle">Package specifications used to calculate real-time carrier shipping rates.</p>
+
+        <!-- Physical Product Toggle -->
+        <div class="checkbox-toggle-wrap">
+          <input
+            type="checkbox"
+            id="physicalProductCheck"
+            class="custom-checkbox"
+            formControlName="isPhysicalProduct"
+          />
+          <label for="physicalProductCheck" class="checkbox-label">
+            <strong>This is a physical product</strong>
+            <span class="checkbox-subtext">Requires shipping package dimensions and courier delivery.</span>
+          </label>
+        </div>
+
+        @if (form.get('isPhysicalProduct')?.value) {
+          <div class="form-row-2">
+            <!-- Weight -->
+            <div class="form-group">
+              <label class="form-label" for="packageWeight">Package Weight</label>
+              <div class="input-unit-wrap">
+                <input
+                  id="packageWeight"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  class="form-control has-unit"
+                  placeholder="0.0"
+                  formControlName="weight"
+                />
+                <select class="unit-select" formControlName="weightUnit">
+                  <option value="kg">kg</option>
+                  <option value="lb">lb</option>
+                  <option value="g">g</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Dimensions -->
+            <div class="form-group">
+              <label class="form-label">Dimensions (L × W × H)</label>
+              <div class="dimensions-input-group">
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  class="form-control dim-input"
+                  placeholder="L"
+                  formControlName="dimensionLength"
+                  title="Length"
+                />
+                <span class="dim-separator">×</span>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  class="form-control dim-input"
+                  placeholder="W"
+                  formControlName="dimensionWidth"
+                  title="Width"
+                />
+                <span class="dim-separator">×</span>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  class="form-control dim-input"
+                  placeholder="H"
+                  formControlName="dimensionHeight"
+                  title="Height"
+                />
+                <select class="unit-select dim-unit" formControlName="dimensionUnit">
+                  <option value="cm">cm</option>
+                  <option value="in">in</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Section 7: Search Engine Listing (SEO) -->
+      <section class="form-section-card" id="seoSection">
+        <h2 class="section-title">Search Engine Listing (SEO)</h2>
+        <p class="section-subtitle">Manage how this product appears on Google and search engines.</p>
+
+        <!-- Live Google Search SERP Preview -->
+        <div class="google-serp-preview">
+          <span class="serp-preview-tag">Search Result Preview</span>
+          <div class="serp-url">
+            https://gadgetplanet.com › products › <strong>{{ effectiveSlug() }}</strong>
+          </div>
+          <div class="serp-title">
+            {{ form.get('seoTitle')?.value || form.get('name')?.value || 'Product Title — GadgetPlanet' }}
+          </div>
+          <div class="serp-description">
+            {{ form.get('seoDescription')?.value || form.get('description')?.value || 'Discover cutting-edge gadgets and accessories at GadgetPlanet with official warranty and rapid shipping.' }}
+          </div>
+        </div>
+
+        <!-- Meta Page Title -->
+        <div class="form-group">
+          <div class="label-with-counter">
+            <label class="form-label" for="seoTitle">Page Title</label>
+            <span class="char-counter" [class.counter-limit]="seoTitleCount() > 70">
+              {{ seoTitleCount() }} / 70 characters
+            </span>
+          </div>
+          <input
+            id="seoTitle"
+            type="text"
+            class="form-control"
+            placeholder="e.g. Sony WH-1000XM5 Wireless Noise-Canceling Headphones | GadgetPlanet"
+            formControlName="seoTitle"
+          />
+        </div>
+
+        <!-- Meta Description -->
+        <div class="form-group">
+          <div class="label-with-counter">
+            <label class="form-label" for="seoDescription">Meta Description</label>
+            <span class="char-counter" [class.counter-limit]="seoDescriptionCount() > 160">
+              {{ seoDescriptionCount() }} / 160 characters
+            </span>
+          </div>
+          <textarea
+            id="seoDescription"
+            class="form-control"
+            rows="3"
+            placeholder="A compelling 1-2 sentence description summarizing product highlights to maximize click-through rate..."
+            formControlName="seoDescription"
+          ></textarea>
+        </div>
+
+        <!-- URL Slug / Handle -->
+        <div class="form-group">
+          <label class="form-label" for="seoSlug">URL Handle / Slug</label>
+          <div class="input-prefix-wrap">
+            <span class="input-prefix">https://gadgetplanet.com/products/</span>
+            <input
+              id="seoSlug"
+              type="text"
+              class="form-control has-prefix font-mono"
+              placeholder="sony-wh-1000xm5"
+              formControlName="seoSlug"
+            />
+          </div>
+          <span class="field-hint">Human-readable URL identifier. Auto-generated from title.</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- Right Column (Sidebar Cards) -->
+    <aside class="form-sidebar-column">
+
+      <!-- Product Status Card -->
+      <section class="sidebar-card">
+        <h3 class="sidebar-card-title">Status</h3>
+        <div class="form-group">
+          <select class="form-control status-select" formControlName="status">
+            @for (st of statusOptions; track st) {
+              <option [value]="st">{{ st }}</option>
+            }
+          </select>
+          <span class="sidebar-hint">
+            @switch (form.get('status')?.value) {
+              @case ('Active') { This product will be immediately visible on the storefront. }
+              @case ('Draft') { Saved as an unpublished draft, hidden from customers. }
+              @case ('Low Stock') { Marked with low-stock warnings in admin catalogs. }
+              @case ('Out of Stock') { Product remains listed but ordering is disabled. }
+            }
+          </span>
+        </div>
+      </section>
+
+      <!-- Product Organization Card -->
+      <section class="sidebar-card">
+        <h3 class="sidebar-card-title">Product Organization</h3>
+
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select class="form-control" formControlName="category">
+            @for (cat of categories; track cat) {
+              <option [value]="cat">{{ cat }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Brand / Vendor</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="e.g. Sony, Anker, Keychron"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Catalog Collection</label>
+          <select class="form-control">
+            <option>Featured Gadgets</option>
+            <option>Best Sellers</option>
+            <option>New Arrivals</option>
+            <option>On Sale</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Media Summary Card -->
+      @if (primaryImage(); as pImg) {
+        <section class="sidebar-card primary-preview-card">
+          <h3 class="sidebar-card-title">Catalog Thumbnail</h3>
+          <div class="primary-thumb-wrap">
+            <img [src]="pImg.url" alt="Primary catalog image" />
+          </div>
+          <span class="primary-filename">{{ pImg.altText || 'Primary image' }}</span>
+        </section>
+      }
+
+      <!-- Quick Tips Card -->
+      <section class="sidebar-card info-tips-card">
+        <h3 class="sidebar-card-title">Publishing Tips</h3>
+        <ul class="tips-list">
+          <li>High-resolution square images (1:1) yield the best conversion on mobile screens.</li>
+          <li>Set a Compare-at price to show promotional discounts to customers.</li>
+          <li>Include unique SKUs for each variant to simplify barcode scanning and fulfillment.</li>
+        </ul>
+      </section>
+    </aside>
+  </form>
+
+  <!-- 3. Mobile Fixed Bottom Action Bar (< 768px) -->
+  <div class="mobile-fixed-save-bar" aria-label="Mobile Save Controls">
+    <div class="mobile-save-info">
+      @if (isDirty()) {
+        <span class="pulsing-dot"></span>
+        <span>Unsaved</span>
+      } @else {
+        <span>Saved</span>
+      }
+    </div>
+
+    <div class="mobile-save-actions">
+      <button
+        type="button"
+        class="btn btn-secondary mobile-btn"
+        (click)="discardChanges()"
+      >
+        Discard
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary mobile-btn"
+        (click)="saveProduct()"
+        [disabled]="isSaving()"
+      >
+        {{ isEditMode() ? 'Save' : 'Publish' }}
+      </button>
+    </div>
+  </div>
+</div>

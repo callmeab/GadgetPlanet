@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import {
   AdminMockDataService,
   AdminProduct,
@@ -45,6 +45,7 @@ export interface ProductFormData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminProductsComponent {
+  private readonly router = inject(Router);
   private readonly dataService = inject(AdminMockDataService);
   private readonly toastService = inject(AdminToastService);
 
@@ -356,25 +357,13 @@ export class AdminProductsComponent {
 
   // ── Add & Edit Modal Handlers ───────────────────────────────
   openAddModal(): void {
-    this.editingProduct.set(null);
-    this.formData = this.getEmptyFormData();
-    this.isAddEditModalOpen.set(true);
+    this.router.navigate(['/admin/products/new']);
   }
 
   openEditModal(product: AdminProduct, event?: Event): void {
     if (event) event.stopPropagation();
     this.activeDropdownId.set(null);
-    this.editingProduct.set(product);
-    this.formData = {
-      name: product.name,
-      sku: product.sku,
-      category: product.category,
-      price: product.price,
-      stock: product.stock,
-      status: product.status,
-      imageUrl: product.imageUrl || '',
-    };
-    this.isAddEditModalOpen.set(true);
+    this.router.navigate(['/admin/products', product.id, 'edit']);
   }
 
   closeAddEditModal(): void {

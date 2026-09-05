@@ -1,0 +1,1143 @@
+@use '../../../styles/admin-variables' as *;
+
+.product-edit-page {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding-bottom: $admin-space-10;
+
+  @media (max-width: 767px) {
+    padding-bottom: 80px; // Padding for mobile fixed bottom bar
+  }
+}
+
+// ── 1. Sticky Save Action Bar ───────────────────────────────
+.sticky-save-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $admin-space-3;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  box-shadow: $admin-shadow-sm;
+
+  .save-bar-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: $admin-space-3;
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: $admin-text-secondary;
+      text-decoration: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: background-color $admin-transition-fast;
+
+      .back-icon {
+        width: 16px;
+        height: 16px;
+      }
+
+      &:hover {
+        background: $admin-bg-muted;
+        color: $admin-text-primary;
+      }
+    }
+
+    .title-status-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .page-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: $admin-text-primary;
+        margin: 0;
+        letter-spacing: -0.01em;
+        max-width: 400px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        @media (max-width: 600px) {
+          max-width: 200px;
+          font-size: 1.1rem;
+        }
+      }
+    }
+
+    .save-state-indicator {
+      .indicator-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 999px;
+
+        &.badge-unsaved {
+          background: #FEF3C7;
+          color: #92400E;
+          border: 1px solid #FDE68A;
+
+          .pulsing-dot {
+            width: 7px;
+            height: 7px;
+            background: #D97706;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+          }
+        }
+
+        &.badge-saved {
+          background: #ECFDF5;
+          color: #065F46;
+          border: 1px solid #A7F3D0;
+
+          .saved-icon {
+            width: 12px;
+            height: 12px;
+          }
+        }
+      }
+    }
+  }
+
+  .save-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-2;
+
+    @media (max-width: 767px) {
+      display: none; // Swapped to fixed bottom bar on mobile
+    }
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 6px rgba(217, 119, 6, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+  }
+}
+
+// ── Buttons ─────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: $admin-inner-radius;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+  user-select: none;
+  white-space: nowrap;
+
+  .btn-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  &.btn-primary {
+    background: $admin-primary;
+    color: #ffffff;
+    border-color: $admin-primary;
+
+    &:hover:not(:disabled) {
+      background: $admin-primary-hover;
+      border-color: $admin-primary-hover;
+      box-shadow: 0 2px 4px rgba(10, 132, 255, 0.25);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &.btn-secondary {
+    background: $admin-bg-surface;
+    color: $admin-text-primary;
+    border-color: $admin-border;
+
+    &:hover:not(:disabled) {
+      background: $admin-bg-muted;
+      border-color: #D1D5DB;
+    }
+  }
+
+  &.btn-sm {
+    height: 32px;
+    padding: 0 10px;
+    font-size: 0.8125rem;
+  }
+}
+
+.btn-text-link {
+  background: none;
+  border: none;
+  color: $admin-primary;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ── 2. Two-Column Layout ────────────────────────────────────
+.product-form-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: $admin-space-4;
+  align-items: start;
+
+  @media (max-width: 1023px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-main-column {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+}
+
+.form-sidebar-column {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+}
+
+// ── Form Section Cards ──────────────────────────────────────
+.form-section-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: $admin-space-5;
+  box-shadow: $admin-shadow-xs;
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+
+  .section-title {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: $admin-text-primary;
+    margin: 0;
+  }
+
+  .section-subtitle {
+    font-size: 0.8125rem;
+    color: $admin-text-secondary;
+    margin: -8px 0 0 0;
+  }
+
+  .section-header-flex {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: $admin-space-2;
+  }
+}
+
+// ── Form Controls & Groups ──────────────────────────────────
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &.has-error {
+    .form-control {
+      border-color: #EF4444;
+      background: #FEF2F2;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+      }
+    }
+  }
+}
+
+.form-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $admin-text-primary;
+
+  .required-star {
+    color: #EF4444;
+  }
+
+  .label-hint {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: $admin-text-muted;
+    margin-left: 4px;
+  }
+}
+
+.label-with-counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .char-counter {
+    font-size: 0.75rem;
+    color: $admin-text-muted;
+
+    &.counter-limit {
+      color: #EF4444;
+      font-weight: 600;
+    }
+  }
+}
+
+.form-control {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  font-size: 0.875rem;
+  color: $admin-text-primary;
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  transition: border-color $admin-transition-fast, box-shadow $admin-transition-fast;
+
+  &:focus {
+    outline: none;
+    border-color: $admin-primary;
+    box-shadow: 0 0 0 3px $admin-primary-subtle;
+  }
+
+  &::placeholder {
+    color: $admin-text-muted;
+  }
+
+  &.form-control-lg {
+    height: 42px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+  }
+
+  &.form-control-sm {
+    height: 32px;
+    padding: 0 8px;
+    font-size: 0.8125rem;
+  }
+
+  &.has-prefix {
+    padding-left: 28px;
+  }
+
+  &.font-mono {
+    font-family: monospace;
+  }
+}
+
+.field-error {
+  font-size: 0.75rem;
+  color: #EF4444;
+  font-weight: 500;
+}
+
+.field-hint {
+  font-size: 0.75rem;
+  color: $admin-text-muted;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $admin-space-4;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: $admin-space-4;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.input-prefix-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .input-prefix {
+    position: absolute;
+    left: 10px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $admin-text-muted;
+    pointer-events: none;
+  }
+}
+
+// ── Rich Text Toolbar ───────────────────────────────────────
+.rich-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  background: $admin-bg-muted;
+  border: 1px solid $admin-border;
+  border-bottom: none;
+  border-top-left-radius: $admin-inner-radius;
+  border-top-right-radius: $admin-inner-radius;
+
+  .toolbar-btn {
+    height: 26px;
+    padding: 0 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: $admin-text-secondary;
+    cursor: pointer;
+
+    &:hover {
+      background: $admin-bg-surface;
+      color: $admin-text-primary;
+      border-color: $admin-border;
+    }
+  }
+}
+
+.rich-textarea {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  height: auto;
+  min-height: 100px;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+// ── Tags Input ──────────────────────────────────────────────
+.tags-input-container {
+  display: flex;
+  align-items: center;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  background: $admin-bg-surface;
+  padding-right: 4px;
+
+  .tag-inline-input {
+    flex: 1;
+    height: 36px;
+    border: none;
+    padding: 0 10px;
+    font-size: 0.8125rem;
+    outline: none;
+
+    &::placeholder {
+      color: $admin-text-muted;
+    }
+  }
+
+  .tag-add-btn {
+    height: 28px;
+    padding: 0 10px;
+    background: $admin-bg-muted;
+    border: 1px solid $admin-border;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: #D1D5DB;
+    }
+  }
+}
+
+.tag-chips-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+
+  .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: $admin-bg-muted;
+    color: $admin-text-primary;
+    border: 1px solid $admin-border;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+
+    .remove-chip-btn {
+      background: none;
+      border: none;
+      color: $admin-text-muted;
+      cursor: pointer;
+      font-size: 0.875rem;
+      line-height: 1;
+      padding: 0;
+
+      &:hover {
+        color: #EF4444;
+      }
+    }
+  }
+}
+
+// ── Media Dropzone & Thumbnails ─────────────────────────────
+.url-input-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: $admin-bg-muted;
+  border-radius: $admin-inner-radius;
+}
+
+.media-dropzone {
+  border: 2px dashed $admin-border;
+  border-radius: $admin-card-radius;
+  padding: 36px 20px;
+  text-align: center;
+  background: $admin-bg-hover;
+  transition: all $admin-transition-base;
+  cursor: pointer;
+
+  &.dropzone-active,
+  &:hover {
+    border-color: $admin-primary;
+    background: $admin-primary-subtle;
+  }
+
+  .dropzone-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 10px auto;
+    color: $admin-primary;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .dropzone-text {
+    font-size: 0.875rem;
+    color: $admin-text-secondary;
+    margin: 0 0 4px 0;
+
+    strong {
+      color: $admin-text-primary;
+    }
+
+    .file-browse-label {
+      color: $admin-primary;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+
+      .hidden-file-input {
+        display: none;
+      }
+    }
+  }
+
+  .dropzone-hint {
+    font-size: 0.75rem;
+    color: $admin-text-muted;
+  }
+}
+
+.media-thumbnails-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: $admin-space-3;
+  margin-top: $admin-space-2;
+
+  .media-card {
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+    overflow: hidden;
+    background: $admin-bg-surface;
+    display: flex;
+    flex-direction: column;
+
+    &.is-primary {
+      border: 2px solid $admin-primary;
+      box-shadow: 0 0 0 2px $admin-primary-subtle;
+    }
+
+    .media-preview {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: $admin-bg-muted;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .primary-badge {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        padding: 2px 6px;
+        background: $admin-primary;
+        color: #FFFFFF;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        border-radius: 4px;
+        letter-spacing: 0.02em;
+      }
+    }
+
+    .media-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      background: $admin-bg-surface;
+      border-top: 1px solid $admin-border-subtle;
+      gap: 2px;
+
+      .media-icon-btn {
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: 1px solid $admin-border;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        color: $admin-text-secondary;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+          background: $admin-bg-muted;
+          color: $admin-text-primary;
+        }
+
+        &:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+
+        &.btn-danger-icon:hover {
+          background: #FEE2E2;
+          color: #EF4444;
+          border-color: #FECACA;
+        }
+      }
+
+      .media-text-btn {
+        background: none;
+        border: none;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: $admin-primary;
+        cursor: pointer;
+        padding: 0;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+// ── Pricing Banner ──────────────────────────────────────────
+.profit-calculation-banner {
+  display: flex;
+  align-items: center;
+  gap: $admin-space-4;
+  padding: 10px 16px;
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  border-radius: $admin-inner-radius;
+
+  .calc-metric {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .metric-label {
+      font-size: 0.8125rem;
+      color: #065F46;
+    }
+
+    .metric-value {
+      font-size: 0.9375rem;
+      color: #065F46;
+    }
+  }
+
+  .calc-divider {
+    width: 1px;
+    height: 18px;
+    background: #A7F3D0;
+  }
+}
+
+// ── Checkbox Toggles ────────────────────────────────────────
+.checkbox-toggle-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+
+  &.no-margin {
+    margin: 0;
+  }
+
+  .custom-checkbox {
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: $admin-primary;
+  }
+
+  .checkbox-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    cursor: pointer;
+
+    strong {
+      font-size: 0.875rem;
+      color: $admin-text-primary;
+    }
+
+    .checkbox-subtext {
+      font-size: 0.75rem;
+      color: $admin-text-secondary;
+    }
+  }
+}
+
+.toggles-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+// ── Variants Section ────────────────────────────────────────
+.variants-options-builder {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-3;
+  margin-top: $admin-space-2;
+
+  .option-row-card {
+    background: $admin-bg-muted;
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+    padding: $admin-space-3;
+    display: flex;
+    flex-direction: column;
+    gap: $admin-space-2;
+
+    .option-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .option-badge {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: $admin-text-secondary;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+      }
+
+      .option-name-input {
+        max-width: 220px;
+        background: $admin-bg-surface;
+      }
+
+      .btn-danger-icon {
+        background: none;
+        border: none;
+        color: $admin-text-muted;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+
+        svg {
+          width: 16px;
+          height: 16px;
+        }
+
+        &:hover {
+          color: #EF4444;
+        }
+      }
+    }
+
+    .option-values-container {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .values-pills-list {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+
+        .value-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 3px 10px;
+          background: #FFFFFF;
+          border: 1px solid $admin-border;
+          border-radius: 999px;
+          font-size: 0.8125rem;
+          font-weight: 500;
+          color: $admin-text-primary;
+
+          .remove-pill-btn {
+            background: none;
+            border: none;
+            color: $admin-text-muted;
+            cursor: pointer;
+            font-size: 0.875rem;
+            line-height: 1;
+
+            &:hover {
+              color: #EF4444;
+            }
+          }
+        }
+      }
+
+      .add-value-field {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        input {
+          max-width: 200px;
+          background: #FFFFFF;
+        }
+      }
+    }
+  }
+
+  .btn-add-option {
+    align-self: flex-start;
+  }
+}
+
+.variants-table-container {
+  margin-top: $admin-space-4;
+  overflow-x: auto;
+
+  .subsection-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: $admin-text-primary;
+    margin: 0 0 10px 0;
+  }
+}
+
+.variants-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  text-align: left;
+
+  thead th {
+    background: $admin-bg-muted;
+    border: 1px solid $admin-border;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $admin-text-secondary;
+    text-transform: uppercase;
+  }
+
+  tbody td {
+    border: 1px solid $admin-border;
+    padding: 6px 10px;
+    vertical-align: middle;
+
+    &.col-combo-name {
+      font-weight: 600;
+      color: $admin-text-primary;
+      min-width: 140px;
+    }
+
+    input {
+      background: $admin-bg-surface;
+    }
+  }
+}
+
+// ── Shipping Section ────────────────────────────────────────
+.input-unit-wrap {
+  display: flex;
+  align-items: center;
+
+  .has-unit {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .unit-select {
+    height: 38px;
+    padding: 0 8px;
+    background: $admin-bg-muted;
+    border: 1px solid $admin-border;
+    border-left: none;
+    border-top-right-radius: $admin-inner-radius;
+    border-bottom-right-radius: $admin-inner-radius;
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+}
+
+.dimensions-input-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .dim-input {
+    width: 65px;
+    text-align: center;
+  }
+
+  .dim-separator {
+    color: $admin-text-muted;
+    font-weight: 700;
+  }
+
+  .dim-unit {
+    height: 38px;
+    padding: 0 8px;
+    background: $admin-bg-muted;
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+}
+
+// ── SEO & Google SERP Preview ───────────────────────────────
+.google-serp-preview {
+  background: #F8FAFC;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: $admin-space-2;
+
+  .serp-preview-tag {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $admin-text-muted;
+    margin-bottom: 2px;
+  }
+
+  .serp-url {
+    font-size: 0.75rem;
+    color: #202124;
+    font-family: system-ui, sans-serif;
+
+    strong {
+      color: #3C4043;
+    }
+  }
+
+  .serp-title {
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #1A0DAB;
+    line-height: 1.3;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .serp-description {
+    font-size: 0.8125rem;
+    color: #4D5156;
+    line-height: 1.4;
+  }
+}
+
+// ── Sidebar Cards ───────────────────────────────────────────
+.sidebar-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: $admin-space-4;
+  box-shadow: $admin-shadow-xs;
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-3;
+
+  .sidebar-card-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: $admin-text-primary;
+    margin: 0;
+  }
+
+  .sidebar-hint {
+    font-size: 0.75rem;
+    color: $admin-text-secondary;
+    line-height: 1.4;
+  }
+}
+
+.primary-preview-card {
+  .primary-thumb-wrap {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: $admin-bg-muted;
+    border-radius: $admin-inner-radius;
+    overflow: hidden;
+    border: 1px solid $admin-border;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .primary-filename {
+    font-size: 0.75rem;
+    color: $admin-text-muted;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.info-tips-card {
+  background: #F8FAFC;
+
+  .tips-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.75rem;
+    color: $admin-text-secondary;
+    line-height: 1.5;
+
+    li + li {
+      margin-top: 6px;
+    }
+  }
+}
+
+// ── 3. Mobile Fixed Bottom Bar (< 768px) ────────────────────
+.mobile-fixed-save-bar {
+  display: none; // Hidden on desktop
+
+  @media (max-width: 767px) {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)) 16px;
+    background: #FFFFFF;
+    border-top: 1px solid $admin-border;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+
+    .mobile-save-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: $admin-text-secondary;
+
+      .pulsing-dot {
+        width: 8px;
+        height: 8px;
+        background: #D97706;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+      }
+    }
+
+    .mobile-save-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .mobile-btn {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0 16px;
+        font-weight: 600;
+      }
+    }
+  }
+}
