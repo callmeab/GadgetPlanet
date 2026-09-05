@@ -1,0 +1,1175 @@
+@use '../../styles/admin-variables' as *;
+
+.admin-products-page {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-5;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// ── 1. Page Header ──────────────────────────────────────────
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $admin-space-4;
+
+  .header-left {
+    .title-with-badge {
+      display: flex;
+      align-items: center;
+      gap: $admin-space-3;
+
+      .page-title {
+        font-size: 1.625rem;
+        font-weight: 700;
+        color: $admin-text-primary;
+        margin: 0;
+        letter-spacing: -0.02em;
+      }
+
+      .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 999px;
+        background: $admin-bg-muted;
+        color: $admin-text-secondary;
+        border: 1px solid $admin-border;
+      }
+    }
+
+    .page-subtitle {
+      font-size: 0.875rem;
+      color: $admin-text-secondary;
+      margin: 4px 0 0 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-3;
+  }
+}
+
+// ── Buttons ─────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: $admin-inner-radius;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+  user-select: none;
+  white-space: nowrap;
+
+  .btn-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  &.btn-primary {
+    background: $admin-primary;
+    color: #ffffff;
+    border-color: $admin-primary;
+
+    &:hover {
+      background: $admin-primary-hover;
+      border-color: $admin-primary-hover;
+      box-shadow: 0 2px 4px rgba(10, 132, 255, 0.25);
+    }
+  }
+
+  &.btn-secondary {
+    background: $admin-bg-surface;
+    color: $admin-text-primary;
+    border-color: $admin-border;
+
+    &:hover {
+      background: $admin-bg-muted;
+      border-color: #D1D5DB;
+    }
+  }
+
+  &.btn-danger {
+    background: #DC2626;
+    color: #ffffff;
+    border-color: #DC2626;
+
+    &:hover {
+      background: #B91C1C;
+    }
+  }
+
+  &.btn-sm {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 0.8125rem;
+  }
+}
+
+// ── 2. Filter & Search Bar ──────────────────────────────────
+.filters-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: $admin-space-4;
+  box-shadow: $admin-shadow-xs;
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-3;
+
+  .filters-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: $admin-space-3;
+
+    @media (max-width: 960px) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .search-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      width: 16px;
+      height: 16px;
+      color: $admin-text-muted;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 38px;
+      padding: 0 32px 0 36px;
+      font-size: 0.875rem;
+      color: $admin-text-primary;
+      background: $admin-bg-surface;
+      border: 1px solid $admin-border;
+      border-radius: $admin-inner-radius;
+      transition: border-color $admin-transition-fast, box-shadow $admin-transition-fast;
+
+      &:focus {
+        outline: none;
+        border-color: $admin-primary;
+        box-shadow: 0 0 0 3px $admin-primary-subtle;
+      }
+
+      &::placeholder {
+        color: $admin-text-muted;
+      }
+    }
+
+    .clear-search-btn {
+      position: absolute;
+      right: 8px;
+      width: 22px;
+      height: 22px;
+      background: none;
+      border: none;
+      font-size: 1.125rem;
+      color: $admin-text-muted;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        color: $admin-text-primary;
+      }
+    }
+  }
+
+  .filter-select-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .filter-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: $admin-text-secondary;
+      display: none; // Kept for screen readers
+    }
+
+    .filter-select {
+      height: 38px;
+      padding: 0 10px;
+      font-size: 0.875rem;
+      color: $admin-text-primary;
+      background: $admin-bg-surface;
+      border: 1px solid $admin-border;
+      border-radius: $admin-inner-radius;
+      cursor: pointer;
+      transition: border-color $admin-transition-fast;
+
+      &:focus {
+        outline: none;
+        border-color: $admin-primary;
+        box-shadow: 0 0 0 3px $admin-primary-subtle;
+      }
+    }
+  }
+
+  .filters-summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: $admin-space-2;
+    padding-top: $admin-space-2;
+    border-top: 1px dashed $admin-border-subtle;
+    font-size: 0.8125rem;
+    color: $admin-text-secondary;
+
+    .results-count strong {
+      color: $admin-text-primary;
+    }
+
+    .active-chips {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+
+      .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 8px;
+        background: $admin-primary-subtle;
+        color: $admin-primary;
+        border: 1px solid $admin-primary-border;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+
+        button {
+          background: none;
+          border: none;
+          color: $admin-primary;
+          cursor: pointer;
+          font-size: 0.875rem;
+          line-height: 1;
+          padding: 0;
+
+          &:hover {
+            opacity: 0.7;
+          }
+        }
+      }
+
+      .btn-clear-all {
+        background: none;
+        border: none;
+        color: $admin-text-secondary;
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: underline;
+
+        &:hover {
+          color: $admin-text-primary;
+        }
+      }
+    }
+  }
+}
+
+// ── 3. Bulk Actions Bar ─────────────────────────────────────
+.bulk-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $admin-space-3;
+  padding: 10px 16px;
+  background: #1E293B; // Dark sleek admin bar (Stripe style)
+  color: #FFFFFF;
+  border-radius: $admin-card-radius;
+  box-shadow: $admin-shadow-md;
+  animation: slideDown 180ms ease-out;
+
+  .bulk-bar-info {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-3;
+
+    .selection-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.875rem;
+
+      .check-icon {
+        width: 18px;
+        height: 18px;
+        color: #10B981;
+      }
+    }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: #94A3B8;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+
+      &:hover {
+        color: #FFFFFF;
+      }
+    }
+  }
+
+  .bulk-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-2;
+
+    .btn-bulk-secondary {
+      background: rgba(255, 255, 255, 0.12);
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .chevron-icon {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    .btn-bulk-danger {
+      background: #EF4444;
+      color: #FFFFFF;
+      border-color: #EF4444;
+
+      &:hover {
+        background: #DC2626;
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── 4. Main Products Content Card ───────────────────────────
+.products-content-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  box-shadow: $admin-shadow-xs;
+  overflow: hidden;
+}
+
+// ── Checkbox ────────────────────────────────────────────────
+.custom-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: $admin-primary;
+}
+
+// ── Desktop Table View (>= 768px) ───────────────────────────
+.desktop-table-container {
+  width: 100%;
+  overflow-x: auto;
+
+  @media (max-width: 767px) {
+    display: none; // Hidden on mobile, swapped to stacked cards
+  }
+}
+
+.admin-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+
+  thead {
+    background: $admin-bg-muted;
+    border-bottom: 1px solid $admin-border;
+
+    th {
+      padding: 12px 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: $admin-text-secondary;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+
+      &.sortable {
+        cursor: pointer;
+        user-select: none;
+
+        &:hover {
+          color: $admin-text-primary;
+        }
+      }
+
+      .th-content {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        &.content-right {
+          justify-content: flex-end;
+        }
+
+        &.content-center {
+          justify-content: center;
+        }
+
+        .sort-indicator {
+          color: $admin-primary;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+
+  tbody {
+    .table-row {
+      border-bottom: 1px solid $admin-border-subtle;
+      transition: background-color $admin-transition-fast;
+      cursor: pointer;
+
+      &:hover {
+        background-color: $admin-bg-hover;
+      }
+
+      &.row-selected {
+        background-color: rgba(10, 132, 255, 0.04);
+      }
+
+      td {
+        padding: 10px 16px;
+        vertical-align: middle;
+      }
+    }
+  }
+}
+
+// Column widths & Alignments
+.col-checkbox {
+  width: 40px;
+  text-align: center;
+}
+
+.col-thumb {
+  width: 60px;
+}
+
+.col-name {
+  min-width: 240px;
+}
+
+.col-category {
+  width: 140px;
+}
+
+.col-price {
+  width: 110px;
+}
+
+.col-stock {
+  width: 120px;
+}
+
+.col-status {
+  width: 130px;
+}
+
+.col-actions {
+  width: 140px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+// ── Table Cells Content ─────────────────────────────────────
+.product-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: $admin-inner-radius;
+  overflow: hidden;
+  border: 1px solid $admin-border;
+  background: $admin-bg-muted;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .thumb-fallback {
+    width: 24px;
+    height: 24px;
+    color: $admin-text-muted;
+  }
+}
+
+.name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .product-name-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $admin-text-primary;
+    cursor: pointer;
+    line-height: 1.3;
+
+    &:hover {
+      color: $admin-primary;
+      text-decoration: underline;
+    }
+  }
+
+  .product-sku {
+    font-size: 0.75rem;
+    color: $admin-text-muted;
+    font-family: monospace;
+  }
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $admin-text-secondary;
+  background: $admin-bg-muted;
+  border: 1px solid $admin-border;
+  border-radius: 4px;
+}
+
+.price-value {
+  font-weight: 600;
+  color: $admin-text-primary;
+  font-variant-numeric: tabular-nums;
+}
+
+.stock-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.stock-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+
+  &.stock-good {
+    background: #ECFDF5;
+    color: #065F46;
+  }
+
+  &.stock-low {
+    background: #FFFBEB;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+  }
+
+  &.stock-out {
+    background: #FEF2F2;
+    color: #991B1B;
+    border: 1px solid #FECACA;
+  }
+}
+
+// ── Action Buttons ──────────────────────────────────────────
+.action-buttons-group {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.icon-action-btn {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: $admin-inner-radius;
+  color: $admin-text-secondary;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    background: $admin-bg-muted;
+    color: $admin-text-primary;
+    border-color: $admin-border;
+  }
+
+  &.btn-danger-hover:hover {
+    background: #FEE2E2;
+    color: #DC2626;
+    border-color: #FECACA;
+  }
+}
+
+// ── Dropdown Menus ──────────────────────────────────────────
+.actions-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 50;
+  min-width: 180px;
+  background: #FFFFFF;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  box-shadow: $admin-shadow-lg;
+  padding: 4px 0;
+  animation: fadeIn 120ms ease-out;
+
+  &.dropdown-menu-bulk {
+    color: $admin-text-primary;
+  }
+
+  .dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: $admin-text-primary;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color $admin-transition-fast;
+
+    .dropdown-item-icon {
+      width: 15px;
+      height: 15px;
+      color: $admin-text-muted;
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: $admin-bg-muted;
+
+      .dropdown-item-icon {
+        color: $admin-text-primary;
+      }
+    }
+
+    &.item-danger {
+      color: #DC2626;
+
+      .dropdown-item-icon {
+        color: #DC2626;
+      }
+
+      &:hover {
+        background: #FEF2F2;
+      }
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+
+      &.dot-success {
+        background: #10B981;
+      }
+
+      &.dot-neutral {
+        background: #94A3B8;
+      }
+
+      &.dot-danger {
+        background: #EF4444;
+      }
+    }
+  }
+
+  .dropdown-divider {
+    height: 1px;
+    background: $admin-border-subtle;
+    margin: 4px 0;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ── 5. Mobile Stacked Card List (< 768px) ───────────────────
+.mobile-cards-list {
+  display: none; // Hidden on desktop, shown on mobile
+
+  @media (max-width: 767px) {
+    display: flex;
+    flex-direction: column;
+    gap: $admin-space-3;
+    padding: $admin-space-3;
+  }
+}
+
+.product-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: $admin-space-4;
+  box-shadow: $admin-shadow-xs;
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-3;
+  transition: all $admin-transition-fast;
+
+  &.card-selected {
+    border-color: $admin-primary;
+    background-color: rgba(10, 132, 255, 0.02);
+  }
+
+  .card-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: $admin-space-3;
+
+    .card-header-left {
+      display: flex;
+      align-items: flex-start;
+      gap: $admin-space-3;
+      flex: 1;
+
+      .custom-checkbox {
+        margin-top: 4px;
+        min-width: 20px;
+        min-height: 20px;
+      }
+
+      .card-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .card-product-name {
+          font-size: 0.9375rem;
+          font-weight: 600;
+          color: $admin-text-primary;
+          margin: 0;
+          line-height: 1.3;
+          cursor: pointer;
+
+          &:hover {
+            color: $admin-primary;
+          }
+        }
+
+        .card-product-sku {
+          font-size: 0.75rem;
+          color: $admin-text-muted;
+          font-family: monospace;
+        }
+      }
+    }
+  }
+
+  .card-metrics-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: $admin-space-2;
+    padding: $admin-space-2 0;
+    border-top: 1px solid $admin-border-subtle;
+    border-bottom: 1px solid $admin-border-subtle;
+
+    .card-price-stock {
+      display: flex;
+      align-items: center;
+      gap: $admin-space-3;
+
+      .card-price {
+        font-size: 1rem;
+        font-weight: 700;
+        color: $admin-text-primary;
+      }
+    }
+  }
+
+  .card-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $admin-space-2;
+
+    .card-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+
+  // 44x44px Touch Targets for Mobile
+  .mobile-touch-btn {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: $admin-bg-muted;
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+    color: $admin-text-primary;
+    cursor: pointer;
+    transition: all $admin-transition-fast;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    &:active {
+      transform: scale(0.96);
+      background: #E5E7EB;
+    }
+
+    &.btn-danger-hover:active {
+      background: #FEE2E2;
+      color: #DC2626;
+      border-color: #FECACA;
+    }
+  }
+}
+
+// ── 6. Pagination Footer ────────────────────────────────────
+.pagination-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $admin-space-4;
+  padding: 12px 16px;
+  border-top: 1px solid $admin-border;
+  background: $admin-bg-surface;
+
+  .pagination-summary {
+    font-size: 0.8125rem;
+    color: $admin-text-secondary;
+
+    strong {
+      color: $admin-text-primary;
+    }
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-4;
+    flex-wrap: wrap;
+
+    .page-size-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .page-size-label {
+        font-size: 0.8125rem;
+        color: $admin-text-secondary;
+      }
+
+      .page-size-select {
+        height: 32px;
+        padding: 0 8px;
+        font-size: 0.8125rem;
+        color: $admin-text-primary;
+        border: 1px solid $admin-border;
+        border-radius: $admin-inner-radius;
+        background: $admin-bg-surface;
+        cursor: pointer;
+
+        &:focus {
+          outline: none;
+          border-color: $admin-primary;
+        }
+      }
+    }
+
+    .page-buttons-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .page-btn {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: $admin-text-primary;
+        background: $admin-bg-surface;
+        border: 1px solid $admin-border;
+        border-radius: $admin-inner-radius;
+        cursor: pointer;
+        transition: all $admin-transition-fast;
+
+        svg {
+          width: 14px;
+          height: 14px;
+        }
+
+        &:hover:not(:disabled) {
+          background: $admin-bg-muted;
+          border-color: #D1D5DB;
+        }
+
+        &.active {
+          background: $admin-primary;
+          color: #ffffff;
+          border-color: $admin-primary;
+          font-weight: 600;
+        }
+
+        &:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+      }
+
+      .page-ellipsis {
+        padding: 0 4px;
+        color: $admin-text-muted;
+      }
+    }
+  }
+}
+
+// ── 7. Empty State ──────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 24px;
+
+  .empty-state-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $admin-bg-muted;
+    border-radius: 50%;
+    color: $admin-text-muted;
+    margin-bottom: $admin-space-4;
+
+    svg {
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .empty-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: $admin-text-primary;
+    margin: 0 0 6px 0;
+  }
+
+  .empty-desc {
+    font-size: 0.875rem;
+    color: $admin-text-secondary;
+    max-width: 420px;
+    margin: 0 0 $admin-space-5 0;
+    line-height: 1.5;
+  }
+}
+
+// ── 8. Product Form Grid (Modal) ────────────────────────────
+.product-form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $admin-space-4;
+
+    @media (max-width: 560px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-control {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    font-size: 0.875rem;
+    color: $admin-text-primary;
+    background: $admin-bg-surface;
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+    transition: border-color $admin-transition-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $admin-primary;
+      box-shadow: 0 0 0 3px $admin-primary-subtle;
+    }
+
+    &::placeholder {
+      color: $admin-text-muted;
+    }
+  }
+
+  .image-preview-box {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-3;
+    padding: $admin-space-3;
+    background: $admin-bg-muted;
+    border-radius: $admin-inner-radius;
+
+    .preview-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: $admin-text-secondary;
+    }
+
+    .preview-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid $admin-border;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+  }
+}
+
+.modal-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $admin-space-3;
+  width: 100%;
+}
+
+// ── 9. Delete Confirmation Modal ────────────────────────────
+.delete-confirm-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: $admin-space-2 0;
+
+  .delete-warning-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #FEF2F2;
+    color: #DC2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $admin-space-3;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .delete-msg {
+    font-size: 0.875rem;
+    color: $admin-text-secondary;
+    line-height: 1.5;
+    margin: 0;
+
+    strong {
+      color: $admin-text-primary;
+    }
+  }
+}

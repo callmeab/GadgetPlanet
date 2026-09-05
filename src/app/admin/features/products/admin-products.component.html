@@ -1,0 +1,895 @@
+<div class="admin-products-page">
+  <!-- 1. Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="title-with-badge">
+        <h1 class="page-title">Products</h1>
+        <span class="count-badge">{{ totalCatalogCount() }}</span>
+      </div>
+      <p class="page-subtitle">
+        Manage your product catalog, pricing, inventory levels, and statuses.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn btn-secondary btn-export"
+        (click)="exportToCsv()"
+        title="Export filtered products to CSV"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+          <path d="M4 14v2a2 2 0 002 2h8a2 2 0 002-2v-2M7 10l3 3 3-3M10 3v10"/>
+        </svg>
+        <span>Export CSV</span>
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary btn-add"
+        (click)="openAddModal()"
+        id="addProductBtn"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" class="btn-icon">
+          <line x1="10" y1="4" x2="10" y2="16"/>
+          <line x1="4" y1="10" x2="16" y2="10"/>
+        </svg>
+        <span>+ Add Product</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. Filter / Search Bar -->
+  <section class="filters-card">
+    <div class="filters-grid">
+      <!-- Search Input -->
+      <div class="search-field">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+          <circle cx="9" cy="9" r="6"/>
+          <line x1="13.5" y1="13.5" x2="18" y2="18"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by product name or SKU..."
+          [value]="searchQuery()"
+          (input)="onSearchChange($any($event.target).value)"
+          id="productSearchInput"
+        />
+        @if (searchQuery()) {
+          <button
+            type="button"
+            class="clear-search-btn"
+            (click)="onSearchChange('')"
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        }
+      </div>
+
+      <!-- Category Filter -->
+      <div class="filter-select-group">
+        <label class="filter-label" for="categoryFilter">Category</label>
+        <select
+          id="categoryFilter"
+          class="filter-select"
+          [value]="selectedCategory()"
+          (change)="onCategoryChange($any($event.target).value)"
+        >
+          @for (cat of categories; track cat) {
+            <option [value]="cat === 'All Categories' ? 'all' : cat">{{ cat }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-select-group">
+        <label class="filter-label" for="statusFilter">Status</label>
+        <select
+          id="statusFilter"
+          class="filter-select"
+          [value]="selectedStatus()"
+          (change)="onStatusChange($any($event.target).value)"
+        >
+          @for (st of statuses; track st.value) {
+            <option [value]="st.value">{{ st.label }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Price Range Filter -->
+      <div class="filter-select-group">
+        <label class="filter-label" for="priceFilter">Price</label>
+        <select
+          id="priceFilter"
+          class="filter-select"
+          [value]="selectedPriceRange()"
+          (change)="onPriceRangeChange($any($event.target).value)"
+        >
+          @for (pr of priceRanges; track pr.value) {
+            <option [value]="pr.value">{{ pr.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Active Filters Row & Summary -->
+    <div class="filters-summary-row">
+      <div class="results-count">
+        Showing <strong>{{ totalItems() }}</strong> of {{ totalCatalogCount() }} products
+      </div>
+
+      @if (hasActiveFilters()) {
+        <div class="active-chips">
+          @if (searchQuery()) {
+            <span class="filter-chip">
+              Search: "{{ searchQuery() }}"
+              <button type="button" (click)="onSearchChange('')">&times;</button>
+            </span>
+          }
+          @if (selectedCategory() !== 'all' && selectedCategory() !== 'All Categories') {
+            <span class="filter-chip">
+              {{ selectedCategory() }}
+              <button type="button" (click)="onCategoryChange('all')">&times;</button>
+            </span>
+          }
+          @if (selectedStatus() !== 'all') {
+            <span class="filter-chip">
+              Status: {{ selectedStatus() }}
+              <button type="button" (click)="onStatusChange('all')">&times;</button>
+            </span>
+          }
+          @if (selectedPriceRange() !== 'all') {
+            <span class="filter-chip">
+              Price filtered
+              <button type="button" (click)="onPriceRangeChange('all')">&times;</button>
+            </span>
+          }
+          <button type="button" class="btn-clear-all" (click)="resetFilters()">
+            Clear all
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 3. Bulk Actions Bar (Appears when rows selected) -->
+  @if (selectedCount() > 0) {
+    <aside class="bulk-actions-bar" aria-label="Bulk actions bar">
+      <div class="bulk-bar-info">
+        <span class="selection-indicator">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="check-icon">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <strong>{{ selectedCount() }}</strong> products selected
+        </span>
+        <button type="button" class="btn-link" (click)="clearSelection()">
+          Deselect all
+        </button>
+      </div>
+
+      <div class="bulk-bar-actions">
+        <!-- Status Change Dropdown -->
+        <div class="actions-dropdown-wrapper">
+          <button
+            type="button"
+            class="btn btn-sm btn-bulk-secondary"
+            (click)="toggleBulkStatusDropdown($event)"
+            id="bulkStatusChangeBtn"
+          >
+            <span>Change Status</span>
+            <svg viewBox="0 0 20 20" fill="currentColor" class="chevron-icon">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          @if (isBulkStatusDropdownOpen()) {
+            <div class="dropdown-menu dropdown-menu-bulk" (click)="$event.stopPropagation()">
+              <button type="button" class="dropdown-item" (click)="applyBulkStatus('Active')">
+                <span class="status-dot dot-success"></span>
+                Set to Active
+              </button>
+              <button type="button" class="dropdown-item" (click)="applyBulkStatus('Draft')">
+                <span class="status-dot dot-neutral"></span>
+                Set to Draft
+              </button>
+              <button type="button" class="dropdown-item" (click)="applyBulkStatus('Out of Stock')">
+                <span class="status-dot dot-danger"></span>
+                Set to Out of Stock
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Bulk Delete Button -->
+        <button
+          type="button"
+          class="btn btn-sm btn-bulk-danger"
+          (click)="confirmBulkDelete()"
+          id="bulkDeleteBtn"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+            <path d="M4 6h12M8 6V4a2 2 0 012-2h0a2 2 0 012 2v2M5 6l1 11a2 2 0 002 2h4a2 2 0 002-2l1-11"/>
+          </svg>
+          <span>Bulk Delete</span>
+        </button>
+      </div>
+    </aside>
+  }
+
+  <!-- 4. Table / Cards View Container -->
+  <main class="products-content-card">
+    @if (filteredProducts().length === 0) {
+      <!-- 5. Empty State -->
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="8" y="10" width="32" height="28" rx="4"/>
+            <path d="M8 18h32M16 10v4M32 10v4M18 28h12M24 24v8"/>
+          </svg>
+        </div>
+        @if (hasActiveFilters()) {
+          <h3 class="empty-title">No products match your filters</h3>
+          <p class="empty-desc">
+            Try adjusting your search keywords, category, status, or price range filters.
+          </p>
+          <button type="button" class="btn btn-secondary" (click)="resetFilters()">
+            Reset All Filters
+          </button>
+        } @else {
+          <h3 class="empty-title">Add your first product</h3>
+          <p class="empty-desc">
+            Your inventory is currently empty. Create your first product to start selling gadgets.
+          </p>
+          <button type="button" class="btn btn-primary" (click)="openAddModal()">
+            + Add Product
+          </button>
+        }
+      </div>
+    } @else {
+      <!-- Desktop DataTable (>= 768px) -->
+      <div class="desktop-table-container">
+        <table class="admin-data-table" aria-label="Products catalog table">
+          <thead>
+            <tr>
+              <!-- Checkbox Column -->
+              <th class="col-checkbox">
+                <input
+                  type="checkbox"
+                  class="custom-checkbox"
+                  [checked]="isAllSelected()"
+                  [indeterminate]="isIndeterminate()"
+                  (change)="toggleSelectAll()"
+                  aria-label="Select all products on page"
+                />
+              </th>
+
+              <!-- Thumbnail Column -->
+              <th class="col-thumb">Image</th>
+
+              <!-- Product Name & SKU -->
+              <th class="col-name sortable" (click)="setSort('name')">
+                <div class="th-content">
+                  <span>Product</span>
+                  @if (sortColumn() === 'name') {
+                    <span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </div>
+              </th>
+
+              <!-- Category -->
+              <th class="col-category sortable" (click)="setSort('category')">
+                <div class="th-content">
+                  <span>Category</span>
+                  @if (sortColumn() === 'category') {
+                    <span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </div>
+              </th>
+
+              <!-- Price -->
+              <th class="col-price sortable text-right" (click)="setSort('price')">
+                <div class="th-content content-right">
+                  <span>Price</span>
+                  @if (sortColumn() === 'price') {
+                    <span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </div>
+              </th>
+
+              <!-- Stock Quantity -->
+              <th class="col-stock sortable text-right" (click)="setSort('stock')">
+                <div class="th-content content-right">
+                  <span>Stock</span>
+                  @if (sortColumn() === 'stock') {
+                    <span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </div>
+              </th>
+
+              <!-- Status Pill -->
+              <th class="col-status sortable text-center" (click)="setSort('status')">
+                <div class="th-content content-center">
+                  <span>Status</span>
+                  @if (sortColumn() === 'status') {
+                    <span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </div>
+              </th>
+
+              <!-- Actions -->
+              <th class="col-actions text-right">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (product of paginatedProducts(); track product.id) {
+              <tr
+                class="table-row"
+                [class.row-selected]="selectedIds().has(product.id)"
+                (click)="toggleSelectRow(product.id)"
+              >
+                <!-- Checkbox -->
+                <td class="col-checkbox" (click)="$event.stopPropagation()">
+                  <input
+                    type="checkbox"
+                    class="custom-checkbox"
+                    [checked]="selectedIds().has(product.id)"
+                    (change)="toggleSelectRow(product.id)"
+                    [attr.aria-label]="'Select product ' + product.name"
+                  />
+                </td>
+
+                <!-- Thumbnail -->
+                <td class="col-thumb">
+                  <div class="product-thumb">
+                    @if (product.imageUrl) {
+                      <img [src]="product.imageUrl" [alt]="product.name" loading="lazy" />
+                    } @else {
+                      <div class="thumb-fallback">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                          <rect x="4" y="4" width="16" height="16" rx="2"/>
+                          <circle cx="8.5" cy="8.5" r="1.5"/>
+                          <path d="M20 15l-5-5L5 20"/>
+                        </svg>
+                      </div>
+                    }
+                  </div>
+                </td>
+
+                <!-- Product Name & SKU -->
+                <td class="col-name">
+                  <div class="name-cell">
+                    <button
+                      type="button"
+                      class="product-name-btn"
+                      (click)="openEditModal(product, $event)"
+                      title="Edit {{ product.name }}"
+                    >
+                      {{ product.name }}
+                    </button>
+                    <span class="product-sku">SKU: {{ product.sku }}</span>
+                  </div>
+                </td>
+
+                <!-- Category -->
+                <td class="col-category">
+                  <span class="category-badge">{{ product.category }}</span>
+                </td>
+
+                <!-- Price -->
+                <td class="col-price text-right">
+                  <span class="price-value">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</span>
+                </td>
+
+                <!-- Stock Quantity -->
+                <td class="col-stock text-right">
+                  <div class="stock-cell">
+                    <span
+                      class="stock-badge"
+                      [class.stock-out]="product.stock === 0"
+                      [class.stock-low]="product.stock > 0 && product.stock <= 5"
+                      [class.stock-good]="product.stock > 5"
+                    >
+                      @if (product.stock === 0) {
+                        0 in stock
+                      } @else if (product.stock <= 5) {
+                        {{ product.stock }} left
+                      } @else {
+                        {{ product.stock }}
+                      }
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Status Pill -->
+                <td class="col-status text-center">
+                  <gp-admin-status-pill [status]="product.status" size="sm"></gp-admin-status-pill>
+                </td>
+
+                <!-- Actions -->
+                <td class="col-actions text-right" (click)="$event.stopPropagation()">
+                  <div class="action-buttons-group">
+                    <!-- Edit Button -->
+                    <button
+                      type="button"
+                      class="icon-action-btn"
+                      (click)="openEditModal(product, $event)"
+                      title="Edit product"
+                      aria-label="Edit product"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
+                        <path d="M14.5 3.5l2 2L6 16H4v-2L14.5 3.5z"/>
+                      </svg>
+                    </button>
+
+                    <!-- Duplicate Button -->
+                    <button
+                      type="button"
+                      class="icon-action-btn"
+                      (click)="duplicateProduct(product.id, $event)"
+                      title="Duplicate product"
+                      aria-label="Duplicate product"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
+                        <rect x="7" y="7" width="9" height="9" rx="1.5"/>
+                        <path d="M4 13V5a1.5 1.5 0 011.5-1.5H12"/>
+                      </svg>
+                    </button>
+
+                    <!-- Delete Button -->
+                    <button
+                      type="button"
+                      class="icon-action-btn btn-danger-hover"
+                      (click)="confirmDelete(product, $event)"
+                      title="Delete product"
+                      aria-label="Delete product"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
+                        <path d="M4 6h12M8 6V4a2 2 0 012-2h0a2 2 0 012 2v2M5 6l1 11a2 2 0 002 2h4a2 2 0 002-2l1-11"/>
+                      </svg>
+                    </button>
+
+                    <!-- More Actions Dropdown -->
+                    <div class="actions-dropdown-wrapper">
+                      <button
+                        type="button"
+                        class="icon-action-btn"
+                        (click)="toggleRowDropdown(product.id, $event)"
+                        title="More actions"
+                        aria-label="More actions"
+                      >
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                          <circle cx="10" cy="5" r="1.5"/>
+                          <circle cx="10" cy="10" r="1.5"/>
+                          <circle cx="10" cy="15" r="1.5"/>
+                        </svg>
+                      </button>
+
+                      @if (activeDropdownId() === product.id) {
+                        <div class="dropdown-menu row-dropdown" (click)="$event.stopPropagation()">
+                          <button
+                            type="button"
+                            class="dropdown-item"
+                            (click)="restockProduct(product, 10, $event)"
+                          >
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="dropdown-item-icon">
+                              <path d="M10 4v12M4 10h12"/>
+                            </svg>
+                            Restock (+10 units)
+                          </button>
+
+                          <button
+                            type="button"
+                            class="dropdown-item"
+                            (click)="toggleProductStatus(product, $event)"
+                          >
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="dropdown-item-icon">
+                              <circle cx="10" cy="10" r="7"/>
+                              <path d="M10 7v6M7 10h6"/>
+                            </svg>
+                            Toggle Status ({{ product.status === 'Active' ? 'Draft' : 'Active' }})
+                          </button>
+
+                          <button
+                            type="button"
+                            class="dropdown-item"
+                            (click)="copySku(product.sku, $event)"
+                          >
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="dropdown-item-icon">
+                              <rect x="7" y="7" width="9" height="9" rx="1.5"/>
+                              <path d="M4 13V5a1.5 1.5 0 011.5-1.5H12"/>
+                            </svg>
+                            Copy SKU
+                          </button>
+
+                          <div class="dropdown-divider"></div>
+
+                          <button
+                            type="button"
+                            class="dropdown-item item-danger"
+                            (click)="confirmDelete(product, $event)"
+                          >
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="dropdown-item-icon">
+                              <path d="M4 6h12M8 6V4a2 2 0 012-2h0a2 2 0 012 2v2M5 6l1 11a2 2 0 002 2h4a2 2 0 002-2l1-11"/>
+                            </svg>
+                            Delete Product
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 6. Mobile Stacked Card List (< 768px) -->
+      <div class="mobile-cards-list" aria-label="Products catalog mobile list">
+        @for (product of paginatedProducts(); track product.id) {
+          <article
+            class="product-card"
+            [class.card-selected]="selectedIds().has(product.id)"
+          >
+            <!-- Card Top: Checkbox, Thumbnail, Title & SKU, Dropdown Trigger -->
+            <div class="card-header-row">
+              <div class="card-header-left">
+                <input
+                  type="checkbox"
+                  class="custom-checkbox"
+                  [checked]="selectedIds().has(product.id)"
+                  (change)="toggleSelectRow(product.id, $event)"
+                  [attr.aria-label]="'Select product ' + product.name"
+                />
+                <div class="product-thumb">
+                  @if (product.imageUrl) {
+                    <img [src]="product.imageUrl" [alt]="product.name" loading="lazy" />
+                  } @else {
+                    <div class="thumb-fallback">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="4" y="4" width="16" height="16" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                      </svg>
+                    </div>
+                  }
+                </div>
+                <div class="card-title-group">
+                  <h4 class="card-product-name" (click)="openEditModal(product, $event)">
+                    {{ product.name }}
+                  </h4>
+                  <span class="card-product-sku">SKU: {{ product.sku }}</span>
+                </div>
+              </div>
+
+              <!-- Mobile Actions Dropdown Trigger -->
+              <div class="actions-dropdown-wrapper">
+                <button
+                  type="button"
+                  class="mobile-touch-btn"
+                  (click)="toggleRowDropdown(product.id, $event)"
+                  aria-label="Product options"
+                >
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <circle cx="10" cy="5" r="1.5"/>
+                    <circle cx="10" cy="10" r="1.5"/>
+                    <circle cx="10" cy="15" r="1.5"/>
+                  </svg>
+                </button>
+
+                @if (activeDropdownId() === product.id) {
+                  <div class="dropdown-menu row-dropdown" (click)="$event.stopPropagation()">
+                    <button
+                      type="button"
+                      class="dropdown-item"
+                      (click)="restockProduct(product, 10, $event)"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="dropdown-item-icon">
+                        <path d="M10 4v12M4 10h12"/>
+                      </svg>
+                      Restock (+10 units)
+                    </button>
+                    <button
+                      type="button"
+                      class="dropdown-item"
+                      (click)="copySku(product.sku, $event)"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="dropdown-item-icon">
+                        <rect x="7" y="7" width="9" height="9" rx="1.5"/>
+                        <path d="M4 13V5a1.5 1.5 0 011.5-1.5H12"/>
+                      </svg>
+                      Copy SKU
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Card Metrics Row: Category, Price, Stock -->
+            <div class="card-metrics-row">
+              <span class="category-badge">{{ product.category }}</span>
+
+              <div class="card-price-stock">
+                <span class="card-price">{{ product.price | currency:'USD':'symbol':'1.2-2' }}</span>
+                <span
+                  class="stock-badge"
+                  [class.stock-out]="product.stock === 0"
+                  [class.stock-low]="product.stock > 0 && product.stock <= 5"
+                  [class.stock-good]="product.stock > 5"
+                >
+                  {{ product.stock }} in stock
+                </span>
+              </div>
+            </div>
+
+            <!-- Card Bottom: Status Pill + 44px Action Buttons -->
+            <div class="card-footer-row">
+              <gp-admin-status-pill [status]="product.status" size="sm"></gp-admin-status-pill>
+
+              <div class="card-actions-bar">
+                <button
+                  type="button"
+                  class="mobile-touch-btn"
+                  (click)="openEditModal(product, $event)"
+                  title="Edit"
+                  aria-label="Edit product"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
+                    <path d="M14.5 3.5l2 2L6 16H4v-2L14.5 3.5z"/>
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  class="mobile-touch-btn"
+                  (click)="duplicateProduct(product.id, $event)"
+                  title="Duplicate"
+                  aria-label="Duplicate product"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
+                    <rect x="7" y="7" width="9" height="9" rx="1.5"/>
+                    <path d="M4 13V5a1.5 1.5 0 011.5-1.5H12"/>
+                  </svg>
+                </button>
+
+                <button
+                  type="button"
+                  class="mobile-touch-btn btn-danger-hover"
+                  (click)="confirmDelete(product, $event)"
+                  title="Delete"
+                  aria-label="Delete product"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
+                    <path d="M4 6h12M8 6V4a2 2 0 012-2h0a2 2 0 012 2v2M5 6l1 11a2 2 0 002 2h4a2 2 0 002-2l1-11"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+
+      <!-- 7. Pagination Controls at Bottom -->
+      <footer class="pagination-footer">
+        <div class="pagination-summary">
+          Showing <strong>{{ startIndex() }}</strong> to <strong>{{ endIndex() }}</strong> of <strong>{{ totalItems() }}</strong> products
+        </div>
+
+        <div class="pagination-controls">
+          <!-- Page Size Picker -->
+          <div class="page-size-selector">
+            <span class="page-size-label">Rows per page:</span>
+            <select
+              class="page-size-select"
+              [value]="pageSize()"
+              (change)="setPageSize(+$any($event.target).value)"
+              aria-label="Rows per page selector"
+            >
+              @for (size of pageSizeOptions; track size) {
+                <option [value]="size">{{ size }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Page Buttons -->
+          <nav class="page-buttons-nav" aria-label="Pagination Navigation">
+            <button
+              type="button"
+              class="page-btn page-btn-prev"
+              [disabled]="currentPage() === 1"
+              (click)="goToPage(currentPage() - 1)"
+              aria-label="Previous page"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+
+            @for (item of getPageNumbers(); track $index) {
+              @if (item === '...') {
+                <span class="page-ellipsis">…</span>
+              } @else {
+                <button
+                  type="button"
+                  class="page-btn page-num"
+                  [class.active]="currentPage() === item"
+                  (click)="goToPage(+item)"
+                >
+                  {{ item }}
+                </button>
+              }
+            }
+
+            <button
+              type="button"
+              class="page-btn page-btn-next"
+              [disabled]="currentPage() === totalPages()"
+              (click)="goToPage(currentPage() + 1)"
+              aria-label="Next page"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </nav>
+        </div>
+      </footer>
+    }
+  </main>
+
+  <!-- 8. Add / Edit Product Modal -->
+  <gp-admin-modal
+    [isOpen]="isAddEditModalOpen()"
+    [title]="editingProduct() ? 'Edit Product' : 'Add New Product'"
+    [subtitle]="editingProduct() ? 'Update product details, pricing, and stock levels.' : 'Fill in the information below to add a new gadget to the catalog.'"
+    size="lg"
+    (closed)="closeAddEditModal()"
+  >
+    <div class="product-form-grid">
+      <!-- Name -->
+      <gp-admin-form-field
+        label="Product Name"
+        [required]="true"
+        hint="Customer-facing title shown in the store."
+      >
+        <input
+          type="text"
+          class="form-control"
+          placeholder="e.g. Sony WH-1000XM5 Wireless Headphones"
+          [(ngModel)]="formData.name"
+        />
+      </gp-admin-form-field>
+
+      <!-- SKU -->
+      <gp-admin-form-field
+        label="SKU (Stock Keeping Unit)"
+        [required]="true"
+        hint="Unique product inventory code."
+      >
+        <input
+          type="text"
+          class="form-control"
+          placeholder="e.g. SON-XM5-BLK"
+          [(ngModel)]="formData.sku"
+        />
+      </gp-admin-form-field>
+
+      <!-- Category & Status in 2 columns -->
+      <div class="form-row-2">
+        <gp-admin-form-field label="Category" [required]="true">
+          <select class="form-control" [(ngModel)]="formData.category">
+            <option value="Audio">Audio</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Peripherals">Peripherals</option>
+            <option value="Workspace">Workspace</option>
+            <option value="Docks & Hubs">Docks & Hubs</option>
+          </select>
+        </gp-admin-form-field>
+
+        <gp-admin-form-field label="Product Status" [required]="true">
+          <select class="form-control" [(ngModel)]="formData.status">
+            <option value="Active">Active (Published)</option>
+            <option value="Draft">Draft (Unpublished)</option>
+            <option value="Low Stock">Low Stock</option>
+            <option value="Out of Stock">Out of Stock</option>
+          </select>
+        </gp-admin-form-field>
+      </div>
+
+      <!-- Price & Stock in 2 columns -->
+      <div class="form-row-2">
+        <gp-admin-form-field label="Price (USD)" [required]="true">
+          <input
+            type="number"
+            step="0.01"
+            min="0"
+            class="form-control"
+            placeholder="0.00"
+            [(ngModel)]="formData.price"
+          />
+        </gp-admin-form-field>
+
+        <gp-admin-form-field label="Initial Stock Quantity" [required]="true">
+          <input
+            type="number"
+            step="1"
+            min="0"
+            class="form-control"
+            placeholder="0"
+            [(ngModel)]="formData.stock"
+          />
+        </gp-admin-form-field>
+      </div>
+
+      <!-- Image URL -->
+      <gp-admin-form-field
+        label="Product Image URL"
+        hint="Direct image link (Unsplash or CDN URL)."
+      >
+        <input
+          type="url"
+          class="form-control"
+          placeholder="https://images.unsplash.com/..."
+          [(ngModel)]="formData.imageUrl"
+        />
+      </gp-admin-form-field>
+
+      <!-- Live Thumbnail Preview -->
+      @if (formData.imageUrl) {
+        <div class="image-preview-box">
+          <span class="preview-label">Image Preview:</span>
+          <div class="preview-thumb">
+            <img [src]="formData.imageUrl" alt="Preview" (error)="formData.imageUrl = ''" />
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div modalFooter class="modal-footer-actions">
+      <button type="button" class="btn btn-secondary" (click)="closeAddEditModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-primary" (click)="saveProduct()">
+        {{ editingProduct() ? 'Save Changes' : 'Create Product' }}
+      </button>
+    </div>
+  </gp-admin-modal>
+
+  <!-- 9. Delete Confirmation Modal -->
+  <gp-admin-modal
+    [isOpen]="isDeleteModalOpen()"
+    [title]="itemToDelete() ? 'Delete Product?' : 'Delete Selected Products?'"
+    size="sm"
+    (closed)="closeDeleteModal()"
+  >
+    <div class="delete-confirm-body">
+      <div class="delete-warning-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+
+      <p class="delete-msg">
+        @if (itemToDelete(); as single) {
+          Are you sure you want to delete <strong>"{{ single.name }}"</strong>? This action cannot be undone and will remove it from the catalog.
+        } @else {
+          Are you sure you want to permanently delete <strong>{{ selectedCount() }} selected products</strong>? This action cannot be undone.
+        }
+      </p>
+    </div>
+
+    <div modalFooter class="modal-footer-actions">
+      <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-danger" (click)="executeDelete()">
+        Delete Permanently
+      </button>
+    </div>
+  </gp-admin-modal>
+</div>

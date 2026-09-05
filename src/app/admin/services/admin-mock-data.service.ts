@@ -41,8 +41,9 @@ export interface AdminProduct {
   category: string;
   price: number;
   stock: number;
-  status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  status: 'Active' | 'Draft' | 'Low Stock' | 'Out of Stock';
   salesCount: number;
+  imageUrl?: string;
 }
 
 export interface ChartDataPoint {
@@ -339,16 +340,24 @@ export class AdminMockDataService {
     }
   ]);
 
-  // Products Mock Data
+  // Products Mock Data (Diverse categories, statuses: Active, Draft, Low Stock, Out of Stock)
   readonly products = signal<AdminProduct[]>([
-    { id: 'p1', sku: 'SON-XM5-BLK', name: 'Sony WH-1000XM5 Wireless Headphones', category: 'Audio', price: 299.99, stock: 45, status: 'In Stock', salesCount: 230 },
-    { id: 'p2', sku: 'ANK-65W-WHT', name: 'Anker 65W GaN Fast Charger', category: 'Accessories', price: 50.00, stock: 120, status: 'In Stock', salesCount: 540 },
-    { id: 'p3', sku: 'LOG-MX3S-GRY', name: 'Logitech MX Master 3S Wireless Mouse', category: 'Peripherals', price: 129.50, stock: 18, status: 'In Stock', salesCount: 312 },
-    { id: 'p4', sku: 'KEY-Q1P-RGB', name: 'Keychron Q1 Pro Wireless Mechanical Keyboard', category: 'Peripherals', price: 199.00, stock: 6, status: 'Low Stock', salesCount: 145 },
-    { id: 'p5', sku: 'BNQ-SCR-PRO', name: 'BenQ ScreenBar Pro Monitor Light', category: 'Workspace', price: 140.00, stock: 2, status: 'Low Stock', salesCount: 89 },
-    { id: 'p6', sku: 'CAL-TS4-SIL', name: 'CalDigit TS4 Thunderbolt 4 Dock', category: 'Docks & Hubs', price: 250.00, stock: 0, status: 'Out of Stock', salesCount: 78 },
-    { id: 'p7', sku: 'APP-MAG-BAT', name: 'Apple MagSafe Battery Pack', category: 'Accessories', price: 89.99, stock: 34, status: 'In Stock', salesCount: 420 },
-    { id: 'p8', sku: 'DJI-MIC-2', name: 'DJI Mic 2 Wireless Microphone System', category: 'Audio & Video', price: 349.00, stock: 12, status: 'In Stock', salesCount: 65 }
+    { id: 'p1', sku: 'SON-XM5-BLK', name: 'Sony WH-1000XM5 Wireless Headphones', category: 'Audio', price: 299.99, stock: 45, status: 'Active', salesCount: 230, imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&q=80' },
+    { id: 'p2', sku: 'ANK-65W-WHT', name: 'Anker 65W GaN Fast Charger', category: 'Accessories', price: 49.99, stock: 120, status: 'Active', salesCount: 540, imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=100&q=80' },
+    { id: 'p3', sku: 'LOG-MX3S-GRY', name: 'Logitech MX Master 3S Wireless Mouse', category: 'Peripherals', price: 129.50, stock: 18, status: 'Active', salesCount: 312, imageUrl: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=100&q=80' },
+    { id: 'p4', sku: 'KEY-Q1P-RGB', name: 'Keychron Q1 Pro Wireless Mechanical Keyboard', category: 'Peripherals', price: 199.00, stock: 4, status: 'Low Stock', salesCount: 145, imageUrl: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=100&q=80' },
+    { id: 'p5', sku: 'BNQ-SCR-PRO', name: 'BenQ ScreenBar Pro Monitor Light', category: 'Workspace', price: 139.99, stock: 2, status: 'Low Stock', salesCount: 89, imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=100&q=80' },
+    { id: 'p6', sku: 'CAL-TS4-SIL', name: 'CalDigit TS4 Thunderbolt 4 Dock', category: 'Docks & Hubs', price: 249.99, stock: 0, status: 'Out of Stock', salesCount: 78, imageUrl: 'https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=100&q=80' },
+    { id: 'p7', sku: 'APP-MAG-BAT', name: 'Apple MagSafe Battery Pack 5000mAh', category: 'Accessories', price: 89.99, stock: 34, status: 'Active', salesCount: 420, imageUrl: 'https://images.unsplash.com/photo-1609592424368-e6922d56c4d7?w=100&q=80' },
+    { id: 'p8', sku: 'DJI-MIC-2', name: 'DJI Mic 2 Wireless Microphone System', category: 'Audio', price: 349.00, stock: 12, status: 'Active', salesCount: 65, imageUrl: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=100&q=80' },
+    { id: 'p9', sku: 'RZR-DA-V3', name: 'Razer DeathAdder V3 Pro Ultra-Lightweight', category: 'Peripherals', price: 149.99, stock: 22, status: 'Active', salesCount: 198, imageUrl: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=100&q=80' },
+    { id: 'p10', sku: 'BOS-SL-FLX', name: 'Bose SoundLink Flex Bluetooth Speaker', category: 'Audio', price: 149.00, stock: 15, status: 'Active', salesCount: 172, imageUrl: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=100&q=80' },
+    { id: 'p11', sku: 'BAS-PB-100W', name: 'Baseus Blade 100W Ultra-Thin Power Bank', category: 'Accessories', price: 62.00, stock: 0, status: 'Out of Stock', salesCount: 310, imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=100&q=80' },
+    { id: 'p12', sku: 'HYP-CLD-3', name: 'HyperX Cloud III Wireless Gaming Headset', category: 'Audio', price: 169.99, stock: 3, status: 'Low Stock', salesCount: 94, imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&q=80' },
+    { id: 'p13', sku: 'SND-SD-512', name: 'SanDisk 512GB Extreme PRO UHS-II SDXC', category: 'Accessories', price: 119.00, stock: 50, status: 'Active', salesCount: 150, imageUrl: 'https://images.unsplash.com/photo-1609592424368-e6922d56c4d7?w=100&q=80' },
+    { id: 'p14', sku: 'KEY-K3P-RGB', name: 'Keychron K3 Pro Ultra-Slim Mechanical', category: 'Peripherals', price: 110.00, stock: 0, status: 'Draft', salesCount: 0, imageUrl: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=100&q=80' },
+    { id: 'p15', sku: 'ELG-STR-MK2', name: 'Elgato Stream Deck MK.2 15 LCD Keys', category: 'Workspace', price: 149.99, stock: 14, status: 'Active', salesCount: 88, imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=100&q=80' },
+    { id: 'p16', sku: 'ANK-MAG-GO', name: 'Anker MagGo Wireless Qi2 Charging Station', category: 'Accessories', price: 99.99, stock: 0, status: 'Draft', salesCount: 0, imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=100&q=80' }
   ]);
 
   getOrderById(id: string): AdminOrder | undefined {
@@ -379,6 +388,45 @@ export class AdminMockDataService {
     this.products.update(list => [newProd, ...list]);
   }
 
+  updateProduct(id: string, updates: Partial<AdminProduct>): void {
+    this.products.update(list =>
+      list.map(p => (p.id === id ? { ...p, ...updates } : p))
+    );
+  }
+
+  duplicateProduct(id: string): AdminProduct | undefined {
+    const original = this.products().find(p => p.id === id);
+    if (!original) return undefined;
+
+    const copy: AdminProduct = {
+      ...original,
+      id: `p-${Date.now()}`,
+      sku: `${original.sku}-COPY`,
+      name: `${original.name} (Copy)`,
+      salesCount: 0,
+      status: 'Draft'
+    };
+
+    this.products.update(list => [copy, ...list]);
+    return copy;
+  }
+
+  deleteProduct(id: string): void {
+    this.products.update(list => list.filter(p => p.id !== id));
+  }
+
+  deleteMultipleProducts(ids: string[]): void {
+    const idSet = new Set(ids);
+    this.products.update(list => list.filter(p => !idSet.has(p.id)));
+  }
+
+  updateMultipleProductStatus(ids: string[], status: AdminProduct['status']): void {
+    const idSet = new Set(ids);
+    this.products.update(list =>
+      list.map(p => (idSet.has(p.id) ? { ...p, status } : p))
+    );
+  }
+
   restockProduct(productId: string, amount: number = 10): void {
     this.products.update(list =>
       list.map(p => {
@@ -387,7 +435,7 @@ export class AdminMockDataService {
         return {
           ...p,
           stock: newStock,
-          status: newStock > 5 ? 'In Stock' : (newStock > 0 ? 'Low Stock' : 'Out of Stock')
+          status: newStock > 5 ? 'Active' : (newStock > 0 ? 'Low Stock' : 'Out of Stock')
         };
       })
     );

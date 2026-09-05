@@ -201,7 +201,7 @@ export class AdminDashboardComponent {
       category: this.newProductCategory(),
       price,
       stock,
-      status: stock > 5 ? 'In Stock' : (stock > 0 ? 'Low Stock' : 'Out of Stock')
+      status: stock > 5 ? 'Active' : (stock > 0 ? 'Low Stock' : 'Out of Stock')
     });
 
     this.toastService.success(`Product "${name}" added to catalog`, 'Product Created');
