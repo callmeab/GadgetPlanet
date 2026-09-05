@@ -12,6 +12,7 @@ import { MockDataService } from '../../core/services/mock-data.service';
 import { ProductCardComponent } from '../../shared/components/product-card/product-card.component';
 import { CountdownTimerComponent } from '../../shared/components/countdown-timer/countdown-timer.component';
 import { HeroBannerComponent } from '../../shared/components/hero-banner/hero-banner.component';
+import { ProductCarouselSectionComponent } from '../../shared/components/product-carousel-section/product-carousel-section.component';
 
 @Component({
   selector: 'app-home',
@@ -22,6 +23,7 @@ import { HeroBannerComponent } from '../../shared/components/hero-banner/hero-ba
     ProductCardComponent,
     CountdownTimerComponent,
     HeroBannerComponent,
+    ProductCarouselSectionComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.component.html',
@@ -32,9 +34,12 @@ export class HomeComponent {
 
   @ViewChild('dealsTrack') dealsTrackRef?: ElementRef<HTMLDivElement>;
 
-  readonly featured    = computed(() => this.mockData.getFeaturedProducts(4));
-  readonly newArrivals = computed(() => this.mockData.getNewArrivals(4));
+  readonly featured    = computed(() => this.mockData.getFeaturedProducts(8));
+  readonly newArrivals = computed(() => this.mockData.getNewArrivals(8));
   readonly hotDeals    = computed(() => this.mockData.getHotDeals(8));
+
+  readonly bestsellerTabs = ['All', 'Earphones', 'Smartwatches', 'Speakers'];
+  readonly newLaunchTabs   = ['All', 'Earphones', 'Accessories', 'Headphones'];
 
   scrollDeals(direction: 'left' | 'right'): void {
     if (!this.dealsTrackRef) return;

@@ -1,0 +1,261 @@
+@use '../../../../styles/variables' as v;
+
+@keyframes shimmerAnimation {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.product-carousel-section {
+  padding: v.$space-16 0;
+}
+
+.container {
+  max-width: v.$container-max;
+  margin: 0 auto;
+  padding: 0 v.$space-6;
+}
+
+// ── Header ─────────────────────────────────────────────────
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: v.$space-8;
+  gap: v.$space-4;
+  flex-wrap: wrap;
+}
+
+.title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+}
+
+.section-title {
+  font-size: v.$font-size-2xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  margin: 0;
+  letter-spacing: v.$letter-spacing-tight;
+}
+
+.section-subtitle {
+  color: v.$color-text-secondary;
+  font-size: v.$font-size-sm;
+  margin: 0;
+}
+
+// ── Category Tabs ──────────────────────────────────────────
+.tabs-container {
+  display: flex;
+  align-items: center;
+  gap: v.$space-1;
+  background: v.$color-bg-elevated;
+  padding: 4px;
+  border-radius: v.$radius-full;
+  border: 1px solid v.$color-surface-border;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 16px;
+  border-radius: v.$radius-full;
+  color: v.$color-text-secondary;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-semibold;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all v.$transition-fast;
+
+  &:hover {
+    color: v.$color-text-primary;
+  }
+
+  &--active {
+    background: v.$color-primary;
+    color: #fff;
+    box-shadow: 0 0 12px rgba(10, 132, 255, 0.45);
+  }
+}
+
+// ── Controls (Arrows & View All) ───────────────────────────
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: v.$space-4;
+}
+
+.nav-arrows {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+}
+
+.arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: v.$color-bg-card;
+  border: 1px solid v.$color-surface-border;
+  color: v.$color-text-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all v.$transition-fast;
+
+  &:hover:not(:disabled) {
+    background: rgba(10, 132, 255, 0.22);
+    border-color: v.$color-primary;
+    color: #fff;
+    transform: scale(1.05);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.view-all-link {
+  color: v.$color-primary;
+  text-decoration: none;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  white-space: nowrap;
+  transition: color v.$transition-fast;
+
+  &:hover {
+    color: v.$color-primary-light;
+  }
+}
+
+// ── Carousel Track ─────────────────────────────────────────
+.track-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.carousel-track {
+  display: flex;
+  gap: v.$space-5;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  padding: v.$space-2 0 v.$space-6;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.carousel-item {
+  flex: 0 0 280px;
+  min-width: 280px;
+  max-width: 280px;
+  scroll-snap-align: start;
+
+  @media (max-width: 600px) {
+    flex: 0 0 240px;
+    min-width: 240px;
+    max-width: 240px;
+  }
+}
+
+.carousel-empty {
+  padding: v.$space-12 0;
+  text-align: center;
+  color: v.$color-text-muted;
+  font-size: v.$font-size-sm;
+  width: 100%;
+}
+
+// ── Loading Skeleton State ─────────────────────────────────
+.skeleton-track {
+  display: flex;
+  gap: v.$space-5;
+  overflow: hidden;
+  padding: v.$space-2 0 v.$space-6;
+}
+
+.skeleton-card {
+  flex: 0 0 280px;
+  min-width: 280px;
+  max-width: 280px;
+  background: v.$color-bg-card;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-lg;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 600px) {
+    flex: 0 0 240px;
+    min-width: 240px;
+    max-width: 240px;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.09) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmerAnimation 1.6s infinite;
+}
+
+.skeleton-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.skeleton-body {
+  padding: v.$space-4;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+.skeleton-line {
+  border-radius: v.$radius-sm;
+
+  &--sm {
+    width: 35%;
+    height: 12px;
+  }
+  &--title {
+    width: 85%;
+    height: 18px;
+    margin: 2px 0;
+  }
+  &--rating {
+    width: 45%;
+    height: 14px;
+  }
+  &--price {
+    width: 60%;
+    height: 22px;
+    margin-top: 6px;
+  }
+}

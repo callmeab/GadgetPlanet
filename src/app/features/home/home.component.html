@@ -94,35 +94,25 @@
   </div>
 </section>
 
-<!-- ── Bestsellers ────────────────────────────────────────── -->
-<section class="section" id="featured-section">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">🏆 Bestsellers</h2>
-      <a routerLink="/products" class="section-link">See all →</a>
-    </div>
-    <div class="products-grid">
-      @for (product of featured(); track product.id) {
-        <gp-product-card [product]="product"></gp-product-card>
-      }
-    </div>
-  </div>
-</section>
+<!-- ── Bestsellers Product Carousel ──────────────────────── -->
+<gp-product-carousel-section
+  title="🏆 Best Sellers"
+  subtitle="Top-rated tech loved by over 50,000 gadget enthusiasts"
+  [products]="featured()"
+  [tabs]="bestsellerTabs"
+  viewAllRoute="/products"
+  id="home-bestsellers-carousel"
+></gp-product-carousel-section>
 
-<!-- ── New Arrivals ───────────────────────────────────────── -->
-<section class="section" id="new-arrivals-section">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">🆕 New Arrivals</h2>
-      <a routerLink="/products" class="section-link">See all →</a>
-    </div>
-    <div class="products-grid">
-      @for (product of newArrivals(); track product.id) {
-        <gp-product-card [product]="product"></gp-product-card>
-      }
-    </div>
-  </div>
-</section>
+<!-- ── New Launches Product Carousel ─────────────────────── -->
+<gp-product-carousel-section
+  title="🚀 New Launches"
+  subtitle="Freshly dropped cutting-edge hardware and accessories"
+  [products]="newArrivals()"
+  [tabs]="newLaunchTabs"
+  viewAllRoute="/products"
+  id="home-new-launches-carousel"
+></gp-product-carousel-section>
 
 <!-- ── Trust Banner ───────────────────────────────────────── -->
 <section class="trust-banner" id="trust-banner">

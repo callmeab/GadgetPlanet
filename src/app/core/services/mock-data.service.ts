@@ -255,13 +255,13 @@ export class MockDataService {
     return this.products.filter(p => p.category === category);
   }
 
-  getFeaturedProducts(limit = 6): Product[] {
+  getFeaturedProducts(limit = 10): Product[] {
     return this.products
       .filter(p => p.badges.includes('Bestseller') || p.badges.includes('Top Rated'))
       .slice(0, limit);
   }
 
-  getNewArrivals(limit = 6): Product[] {
+  getNewArrivals(limit = 10): Product[] {
     return this.products
       .filter(p => p.badges.includes('New'))
       .slice(0, limit);
