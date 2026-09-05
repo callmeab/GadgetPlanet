@@ -1,0 +1,202 @@
+@if (cartStore.isDrawerOpen()) {
+  <!-- ── Backdrop Overlay ────────────────────────────────────── -->
+  <div
+    class="cart-drawer-backdrop"
+    (click)="close()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- ── Slide-in Panel from Right ───────────────────────────── -->
+  <div
+    class="cart-drawer-panel"
+    id="mini-cart-drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="mini-cart-title"
+  >
+
+    <!-- Drawer Header -->
+    <div class="drawer-header">
+      <div class="header-title-wrap">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <h3 class="drawer-title" id="mini-cart-title">
+          Shopping Bag ({{ cartStore.count() }})
+        </h3>
+      </div>
+      <button
+        type="button"
+        class="drawer-close-btn"
+        (click)="close()"
+        aria-label="Close cart drawer"
+        id="mini-cart-close-btn"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Free Delivery Progress Bar -->
+    <div class="free-shipping-bar">
+      <div class="shipping-text">
+        @if (cartStore.total() >= 999) {
+          <span class="unlocked-text">🎉 You've unlocked <strong>FREE Express Shipping</strong>!</span>
+        } @else {
+          <span>
+            Add <strong>Rs. {{ cartStore.freeShippingRemaining() | number:'1.0-0' }}</strong> more for FREE Shipping!
+          </span>
+        }
+      </div>
+      <div class="shipping-meter-track">
+        <div
+          class="shipping-meter-fill"
+          [style.width]="cartStore.freeShippingPercent() + '%'"
+          [class.is-complete]="cartStore.total() >= 999"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Drawer Body -->
+    <div class="drawer-body">
+      @if (!cartStore.isEmpty()) {
+        <div class="drawer-items-list">
+          @for (item of cartStore.items(); track item.product.id) {
+            <div class="drawer-item" [id]="'drawer-item-' + item.product.id">
+              <!-- Thumbnail -->
+              <a
+                [routerLink]="['/products', item.product.id]"
+                (click)="close()"
+                class="item-thumb-link"
+              >
+                <img
+                  [src]="item.product.images[0]"
+                  [alt]="item.product.name"
+                  class="item-thumb"
+                />
+              </a>
+
+              <!-- Info -->
+              <div class="item-details">
+                <div class="item-title-row">
+                  <a
+                    [routerLink]="['/products', item.product.id]"
+                    (click)="close()"
+                    class="item-name"
+                  >
+                    {{ item.product.name }}
+                  </a>
+                  <button
+                    type="button"
+                    class="item-remove-btn"
+                    (click)="removeItem(item.product.id)"
+                    [attr.aria-label]="'Remove ' + item.product.name"
+                    title="Remove item"
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                @if (item.variant) {
+                  <span class="item-variant-chip">{{ item.variant }}</span>
+                }
+
+                <div class="item-bottom-row">
+                  <!-- Stepper -->
+                  <div class="drawer-stepper">
+                    <button
+                      type="button"
+                      class="drawer-step-btn"
+                      (click)="decreaseQty(item.product.id, item.quantity)"
+                      aria-label="Decrease quantity"
+                    >
+                      −
+                    </button>
+                    <span class="drawer-step-val">{{ item.quantity }}</span>
+                    <button
+                      type="button"
+                      class="drawer-step-btn"
+                      (click)="increaseQty(item.product.id, item.quantity)"
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <!-- Price -->
+                  <div class="item-pricing">
+                    <span class="item-total-price">
+                      Rs. {{ ((item.product.discountPrice ?? item.product.price) * item.quantity) | number:'1.0-0' }}
+                    </span>
+                    @if (item.quantity > 1) {
+                      <span class="item-unit-note">
+                        Rs. {{ (item.product.discountPrice ?? item.product.price) | number:'1.0-0' }} each
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- Empty Cart Illustration State -->
+        <div class="drawer-empty-state" id="drawer-empty-state">
+          <div class="empty-icon-wrap">
+            <span class="empty-icon">🛒</span>
+            <div class="empty-halo"></div>
+          </div>
+          <h4 class="empty-title">Your Bag is Empty</h4>
+          <p class="empty-desc">
+            Explore our universe of high-performance earbuds, smartwatches &amp; speakers.
+          </p>
+          <button
+            type="button"
+            class="empty-browse-btn"
+            (click)="continueShopping()"
+            id="drawer-browse-btn"
+          >
+            Start Shopping →
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Drawer Footer -->
+    @if (!cartStore.isEmpty()) {
+      <div class="drawer-footer">
+        <div class="drawer-subtotal-row">
+          <span class="subtotal-label">Subtotal:</span>
+          <span class="subtotal-val">Rs. {{ cartStore.total() | number:'1.0-0' }}</span>
+        </div>
+        <p class="drawer-shipping-note">
+          Taxes and shipping calculated at checkout.
+        </p>
+
+        <div class="drawer-cta-group">
+          <button
+            type="button"
+            class="view-cart-btn"
+            (click)="viewFullCart()"
+            id="drawer-view-cart-btn"
+          >
+            View Full Cart
+          </button>
+          <button
+            type="button"
+            class="checkout-btn"
+            (click)="checkout()"
+            id="drawer-checkout-btn"
+          >
+            Checkout (Rs. {{ cartStore.grandTotal() | number:'1.0-0' }}) →
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+}

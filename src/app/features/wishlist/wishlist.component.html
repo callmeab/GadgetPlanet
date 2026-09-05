@@ -1,0 +1,124 @@
+<div class="wishlist-page" id="wishlist-page">
+  <div class="container">
+
+    <!-- ── Breadcrumb ────────────────────────────────────────── -->
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+      <a routerLink="/" class="crumb-link">Home</a>
+      <span class="crumb-sep">/</span>
+      <span class="crumb-current">My Wishlist</span>
+    </nav>
+
+    <!-- ── Header Section ────────────────────────────────────── -->
+    <header class="wishlist-header">
+      <div class="header-left">
+        <h1 class="wishlist-title">
+          My Saved Gadgets
+          @if (!isEmpty()) {
+            <span class="wishlist-count-badge">({{ wishlistCount() }} {{ wishlistCount() === 1 ? 'item' : 'items' }})</span>
+          }
+        </h1>
+        <p class="wishlist-subtitle">
+          Your personal collection of dream tech. Easily move items to your bag whenever you're ready to checkout.
+        </p>
+      </div>
+
+      @if (!isEmpty()) {
+        <div class="header-actions">
+          <button
+            type="button"
+            class="action-btn action-btn--move-all"
+            (click)="moveAllToCart()"
+            id="wishlist-move-all-btn"
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            Move All to Bag
+          </button>
+
+          <button
+            type="button"
+            class="action-btn action-btn--clear"
+            (click)="clearWishlist()"
+            id="wishlist-clear-all-btn"
+          >
+            Clear Wishlist
+          </button>
+        </div>
+      }
+    </header>
+
+    <!-- ── Content Section ───────────────────────────────────── -->
+    @if (!isEmpty()) {
+
+      <!-- Wishlist Products Grid -->
+      <div class="wishlist-grid" id="wishlist-product-grid">
+        @for (product of wishlistItems(); track product.id) {
+          <gp-product-card
+            [product]="product"
+            [showMoveToCart]="true"
+            [id]="'wishlist-card-' + product.id"
+          ></gp-product-card>
+        }
+      </div>
+
+      <!-- Quick Trust Perks Bar -->
+      <div class="wishlist-trust-banner">
+        <div class="trust-perk">
+          <span class="perk-icon">⚡</span>
+          <div>
+            <strong>Fast Express Delivery</strong>
+            <p>Dispatched within 24 hours across Pakistan</p>
+          </div>
+        </div>
+        <div class="trust-perk">
+          <span class="perk-icon">🛡️</span>
+          <div>
+            <strong>1-Year Official Warranty</strong>
+            <p>Genuine authentic gadgets with official claim support</p>
+          </div>
+        </div>
+        <div class="trust-perk">
+          <span class="perk-icon">🔄</span>
+          <div>
+            <strong>30-Day Easy Replacements</strong>
+            <p>Hassle-free support with instant assistance</p>
+          </div>
+        </div>
+      </div>
+
+    } @else {
+
+      <!-- Empty State View -->
+      <div class="wishlist-empty-card" id="wishlist-empty-state">
+        <div class="empty-icon-wrap">
+          <div class="empty-heart-halo"></div>
+          <span class="empty-heart-icon">💖</span>
+        </div>
+        <h2 class="empty-title">Your Wishlist is Empty</h2>
+        <p class="empty-desc">
+          You haven't saved any gadgets yet. Tap the heart icon on any product card while browsing
+          our universe of audio gear, smartwatches, and high-speed chargers to keep track of items you love.
+        </p>
+        <a routerLink="/products" class="empty-browse-cta" id="empty-wishlist-browse-btn">
+          Explore All Products →
+        </a>
+      </div>
+
+    }
+
+    <!-- ── Recommended / Upsell Carousel ─────────────────────── -->
+    <div class="wishlist-recommended-section">
+      <gp-product-carousel-section
+        title="Recommended For You"
+        subtitle="Top-rated gadgets popular among GadgetPlanet members"
+        [products]="recommendedProducts()"
+        viewAllRoute="/products"
+        id="wishlist-recommended-carousel"
+      ></gp-product-carousel-section>
+    </div>
+
+  </div>
+</div>

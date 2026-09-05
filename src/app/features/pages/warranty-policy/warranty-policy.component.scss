@@ -1,0 +1,309 @@
+@use '../../../../styles/variables' as v;
+
+.policy-page-content {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-12;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+// ── Policy Sections ──────────────────────────────────────────
+.policy-section {
+  background: v.$color-bg-card;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-2xl;
+  padding: v.$space-8;
+  box-shadow: v.$shadow-sm;
+
+  @media (max-width: 640px) {
+    padding: v.$space-5;
+  }
+}
+
+.section-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-primary-light;
+  letter-spacing: v.$letter-spacing-wider;
+  margin-bottom: v.$space-2;
+}
+
+.section-heading {
+  font-size: v.$font-size-2xl;
+  font-weight: v.$font-weight-black;
+  color: v.$color-text-primary;
+  letter-spacing: v.$letter-spacing-tight;
+  margin: 0 0 v.$space-3;
+
+  @media (max-width: 640px) {
+    font-size: v.$font-size-xl;
+  }
+}
+
+.section-lead {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-loose;
+  margin: 0 0 v.$space-6;
+
+  strong {
+    color: v.$color-text-primary;
+  }
+}
+
+// ── Coverage Grid (Covered vs Excluded) ───────────────────────
+.coverage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: v.$space-4;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.coverage-card {
+  border-radius: v.$radius-lg;
+  padding: v.$space-5;
+
+  &--covered {
+    background: rgba(48, 209, 88, 0.05);
+    border: 1px solid rgba(48, 209, 88, 0.25);
+  }
+
+  &--excluded {
+    background: rgba(255, 69, 58, 0.05);
+    border: 1px solid rgba(255, 69, 58, 0.25);
+  }
+}
+
+.coverage-title {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  margin: 0 0 v.$space-3;
+}
+
+.coverage-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+
+  li {
+    font-size: v.$font-size-xs;
+    color: v.$color-text-secondary;
+    line-height: v.$line-height-snug;
+    position: relative;
+    padding-left: v.$space-4;
+
+    &::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: v.$color-text-muted;
+    }
+  }
+}
+
+// ── 30-Day Perks Box ─────────────────────────────────────────
+.perks-summary-box {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: v.$space-4;
+  background: v.$color-bg-elevated;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-xl;
+  padding: v.$space-5;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.perk-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .perk-icon {
+    font-size: 24px;
+    line-height: 1;
+    margin-bottom: v.$space-2;
+  }
+
+  strong {
+    font-size: v.$font-size-sm;
+    color: v.$color-text-primary;
+  }
+
+  p {
+    font-size: v.$font-size-xs;
+    color: v.$color-text-secondary;
+    margin: 0;
+    line-height: v.$line-height-snug;
+  }
+}
+
+// ── 4 Claim Steps ────────────────────────────────────────────
+.claim-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: v.$space-4;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 500px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.step-card {
+  background: v.$color-bg-elevated;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-lg;
+  padding: v.$space-4;
+  display: flex;
+  flex-direction: column;
+  transition: all v.$transition-fast;
+
+  &:hover {
+    border-color: v.$color-primary;
+    transform: translateY(-2px);
+  }
+
+  .step-num {
+    font-size: v.$font-size-2xl;
+    font-weight: v.$font-weight-black;
+    color: v.$color-primary-light;
+    line-height: 1;
+    margin-bottom: v.$space-3;
+  }
+
+  .step-title {
+    font-size: v.$font-size-sm;
+    font-weight: v.$font-weight-bold;
+    color: v.$color-text-primary;
+    margin: 0 0 v.$space-2;
+  }
+
+  .step-desc {
+    font-size: v.$font-size-xs;
+    color: v.$color-text-secondary;
+    line-height: v.$line-height-snug;
+    margin: 0;
+  }
+}
+
+// ── Refund Details Table ─────────────────────────────────────
+.refund-details-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-lg;
+  overflow: hidden;
+}
+
+.refund-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: v.$space-3 v.$space-4;
+  background: v.$color-bg-elevated;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: v.$font-size-xs;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .refund-method {
+    font-weight: v.$font-weight-semibold;
+    color: v.$color-text-primary;
+  }
+
+  .refund-time {
+    color: v.$color-text-secondary;
+  }
+}
+
+// ── Bottom Claim CTA Card ────────────────────────────────────
+.claim-cta-card {
+  background: linear-gradient(135deg, rgba(10, 132, 255, 0.08) 0%, rgba(20, 20, 20, 0.95) 100%);
+  border: 1px solid rgba(10, 132, 255, 0.25);
+  border-radius: v.$radius-2xl;
+  padding: v.$space-10 v.$space-6;
+  text-align: center;
+}
+
+.cta-inner {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.cta-heading {
+  font-size: v.$font-size-xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  margin: 0 0 v.$space-2;
+}
+
+.cta-sub {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  margin: 0 0 v.$space-6;
+}
+
+.cta-btn-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: v.$space-3;
+  flex-wrap: wrap;
+}
+
+.cta-primary-btn {
+  background: v.$color-accent;
+  color: #fff;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-bold;
+  padding: v.$space-3 v.$space-6;
+  border-radius: v.$radius-full;
+  text-decoration: none;
+  box-shadow: v.$shadow-orange;
+  transition: all v.$transition-fast;
+
+  &:hover {
+    background: v.$color-accent-light;
+    transform: translateY(-1px);
+  }
+}
+
+.cta-whatsapp-btn {
+  background: rgba(48, 209, 88, 0.15);
+  border: 1px solid rgba(48, 209, 88, 0.3);
+  color: v.$color-success;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  padding: v.$space-3 v.$space-6;
+  border-radius: v.$radius-full;
+  text-decoration: none;
+  transition: all v.$transition-fast;
+
+  &:hover {
+    background: rgba(48, 209, 88, 0.25);
+    transform: translateY(-1px);
+  }
+}

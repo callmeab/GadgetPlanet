@@ -1,0 +1,134 @@
+<gp-static-page-layout
+  title="Track Your Order"
+  subtitle="Monitor real-time courier milestones, delivery timelines, and dispatch status for your GadgetPlanet shipments."
+  badge="LIVE COURIER TRACKING"
+>
+  <div class="track-page-content">
+
+    <!-- ── Search Card ────────────────────────────────────────── -->
+    <div class="track-search-card">
+      <h2 class="search-title">Enter Tracking Information</h2>
+      <p class="search-sub">Input your Order ID (e.g. GP-2026-84920) and contact email to view live updates.</p>
+
+      <form (ngSubmit)="onTrack()" class="search-form">
+        <div class="search-fields-row">
+          <div class="input-field">
+            <label for="track-order-id" class="input-label">Order Number / ID</label>
+            <input
+              type="text"
+              id="track-order-id"
+              name="orderId"
+              [(ngModel)]="orderIdInput"
+              class="search-input"
+              placeholder="e.g. GP-2026-84920"
+            />
+          </div>
+
+          <div class="input-field">
+            <label for="track-contact" class="input-label">Email or Mobile Number</label>
+            <input
+              type="text"
+              id="track-contact"
+              name="contact"
+              [(ngModel)]="contactInput"
+              class="search-input"
+              placeholder="e.g. hamza@example.com"
+            />
+          </div>
+
+          <div class="btn-col">
+            <button type="submit" class="search-btn" [disabled]="isSearching()">
+              @if (isSearching()) {
+                <span>Tracking...</span>
+              } @else {
+                <span>Track Order →</span>
+              }
+            </button>
+          </div>
+        </div>
+
+        @if (searchError()) {
+          <span class="search-error">⚠️ {{ searchError() }}</span>
+        }
+      </form>
+    </div>
+
+    <!-- ── Live Tracking Result ───────────────────────────────── -->
+    @if (hasSearched()) {
+      <div class="tracking-result-section">
+
+        <!-- Status Overview Card -->
+        <div class="tracking-overview-card">
+          <div class="overview-header">
+            <div>
+              <span class="status-badge">🚚 IN TRANSIT</span>
+              <h3 class="order-num-title">Order #{{ orderIdInput }}</h3>
+              <p class="courier-sub">Dispatched via <strong>TCS Express Air Freight</strong> • Waybill: <strong>TCS-PK-98214092</strong></p>
+            </div>
+
+            <div class="eta-box">
+              <span class="eta-label">Estimated Delivery</span>
+              <strong class="eta-date">Today by 6:00 PM</strong>
+              <span class="eta-dest">Delivering to Lahore, Punjab</span>
+            </div>
+          </div>
+
+          <!-- 4-Step Vertical Timeline -->
+          <div class="timeline-stepper">
+            @for (step of trackingSteps; track step.stepNum) {
+              <div
+                class="timeline-item"
+                [class.is-completed]="step.status === 'completed'"
+                [class.is-current]="step.status === 'current'"
+                [class.is-pending]="step.status === 'pending'"
+              >
+                <!-- Indicator Column -->
+                <div class="step-indicator-col">
+                  <div class="step-bullet">
+                    <span>{{ step.icon }}</span>
+                  </div>
+                  @if (step.stepNum < trackingSteps.length) {
+                    <div class="step-connector"></div>
+                  }
+                </div>
+
+                <!-- Info Column -->
+                <div class="step-info-col">
+                  <div class="step-heading-row">
+                    <strong class="step-title">{{ step.title }}</strong>
+                    <span class="step-time">{{ step.time }}</span>
+                  </div>
+                  <p class="step-location">📍 {{ step.location }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Package Contents Preview -->
+        <div class="package-contents-card">
+          <h4 class="contents-title">Package Contents ({{ shipmentItems.length }} items)</h4>
+          <div class="contents-list">
+            @for (item of shipmentItems; track item.name) {
+              <div class="content-item">
+                <img [src]="item.image" [alt]="item.name" class="item-thumb" />
+                <div class="item-info">
+                  <strong class="item-name">{{ item.name }}</strong>
+                  <span class="item-variant">Color: {{ item.variant }} • Qty: {{ item.qty }}</span>
+                </div>
+                <span class="item-price">Rs. {{ item.price | number:'1.0-0' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Help Notice -->
+        <div class="courier-notice">
+          <span>💡 Need to reschedule your delivery slot or update instructions? Contact our helpline at <strong>+92 (042) 111-GADGET</strong> or WhatsApp us directly.</span>
+        </div>
+
+      </div>
+    }
+
+  </div>
+</gp-static-page-layout>

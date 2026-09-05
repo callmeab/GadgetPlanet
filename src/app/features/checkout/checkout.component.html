@@ -1,0 +1,599 @@
+<div class="checkout-page-wrapper" id="checkout-page">
+  <div class="container">
+
+    <!-- ── Top Checkout Navbar ────────────────────────────────── -->
+    <header class="checkout-nav">
+      <a routerLink="/cart" class="checkout-back-link">
+        ← Return to Bag
+      </a>
+      <a routerLink="/" class="checkout-brand">
+        <span class="brand-text">GADGET<strong>PLANET</strong></span>
+      </a>
+      <div class="checkout-secure-badge">
+        <span class="secure-icon">🔒</span>
+        <span>256-Bit SSL Encrypted</span>
+      </div>
+    </header>
+
+    @if (checkoutStore.orderPlaced()) {
+
+      <!-- ====================================================== -->
+      <!-- ── ORDER PLACED CONFIRMATION SCREEN ────────────────── -->
+      <!-- ====================================================== -->
+      <section class="order-confirmed-card" id="order-confirmed-view">
+        <div class="confetti-halo">
+          <span class="confetti-emoji">🎉</span>
+        </div>
+
+        <span class="confirmed-badge">✓ ORDER CONFIRMED</span>
+        <h1 class="confirmed-title">Thank You, {{ checkoutStore.selectedAddress().fullName }}!</h1>
+        <p class="confirmed-subtitle">
+          Your order has been placed successfully. A confirmation message and tracking link have been dispatched to <strong>{{ checkoutStore.selectedAddress().phone }}</strong>.
+        </p>
+
+        <div class="order-details-box">
+          <div class="detail-col">
+            <span class="detail-label">Order Number</span>
+            <strong class="detail-val detail-val--order">{{ checkoutStore.orderNumber() }}</strong>
+          </div>
+          <div class="detail-col">
+            <span class="detail-label">Order Date</span>
+            <strong class="detail-val">{{ checkoutStore.orderDate() }}</strong>
+          </div>
+          <div class="detail-col">
+            <span class="detail-label">Payment Method</span>
+            <strong class="detail-val">{{ checkoutStore.selectedPayment().title }}</strong>
+          </div>
+          <div class="detail-col">
+            <span class="detail-label">Total Amount</span>
+            <strong class="detail-val detail-val--accent">Rs. {{ cartStore.grandTotal() | number:'1.0-0' }}</strong>
+          </div>
+        </div>
+
+        <div class="delivery-timeline-card">
+          <div class="timeline-header">
+            <span class="timeline-icon">🚚</span>
+            <div>
+              <strong>Estimated Express Delivery: 2 – 3 Business Days</strong>
+              <p>Delivering to: {{ checkoutStore.selectedAddress().streetAddress }}, {{ checkoutStore.selectedAddress().city }} ({{ checkoutStore.selectedAddress().postalCode }})</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="confirmed-actions">
+          <button
+            type="button"
+            class="continue-shopping-cta"
+            (click)="startShoppingAgain()"
+            id="checkout-continue-shopping-btn"
+          >
+            Continue Shopping →
+          </button>
+        </div>
+      </section>
+
+    } @else {
+
+      <!-- ── Step Indicator Bar ────────────────────────────────── -->
+      <nav class="checkout-stepper-bar" aria-label="Checkout Progress">
+        <!-- Step 1 -->
+        <button
+          type="button"
+          class="step-item"
+          [class.is-active]="checkoutStore.currentStep() === 1"
+          [class.is-completed]="checkoutStore.currentStep() > 1"
+          (click)="goToStep(1)"
+        >
+          <div class="step-circle">
+            @if (checkoutStore.currentStep() > 1) {
+              <span>✓</span>
+            } @else {
+              <span>1</span>
+            }
+          </div>
+          <span class="step-label">Delivery Address</span>
+        </button>
+
+        <div class="step-line" [class.is-filled]="checkoutStore.currentStep() > 1"></div>
+
+        <!-- Step 2 -->
+        <button
+          type="button"
+          class="step-item"
+          [class.is-active]="checkoutStore.currentStep() === 2"
+          [class.is-completed]="checkoutStore.currentStep() > 2"
+          (click)="checkoutStore.currentStep() > 1 ? goToStep(2) : null"
+        >
+          <div class="step-circle">
+            @if (checkoutStore.currentStep() > 2) {
+              <span>✓</span>
+            } @else {
+              <span>2</span>
+            }
+          </div>
+          <span class="step-label">Payment Method</span>
+        </button>
+
+        <div class="step-line" [class.is-filled]="checkoutStore.currentStep() > 2"></div>
+
+        <!-- Step 3 -->
+        <button
+          type="button"
+          class="step-item"
+          [class.is-active]="checkoutStore.currentStep() === 3"
+          (click)="checkoutStore.currentStep() === 3 ? goToStep(3) : null"
+        >
+          <div class="step-circle">
+            <span>3</span>
+          </div>
+          <span class="step-label">Review &amp; Place</span>
+        </button>
+      </nav>
+
+      <!-- ── Mobile Collapsible Summary Accordion (≤1024px) ────── -->
+      <div class="mobile-summary-accordion">
+        <button
+          type="button"
+          class="mobile-summary-trigger"
+          (click)="toggleMobileSummary()"
+          aria-expanded="false"
+        >
+          <div class="trigger-left">
+            <span class="accordion-icon">🛍️</span>
+            <span>Order Summary ({{ cartStore.count() }} items)</span>
+          </div>
+          <div class="trigger-right">
+            <strong>Rs. {{ cartStore.grandTotal() | number:'1.0-0' }}</strong>
+            <span class="chevron" [class.is-open]="mobileSummaryOpen()">▼</span>
+          </div>
+        </button>
+
+        @if (mobileSummaryOpen()) {
+          <div class="mobile-summary-panel">
+            <div class="summary-items-preview">
+              @for (item of cartStore.items(); track item.product.id) {
+                <div class="preview-item">
+                  <img [src]="item.product.images[0]" [alt]="item.product.name" class="preview-img" />
+                  <div class="preview-meta">
+                    <span class="preview-title">{{ item.product.name }}</span>
+                    <span class="preview-qty">Qty: {{ item.quantity }} @if (item.variant) { • {{ item.variant }} }</span>
+                  </div>
+                  <span class="preview-price">Rs. {{ ((item.product.discountPrice ?? item.product.price) * item.quantity) | number:'1.0-0' }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="summary-breakdown">
+              <div class="breakdown-row">
+                <span>Subtotal</span>
+                <span>Rs. {{ cartStore.total() | number:'1.0-0' }}</span>
+              </div>
+              <div class="breakdown-row">
+                <span>Shipping</span>
+                <span>{{ cartStore.shippingFee() === 0 ? 'FREE' : 'Rs. ' + (cartStore.shippingFee() | number:'1.0-0') }}</span>
+              </div>
+              @if (cartStore.discountAmount() > 0) {
+                <div class="breakdown-row breakdown-row--discount">
+                  <span>Coupon Discount</span>
+                  <span>- Rs. {{ cartStore.discountAmount() | number:'1.0-0' }}</span>
+                </div>
+              }
+              <div class="summary-total-row">
+                <span>Total Amount</span>
+                <span class="total-val">Rs. {{ cartStore.grandTotal() | number:'1.0-0' }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- ── Main Checkout Layout Grid ──────────────────────────── -->
+      <div class="checkout-layout-grid">
+
+        <!-- Left Steps Column -->
+        <main class="checkout-main-col">
+
+          <!-- ==================================================== -->
+          <!-- ── STEP 1: DELIVERY ADDRESS ──────────────────────── -->
+          <!-- ==================================================== -->
+          @if (checkoutStore.currentStep() === 1) {
+            <section class="checkout-step-card" id="step-1-address">
+              <div class="step-card-header">
+                <h2 class="step-card-title">1. Delivery Address</h2>
+                <p class="step-card-sub">Choose where you would like your GadgetPlanet order delivered.</p>
+              </div>
+
+              <!-- Saved Addresses List -->
+              <div class="saved-addresses-list">
+                @for (addr of checkoutStore.savedAddresses(); track addr.id) {
+                  <div
+                    class="address-card"
+                    [class.is-selected]="checkoutStore.selectedAddressId() === addr.id"
+                    (click)="selectAddress(addr.id)"
+                  >
+                    <div class="card-radio-col">
+                      <div class="radio-indicator">
+                        <div class="radio-dot"></div>
+                      </div>
+                    </div>
+                    <div class="card-content-col">
+                      <div class="card-top-row">
+                        <strong class="addr-name">{{ addr.fullName }}</strong>
+                        <div class="addr-pills">
+                          <span class="pill-type">{{ addr.type }}</span>
+                          @if (addr.isDefault) {
+                            <span class="pill-default">Default</span>
+                          }
+                        </div>
+                      </div>
+                      <p class="addr-street">{{ addr.streetAddress }}</p>
+                      <p class="addr-city">{{ addr.city }} — {{ addr.postalCode }}</p>
+                      <p class="addr-phone">📞 {{ addr.phone }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Toggle Add New Address -->
+              <div class="add-address-action">
+                <button
+                  type="button"
+                  class="toggle-address-btn"
+                  (click)="toggleNewAddressForm()"
+                  id="toggle-new-addr-btn"
+                >
+                  {{ checkoutStore.isAddingNewAddress() ? '✕ Cancel' : '+ Add New Delivery Address' }}
+                </button>
+              </div>
+
+              <!-- New Address Form -->
+              @if (checkoutStore.isAddingNewAddress()) {
+                <form
+                  [formGroup]="newAddressForm"
+                  (ngSubmit)="onSaveNewAddress()"
+                  class="new-address-form"
+                  id="new-address-form"
+                  novalidate
+                >
+                  <h3 class="form-title">Enter New Delivery Address</h3>
+
+                  <div class="form-grid-2">
+                    <div class="form-field">
+                      <label for="new-fullname" class="field-label">Recipient Full Name</label>
+                      <input
+                        type="text"
+                        id="new-fullname"
+                        formControlName="fullName"
+                        class="field-input"
+                        [class.is-invalid]="isFieldInvalid('fullName')"
+                        placeholder="e.g. Zain Ahmed"
+                      />
+                    </div>
+                    <div class="form-field">
+                      <label for="new-phone" class="field-label">Mobile Phone</label>
+                      <input
+                        type="tel"
+                        id="new-phone"
+                        formControlName="phone"
+                        class="field-input"
+                        [class.is-invalid]="isFieldInvalid('phone')"
+                        placeholder="e.g. 0300-1234567"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="form-field">
+                    <label for="new-street" class="field-label">Street Address / House No.</label>
+                    <input
+                      type="text"
+                      id="new-street"
+                      formControlName="streetAddress"
+                      class="field-input"
+                      [class.is-invalid]="isFieldInvalid('streetAddress')"
+                      placeholder="e.g. House 14, Street 3, Block D, Gulberg"
+                    />
+                  </div>
+
+                  <div class="form-grid-3">
+                    <div class="form-field">
+                      <label for="new-city" class="field-label">City</label>
+                      <select id="new-city" formControlName="city" class="field-input">
+                        @for (city of pakistaniCities; track city) {
+                          <option [value]="city">{{ city }}</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div class="form-field">
+                      <label for="new-postal" class="field-label">Postal Code</label>
+                      <input
+                        type="text"
+                        id="new-postal"
+                        formControlName="postalCode"
+                        class="field-input"
+                        [class.is-invalid]="isFieldInvalid('postalCode')"
+                        placeholder="e.g. 54000"
+                        maxlength="5"
+                      />
+                    </div>
+
+                    <div class="form-field">
+                      <label for="new-type" class="field-label">Address Type</label>
+                      <select id="new-type" formControlName="type" class="field-input">
+                        <option value="Home">Home (All Day Delivery)</option>
+                        <option value="Work">Office / Work (9 AM - 6 PM)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="form-btn-row">
+                    <button type="submit" class="save-addr-btn" id="save-new-addr-btn">
+                      Save &amp; Use Address
+                    </button>
+                  </div>
+                </form>
+              }
+
+              <!-- Step 1 Footer Action -->
+              <div class="step-card-footer">
+                <button
+                  type="button"
+                  class="step-primary-btn"
+                  (click)="checkoutStore.nextStep()"
+                  id="address-continue-btn"
+                >
+                  Continue to Payment Method →
+                </button>
+              </div>
+            </section>
+          }
+
+          <!-- ==================================================== -->
+          <!-- ── STEP 2: PAYMENT METHOD ────────────────────────── -->
+          <!-- ==================================================== -->
+          @if (checkoutStore.currentStep() === 2) {
+            <section class="checkout-step-card" id="step-2-payment">
+              <div class="step-card-header">
+                <h2 class="step-card-title">2. Payment Method</h2>
+                <p class="step-card-sub">Select your preferred payment option. All payments are 100% secure.</p>
+              </div>
+
+              <!-- Payment Options List -->
+              <div class="payment-options-list">
+                @for (opt of checkoutStore.paymentOptions; track opt.id) {
+                  <div
+                    class="payment-card"
+                    [class.is-selected]="checkoutStore.selectedPaymentMethod() === opt.id"
+                    (click)="selectPayment(opt.id)"
+                  >
+                    <div class="payment-top-row">
+                      <div class="radio-indicator">
+                        <div class="radio-dot"></div>
+                      </div>
+                      <span class="payment-icon">{{ opt.icon }}</span>
+                      <div class="payment-info">
+                        <strong class="payment-title">{{ opt.title }}</strong>
+                        <p class="payment-sub">{{ opt.subtitle }}</p>
+                      </div>
+                      @if (opt.badge) {
+                        <span class="payment-badge">{{ opt.badge }}</span>
+                      }
+                    </div>
+
+                    <!-- Contextual sub-panel when selected -->
+                    @if (checkoutStore.selectedPaymentMethod() === opt.id) {
+                      <div class="payment-detail-box">
+                        <span class="detail-note-icon">ℹ️</span>
+                        <p class="detail-note-txt">{{ opt.detailsNote }}</p>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Step 2 Navigation -->
+              <div class="step-card-footer step-card-footer--dual">
+                <button
+                  type="button"
+                  class="step-back-btn"
+                  (click)="checkoutStore.prevStep()"
+                  id="payment-back-btn"
+                >
+                  ← Back to Address
+                </button>
+                <button
+                  type="button"
+                  class="step-primary-btn"
+                  (click)="checkoutStore.nextStep()"
+                  id="payment-continue-btn"
+                >
+                  Continue to Order Review →
+                </button>
+              </div>
+            </section>
+          }
+
+          <!-- ==================================================== -->
+          <!-- ── STEP 3: ORDER REVIEW & PLACE ──────────────────── -->
+          <!-- ==================================================== -->
+          @if (checkoutStore.currentStep() === 3) {
+            <section class="checkout-step-card" id="step-3-review">
+              <div class="step-card-header">
+                <h2 class="step-card-title">3. Review &amp; Place Order</h2>
+                <p class="step-card-sub">Double-check your delivery details, payment method, and items.</p>
+              </div>
+
+              <!-- Review Summary Cards (Address & Payment) -->
+              <div class="review-meta-grid">
+                <!-- Address Box -->
+                <div class="review-box">
+                  <div class="review-box-header">
+                    <span class="review-box-label">📍 Delivering To:</span>
+                    <button type="button" class="edit-step-link" (click)="goToStep(1)">
+                      Change
+                    </button>
+                  </div>
+                  <strong class="review-box-name">{{ checkoutStore.selectedAddress().fullName }}</strong>
+                  <p class="review-box-txt">{{ checkoutStore.selectedAddress().streetAddress }}, {{ checkoutStore.selectedAddress().city }}</p>
+                  <p class="review-box-txt">📞 {{ checkoutStore.selectedAddress().phone }}</p>
+                </div>
+
+                <!-- Payment Box -->
+                <div class="review-box">
+                  <div class="review-box-header">
+                    <span class="review-box-label">💳 Payment Method:</span>
+                    <button type="button" class="edit-step-link" (click)="goToStep(2)">
+                      Change
+                    </button>
+                  </div>
+                  <strong class="review-box-name">{{ checkoutStore.selectedPayment().title }}</strong>
+                  <p class="review-box-txt">{{ checkoutStore.selectedPayment().subtitle }}</p>
+                  <span class="review-box-badge">{{ checkoutStore.selectedPayment().badge ?? 'Selected' }}</span>
+                </div>
+              </div>
+
+              <!-- Items Detailed Review Table -->
+              <div class="review-items-card">
+                <h4 class="items-card-heading">Cart Items ({{ cartStore.count() }})</h4>
+                <div class="review-items-list">
+                  @for (item of cartStore.items(); track item.product.id) {
+                    <div class="review-item-row">
+                      <img [src]="item.product.images[0]" [alt]="item.product.name" class="review-item-img" />
+                      <div class="review-item-info">
+                        <span class="review-item-brand">{{ item.product.brand }}</span>
+                        <span class="review-item-name">{{ item.product.name }}</span>
+                        @if (item.variant) {
+                          <span class="review-item-variant">Color: {{ item.variant }}</span>
+                        }
+                        <span class="review-item-qty">Quantity: <strong>{{ item.quantity }}</strong></span>
+                      </div>
+                      <div class="review-item-price-col">
+                        <span class="review-item-price">
+                          Rs. {{ ((item.product.discountPrice ?? item.product.price) * item.quantity) | number:'1.0-0' }}
+                        </span>
+                        <span class="review-unit-price">
+                          Rs. {{ (item.product.discountPrice ?? item.product.price) | number:'1.0-0' }} each
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Trust Perks Row -->
+              <div class="review-trust-row">
+                <div class="perk">🛡️ 1-Year Official Brand Warranty</div>
+                <div class="perk">🔄 30-Day Easy Replacement</div>
+                <div class="perk">🔒 256-Bit SSL Encrypted</div>
+              </div>
+
+              <!-- Step 3 Actions -->
+              <div class="step-card-footer step-card-footer--dual">
+                <button
+                  type="button"
+                  class="step-back-btn"
+                  (click)="checkoutStore.prevStep()"
+                  id="review-back-btn"
+                >
+                  ← Back to Payment
+                </button>
+                <button
+                  type="button"
+                  class="place-order-cta"
+                  (click)="onPlaceOrder()"
+                  [disabled]="isPlacingOrder()"
+                  id="place-order-btn"
+                >
+                  @if (isPlacingOrder()) {
+                    <span class="spinner-dot"></span>
+                    <span>Processing Order...</span>
+                  } @else {
+                    <span>Place Order (Rs. {{ cartStore.grandTotal() | number:'1.0-0' }}) →</span>
+                  }
+                </button>
+              </div>
+            </section>
+          }
+
+        </main>
+
+        <!-- ── Right Persistent Order Summary Sidebar ─────────── -->
+        <aside class="checkout-summary-col" aria-label="Order Summary">
+          <div class="persistent-summary-card">
+            <h3 class="summary-title">Order Summary</h3>
+
+            <!-- Items Quick Strip -->
+            <div class="summary-items-scroll">
+              @for (item of cartStore.items(); track item.product.id) {
+                <div class="summary-item-thumb" [title]="item.product.name">
+                  <img [src]="item.product.images[0]" [alt]="item.product.name" />
+                  <span class="item-qty-badge">{{ item.quantity }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Free Shipping Badge -->
+            @if (cartStore.total() >= 999) {
+              <div class="free-shipping-tag">
+                <span>🚚 Free Express Shipping Unlocked!</span>
+              </div>
+            }
+
+            <div class="summary-divider"></div>
+
+            <!-- Breakdown -->
+            <div class="summary-breakdown">
+              <div class="breakdown-row">
+                <span>Items Subtotal ({{ cartStore.count() }})</span>
+                <span class="row-val">Rs. {{ cartStore.total() | number:'1.0-0' }}</span>
+              </div>
+
+              <div class="breakdown-row">
+                <span>Estimated Shipping</span>
+                @if (cartStore.shippingFee() === 0) {
+                  <span class="shipping-free-badge">FREE</span>
+                } @else {
+                  <span class="row-val">Rs. {{ cartStore.shippingFee() | number:'1.0-0' }}</span>
+                }
+              </div>
+
+              @if (cartStore.discountAmount() > 0) {
+                <div class="breakdown-row breakdown-row--discount">
+                  <span>Coupon ({{ cartStore.appliedCoupon()?.code }})</span>
+                  <span class="discount-val">- Rs. {{ cartStore.discountAmount() | number:'1.0-0' }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <!-- Grand Total -->
+            <div class="summary-total-row">
+              <div>
+                <strong class="total-label">Grand Total</strong>
+                <span class="total-tax-note">Inclusive of all local taxes</span>
+              </div>
+              <span class="total-val">Rs. {{ cartStore.grandTotal() | number:'1.0-0' }}</span>
+            </div>
+
+            <!-- Trust Badges -->
+            <div class="summary-trust-perks">
+              <div class="perk-item">
+                <span>🛡️</span>
+                <span>Genuine Brand Warranty Guaranteed</span>
+              </div>
+              <div class="perk-item">
+                <span>⚡</span>
+                <span>Dispatched within 24 Hours</span>
+              </div>
+            </div>
+
+          </div>
+        </aside>
+
+      </div>
+
+    }
+
+  </div>
+</div>

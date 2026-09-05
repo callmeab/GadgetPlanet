@@ -1,100 +1,627 @@
-<div class="listing-layout" id="product-listing-page">
+<div class="listing-page-container" id="category-product-listing-page">
 
-  <!-- ── Sidebar Filters ─────────────────────────────────── -->
-  <aside class="listing-sidebar" [class.listing-sidebar--open]="filtersOpen()">
-    <div class="sidebar-header">
-      <h3 class="sidebar-title">Filters</h3>
-      <button class="sidebar-close" (click)="filtersOpen.set(false)" aria-label="Close filters">✕</button>
+  <!-- ── Breadcrumb Navigation ───────────────────────────────── -->
+  <nav class="listing-breadcrumb" aria-label="Breadcrumb">
+    <div class="container">
+      <ol class="breadcrumb-list">
+        <li class="breadcrumb-item">
+          <a routerLink="/" class="breadcrumb-link">Home</a>
+        </li>
+        <li class="breadcrumb-separator" aria-hidden="true">/</li>
+        <li class="breadcrumb-item">
+          <a routerLink="/products" class="breadcrumb-link">Collections</a>
+        </li>
+        <li class="breadcrumb-separator" aria-hidden="true">/</li>
+        <li class="breadcrumb-item breadcrumb-item--active" aria-current="page">
+          <span>{{ currentCategoryInfo().name }}</span>
+        </li>
+      </ol>
     </div>
+  </nav>
 
-    <!-- Category Filter -->
-    <div class="filter-group">
-      <h4 class="filter-label">Category</h4>
-      <div class="filter-options">
-        <button
-          class="filter-chip"
-          [class.filter-chip--active]="!selectedCategory()"
-          (click)="selectedCategory.set(null)"
-          id="filter-all-categories"
-        >All</button>
+  <!-- ── Category Page Header (boAt Style) ───────────────────── -->
+  <header class="category-header">
+    <div class="category-ambient-glow" aria-hidden="true"></div>
+    <div class="container">
+      <div class="category-header-inner">
+        <div class="category-title-row">
+          <span class="category-icon" aria-hidden="true">{{ currentCategoryInfo().icon }}</span>
+          <h1 class="category-title">{{ currentCategoryInfo().name }}</h1>
+          <span class="category-count-badge" id="category-total-badge">
+            {{ filteredProducts().length }} {{ filteredProducts().length === 1 ? 'Product' : 'Products' }}
+          </span>
+        </div>
+        <p class="category-description">{{ currentCategoryInfo().description }}</p>
 
-        @for (cat of categories; track cat) {
-          <button
-            class="filter-chip"
-            [class.filter-chip--active]="selectedCategory() === cat"
-            (click)="selectedCategory.set(cat)"
-            [id]="'filter-cat-' + cat.toLowerCase()"
-          >{{ cat }}</button>
-        }
+        <!-- Quick-Switch Category Chips -->
+        <div class="category-chips-track" role="tablist">
+          @for (cat of categoryList; track cat.slug) {
+            <button
+              type="button"
+              class="category-chip"
+              [class.category-chip--active]="currentCategoryInfo().slug === cat.slug"
+              (click)="onCategorySelect(cat.slug)"
+              [id]="'quick-cat-' + cat.slug"
+            >
+              <span class="chip-icon">{{ cat.icon }}</span>
+              <span class="chip-name">{{ cat.name }}</span>
+            </button>
+          }
+        </div>
       </div>
     </div>
+  </header>
 
-    <!-- Sort -->
-    <div class="filter-group">
-      <h4 class="filter-label">Sort By</h4>
-      <div class="filter-options filter-options--col">
-        @for (opt of sortOptions; track opt.value) {
-          <button
-            class="filter-chip"
-            [class.filter-chip--active]="sortBy() === opt.value"
-            (click)="sortBy.set(opt.value)"
-            [id]="'sort-' + opt.value"
-          >{{ opt.label }}</button>
+  <!-- ── Main Listing Layout ─────────────────────────────────── -->
+  <div class="container">
+    <div class="listing-layout">
+
+      <!-- ── Left Sidebar Filters (Desktop & Tablet) ─────────── -->
+      <aside class="listing-sidebar" id="desktop-sidebar-filters">
+        <div class="sidebar-top-bar">
+          <h3 class="sidebar-heading">Refine By</h3>
+          @if (filterStore.hasActiveFilters()) {
+            <button
+              type="button"
+              class="sidebar-reset-btn"
+              (click)="resetFilters()"
+              id="sidebar-clear-all-btn"
+            >
+              Clear All
+            </button>
+          }
+        </div>
+
+        <!-- Active Filter Tags Pills -->
+        @if (filterStore.hasActiveFilters()) {
+          <div class="active-filters-box">
+            @if (filterStore.priceMax() < 25000) {
+              <span class="active-filter-pill">
+                <span>≤ Rs. {{ filterStore.priceMax().toLocaleString() }}</span>
+                <button type="button" class="remove-pill-btn" (click)="filterStore.setPriceMax(25000)">✕</button>
+              </span>
+            }
+            @for (brand of filterStore.selectedBrands(); track brand) {
+              <span class="active-filter-pill">
+                <span>{{ brand }}</span>
+                <button type="button" class="remove-pill-btn" (click)="removeBrand(brand)">✕</button>
+              </span>
+            }
+            @if (filterStore.minRating() !== null) {
+              <span class="active-filter-pill">
+                <span>★ {{ filterStore.minRating() }}+</span>
+                <button type="button" class="remove-pill-btn" (click)="filterStore.setRating(null)">✕</button>
+              </span>
+            }
+            @if (filterStore.inStockOnly()) {
+              <span class="active-filter-pill">
+                <span>In Stock Only</span>
+                <button type="button" class="remove-pill-btn" (click)="filterStore.toggleInStock()">✕</button>
+              </span>
+            }
+          </div>
         }
-      </div>
-    </div>
 
-    <!-- In Stock Only -->
-    <div class="filter-group">
-      <label class="toggle-label" for="filter-in-stock">
-        <span>In Stock Only</span>
-        <div class="toggle-wrap">
-          <input
-            id="filter-in-stock"
-            type="checkbox"
-            class="toggle-input"
-            [checked]="inStockOnly()"
-            (change)="toggleInStock()"
-          />
-          <div class="toggle-track">
-            <div class="toggle-thumb"></div>
+        <!-- Filter Section 1: Price Range -->
+        <div class="filter-section">
+          <button
+            type="button"
+            class="filter-section-header"
+            (click)="toggleSection('price')"
+            [attr.aria-expanded]="isPriceOpen()"
+          >
+            <span class="section-title">Price Range</span>
+            <span class="section-chevron" [class.is-collapsed]="!isPriceOpen()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </span>
+          </button>
+
+          @if (isPriceOpen()) {
+            <div class="filter-section-body">
+              <div class="price-slider-wrap">
+                <div class="price-display-row">
+                  <span class="price-min">Rs. 0</span>
+                  <span class="price-current">Up to Rs. {{ filterStore.priceMax().toLocaleString() }}</span>
+                </div>
+                <input
+                  type="range"
+                  class="price-range-slider"
+                  id="price-range-slider"
+                  min="1000"
+                  max="25000"
+                  step="500"
+                  [value]="filterStore.priceMax()"
+                  (input)="onPriceInput($event)"
+                  aria-label="Filter products by maximum price in PKR"
+                />
+              </div>
+
+              <!-- Quick Price Presets -->
+              <div class="price-presets-grid">
+                @for (preset of pricePresets; track preset.label) {
+                  <button
+                    type="button"
+                    class="preset-chip"
+                    [class.preset-chip--active]="filterStore.priceMax() === preset.max"
+                    (click)="filterStore.setPriceMax(preset.max)"
+                  >
+                    {{ preset.label }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Filter Section 2: Brand / Features -->
+        <div class="filter-section">
+          <button
+            type="button"
+            class="filter-section-header"
+            (click)="toggleSection('brand')"
+            [attr.aria-expanded]="isBrandOpen()"
+          >
+            <span class="section-title">Brand</span>
+            <span class="section-chevron" [class.is-collapsed]="!isBrandOpen()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </span>
+          </button>
+
+          @if (isBrandOpen()) {
+            <div class="filter-section-body">
+              <div class="checkbox-list">
+                @for (item of availableBrands(); track item.brand) {
+                  <label class="custom-checkbox-row">
+                    <input
+                      type="checkbox"
+                      class="custom-checkbox-input"
+                      [checked]="isBrandSelected(item.brand)"
+                      (change)="filterStore.toggleBrand(item.brand)"
+                      [id]="'brand-cb-' + item.brand.toLowerCase()"
+                    />
+                    <span class="checkbox-box">
+                      <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                    </span>
+                    <span class="checkbox-label-text">{{ item.brand }}</span>
+                    <span class="checkbox-count">({{ item.count }})</span>
+                  </label>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Filter Section 3: Customer Rating -->
+        <div class="filter-section">
+          <button
+            type="button"
+            class="filter-section-header"
+            (click)="toggleSection('rating')"
+            [attr.aria-expanded]="isRatingOpen()"
+          >
+            <span class="section-title">Customer Rating</span>
+            <span class="section-chevron" [class.is-collapsed]="!isRatingOpen()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </span>
+          </button>
+
+          @if (isRatingOpen()) {
+            <div class="filter-section-body">
+              <div class="rating-pills-list">
+                @for (opt of ratingOptions; track opt.label) {
+                  <button
+                    type="button"
+                    class="rating-pill"
+                    [class.rating-pill--active]="filterStore.minRating() === opt.value"
+                    (click)="filterStore.setRating(opt.value)"
+                  >
+                    <span>{{ opt.label }}</span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Filter Section 4: Availability Toggle -->
+        <div class="filter-section">
+          <button
+            type="button"
+            class="filter-section-header"
+            (click)="toggleSection('availability')"
+            [attr.aria-expanded]="isAvailabilityOpen()"
+          >
+            <span class="section-title">Availability</span>
+            <span class="section-chevron" [class.is-collapsed]="!isAvailabilityOpen()">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </span>
+          </button>
+
+          @if (isAvailabilityOpen()) {
+            <div class="filter-section-body">
+              <label class="toggle-switch-row" for="desktop-in-stock-toggle">
+                <div class="toggle-info">
+                  <span class="toggle-title">In Stock Only</span>
+                  <span class="toggle-sub">Hide sold-out products</span>
+                </div>
+                <div class="toggle-ui">
+                  <input
+                    type="checkbox"
+                    id="desktop-in-stock-toggle"
+                    class="toggle-checkbox"
+                    [checked]="filterStore.inStockOnly()"
+                    (change)="filterStore.toggleInStock()"
+                  />
+                  <div class="toggle-track">
+                    <div class="toggle-thumb"></div>
+                  </div>
+                </div>
+              </label>
+            </div>
+          }
+        </div>
+
+      </aside>
+
+      <!-- ── Main Content Area ───────────────────────────────── -->
+      <main class="listing-main-content">
+
+        <!-- Top Controls Bar -->
+        <div class="listing-top-bar" id="listing-top-bar">
+          <div class="top-bar-left">
+            <button
+              type="button"
+              class="mobile-filter-open-btn"
+              (click)="openDrawer()"
+              id="mobile-open-filters-btn"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+              <span>Filters</span>
+              @if (filterStore.activeFilterCount() > 0) {
+                <span class="filter-counter-badge">{{ filterStore.activeFilterCount() }}</span>
+              }
+            </button>
+
+            <span class="products-showing-text" id="products-showing-count">
+              Showing <strong>{{ visibleProducts().length }}</strong> of <strong>{{ filteredProducts().length }}</strong> products
+            </span>
+          </div>
+
+          <div class="top-bar-right">
+            <!-- Sort Dropdown -->
+            <div class="sort-select-wrapper">
+              <label for="product-sort-select" class="sort-label">Sort by:</label>
+              <div class="custom-select-box">
+                <select
+                  id="product-sort-select"
+                  class="custom-select"
+                  [value]="filterStore.sortBy()"
+                  (change)="onSortChange($event)"
+                >
+                  @for (opt of sortOptions; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                  }
+                </select>
+                <span class="select-chevron" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            <!-- Grid / List View Mode Toggle -->
+            <div class="view-mode-toggle">
+              <button
+                type="button"
+                class="view-mode-btn"
+                [class.view-mode-btn--active]="filterStore.viewMode() === 'grid'"
+                (click)="onViewModeChange('grid')"
+                aria-label="Switch to grid view"
+                id="view-grid-btn"
+                title="Grid View"
+              >
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="view-mode-btn"
+                [class.view-mode-btn--active]="filterStore.viewMode() === 'list'"
+                (click)="onViewModeChange('list')"
+                aria-label="Switch to list view"
+                id="view-list-btn"
+                title="List View"
+              >
+                <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="8" y1="6" x2="21" y2="6"></line>
+                  <line x1="8" y1="12" x2="21" y2="12"></line>
+                  <line x1="8" y1="18" x2="21" y2="18"></line>
+                  <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                  <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                  <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
-      </label>
-    </div>
-  </aside>
 
-  <!-- ── Main Content ─────────────────────────────────────── -->
-  <main class="listing-main">
-    <div class="listing-toolbar">
-      <div class="toolbar-left">
-        <button
-          class="filter-toggle-btn"
-          id="listing-filter-toggle"
-          (click)="toggleFilters()"
-        >
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="4" y1="6" x2="20" y2="6" />
-            <line x1="8" y1="12" x2="16" y2="12" />
-            <line x1="10" y1="18" x2="14" y2="18" />
-          </svg>
-          Filters
-        </button>
-        <p class="listing-count">{{ filteredProducts().length }} products</p>
-      </div>
-    </div>
+        <!-- ── Product Grid or List View ──────────────────────── -->
+        @if (filteredProducts().length > 0) {
+          <div
+            class="products-container"
+            [class.products-container--grid]="filterStore.viewMode() === 'grid'"
+            [class.products-container--list]="filterStore.viewMode() === 'list'"
+            id="products-display-grid"
+          >
+            @for (product of visibleProducts(); track product.id) {
+              <div class="product-item-wrap">
+                <gp-product-card [product]="product"></gp-product-card>
+              </div>
+            }
 
-    <div class="listing-grid">
-      @for (product of filteredProducts(); track product.id) {
-        <gp-product-card [product]="product"></gp-product-card>
+            <!-- Shimmer Skeleton Loading State -->
+            @if (filterStore.isLoadingMore()) {
+              @for (sk of [1, 2, 3, 4]; track sk) {
+                <div class="product-skeleton-card" aria-hidden="true">
+                  <div class="skeleton-img-wrap shimmer"></div>
+                  <div class="skeleton-body">
+                    <div class="skeleton-pill shimmer"></div>
+                    <div class="skeleton-title shimmer"></div>
+                    <div class="skeleton-price-row shimmer"></div>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Pagination / "Load More" Button -->
+          @if (hasMoreProducts()) {
+            <div class="load-more-container">
+              <button
+                type="button"
+                class="load-more-btn"
+                (click)="onLoadMore()"
+                [disabled]="filterStore.isLoadingMore()"
+                id="listing-load-more-btn"
+              >
+                @if (filterStore.isLoadingMore()) {
+                  <span class="btn-spinner" aria-hidden="true"></span>
+                  <span>Loading Gadgets...</span>
+                } @else {
+                  <span>Load More Products ({{ remainingCount() }} Remaining)</span>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                }
+              </button>
+            </div>
+          }
+        } @else {
+          <!-- ── Empty State UI ──────────────────────────────── -->
+          <div class="listing-empty-state" id="listing-empty-state">
+            <div class="empty-icon-wrap">
+              <span class="empty-icon">🔍</span>
+              <div class="empty-glow"></div>
+            </div>
+            <h3 class="empty-title">No Gadgets Found</h3>
+            <p class="empty-desc">
+              We couldn't find any products matching your current combination of filters.
+              Try adjusting your price range or clearing brand selections.
+            </p>
+            <button
+              type="button"
+              class="empty-reset-btn"
+              (click)="resetFilters()"
+              id="empty-state-reset-btn"
+            >
+              Reset All Filters
+            </button>
+          </div>
+        }
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ── Mobile Sticky Bar (Bottom of Viewport) ──────────────── -->
+  <div class="mobile-sticky-bar" id="mobile-sticky-filter-bar">
+    <button
+      type="button"
+      class="mobile-sticky-btn"
+      (click)="openDrawer()"
+      id="mobile-sticky-filter-btn"
+    >
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+      </svg>
+      <span>Filter &amp; Sort</span>
+      @if (filterStore.activeFilterCount() > 0) {
+        <span class="sticky-counter">{{ filterStore.activeFilterCount() }}</span>
       }
-      @if (filteredProducts().length === 0) {
-        <div class="listing-empty">
-          <span class="listing-empty-icon">🔍</span>
-          <p>No products found. Try adjusting filters.</p>
+    </button>
+  </div>
+
+  <!-- ── Mobile Slide-Up Bottom Sheet Drawer ─────────────────── -->
+  @if (filterStore.isMobileDrawerOpen()) {
+    <div class="mobile-drawer-overlay" (click)="closeDrawer()" aria-hidden="true"></div>
+
+    <div
+      class="mobile-drawer"
+      id="mobile-filter-drawer"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="drawer-title"
+    >
+      <!-- Drawer Header -->
+      <div class="drawer-header">
+        <div class="drawer-title-wrap">
+          <h3 class="drawer-title" id="drawer-title">Filter &amp; Sort</h3>
+          <span class="drawer-count">({{ filteredProducts().length }} Results)</span>
         </div>
-      }
+        <div class="drawer-header-actions">
+          @if (filterStore.hasActiveFilters()) {
+            <button type="button" class="drawer-clear-btn" (click)="resetFilters()">
+              Clear All
+            </button>
+          }
+          <button
+            type="button"
+            class="drawer-close-btn"
+            (click)="closeDrawer()"
+            aria-label="Close filter drawer"
+            id="drawer-close-btn"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Drawer Scrollable Content -->
+      <div class="drawer-body">
+
+        <!-- Mobile Sort Section -->
+        <div class="drawer-section">
+          <h4 class="drawer-section-title">Sort By</h4>
+          <div class="drawer-sort-options">
+            @for (opt of sortOptions; track opt.value) {
+              <button
+                type="button"
+                class="drawer-sort-chip"
+                [class.drawer-sort-chip--active]="filterStore.sortBy() === opt.value"
+                (click)="filterStore.setSortBy(opt.value)"
+              >
+                {{ opt.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Mobile Price Range -->
+        <div class="drawer-section">
+          <h4 class="drawer-section-title">
+            Price Range (Up to Rs. {{ filterStore.priceMax().toLocaleString() }})
+          </h4>
+          <div class="price-slider-wrap">
+            <input
+              type="range"
+              class="price-range-slider"
+              min="1000"
+              max="25000"
+              step="500"
+              [value]="filterStore.priceMax()"
+              (input)="onPriceInput($event)"
+            />
+          </div>
+          <div class="price-presets-grid">
+            @for (preset of pricePresets; track preset.label) {
+              <button
+                type="button"
+                class="preset-chip"
+                [class.preset-chip--active]="filterStore.priceMax() === preset.max"
+                (click)="filterStore.setPriceMax(preset.max)"
+              >
+                {{ preset.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Mobile Brand Checkboxes -->
+        <div class="drawer-section">
+          <h4 class="drawer-section-title">Brand</h4>
+          <div class="checkbox-list">
+            @for (item of availableBrands(); track item.brand) {
+              <label class="custom-checkbox-row">
+                <input
+                  type="checkbox"
+                  class="custom-checkbox-input"
+                  [checked]="isBrandSelected(item.brand)"
+                  (change)="filterStore.toggleBrand(item.brand)"
+                />
+                <span class="checkbox-box">
+                  <svg class="check-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </span>
+                <span class="checkbox-label-text">{{ item.brand }}</span>
+                <span class="checkbox-count">({{ item.count }})</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Mobile Rating Filter -->
+        <div class="drawer-section">
+          <h4 class="drawer-section-title">Minimum Rating</h4>
+          <div class="rating-pills-list">
+            @for (opt of ratingOptions; track opt.label) {
+              <button
+                type="button"
+                class="rating-pill"
+                [class.rating-pill--active]="filterStore.minRating() === opt.value"
+                (click)="filterStore.setRating(opt.value)"
+              >
+                {{ opt.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Mobile Availability -->
+        <div class="drawer-section">
+          <label class="toggle-switch-row" for="mobile-in-stock-toggle">
+            <div class="toggle-info">
+              <span class="toggle-title">In Stock Only</span>
+              <span class="toggle-sub">Hide sold-out items</span>
+            </div>
+            <div class="toggle-ui">
+              <input
+                type="checkbox"
+                id="mobile-in-stock-toggle"
+                class="toggle-checkbox"
+                [checked]="filterStore.inStockOnly()"
+                (change)="filterStore.toggleInStock()"
+              />
+              <div class="toggle-track">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+          </label>
+        </div>
+
+      </div>
+
+      <!-- Sticky Drawer Footer -->
+      <div class="drawer-footer">
+        <button
+          type="button"
+          class="drawer-apply-btn"
+          (click)="closeDrawer()"
+          id="drawer-apply-filters-btn"
+        >
+          Apply Filters ({{ filteredProducts().length }} Gadgets)
+        </button>
+      </div>
+
     </div>
-  </main>
+  }
 
 </div>

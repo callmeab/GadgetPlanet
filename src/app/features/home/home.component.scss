@@ -55,50 +55,6 @@
   gap: v.$space-5;
 }
 
-// ── Categories ─────────────────────────────────────────────
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: v.$space-4;
-
-  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 480px) { grid-template-columns: repeat(2, 1fr); }
-}
-
-.category-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: v.$space-2;
-  padding: v.$space-5 v.$space-4;
-  background: v.$color-bg-card;
-  border: 1px solid v.$color-surface-border;
-  border-radius: v.$radius-lg;
-  text-decoration: none;
-  transition: all v.$transition-base;
-  cursor: pointer;
-
-  &:hover {
-    border-color: v.$color-primary;
-    background: v.$color-primary-glow;
-    transform: translateY(-2px);
-    box-shadow: v.$shadow-blue;
-  }
-}
-
-.category-emoji { font-size: 32px; }
-
-.category-name {
-  font-size: v.$font-size-sm;
-  font-weight: v.$font-weight-semibold;
-  color: v.$color-text-primary;
-}
-
-.category-count {
-  font-size: v.$font-size-xs;
-  color: v.$color-text-muted;
-}
-
 // ── Sale Is Live Section ───────────────────────────────────
 @keyframes liveBlink {
   0%, 100% {

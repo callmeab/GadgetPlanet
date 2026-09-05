@@ -62,6 +62,10 @@ export class HeaderComponent {
 
   readonly isCompact = computed(() => this.scrolled() && !this.mobileDrawerOpen());
 
+  openCart(): void {
+    this.cartStore.openDrawer();
+  }
+
   // ── Announcements (rotating) ───────────────────────────────
   readonly announcements: Announcement[] = [
     { text: 'FREE delivery on orders above', highlight: 'Rs. 999', cta: 'Shop Now' },

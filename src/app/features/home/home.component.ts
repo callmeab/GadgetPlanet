@@ -13,6 +13,9 @@ import { ProductCardComponent } from '../../shared/components/product-card/produ
 import { CountdownTimerComponent } from '../../shared/components/countdown-timer/countdown-timer.component';
 import { HeroBannerComponent } from '../../shared/components/hero-banner/hero-banner.component';
 import { ProductCarouselSectionComponent } from '../../shared/components/product-carousel-section/product-carousel-section.component';
+import { CategoryGridComponent } from '../../shared/components/category-grid/category-grid.component';
+import { LifestyleSectionComponent } from '../../shared/components/lifestyle-section/lifestyle-section.component';
+import { NewsletterSectionComponent } from '../../shared/components/newsletter-section/newsletter-section.component';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +27,9 @@ import { ProductCarouselSectionComponent } from '../../shared/components/product
     CountdownTimerComponent,
     HeroBannerComponent,
     ProductCarouselSectionComponent,
+    CategoryGridComponent,
+    LifestyleSectionComponent,
+    NewsletterSectionComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.component.html',
@@ -50,21 +56,6 @@ export class HomeComponent {
       behavior: 'smooth',
     });
   }
-
-  readonly heroStats = [
-    { value: '50K+', label: 'Happy Customers' },
-    { value: '500+', label: 'Premium Brands' },
-    { value: '4.8★', label: 'Avg. Rating' },
-  ];
-
-  readonly categories = [
-    { name: 'Earphones',    emoji: '🎧', count: 3 },
-    { name: 'Speakers',     emoji: '🔊', count: 2 },
-    { name: 'Smartwatches', emoji: '⌚', count: 2 },
-    { name: 'Headphones',   emoji: '🎵', count: 2 },
-    { name: 'Gaming',       emoji: '🎮', count: 1 },
-    { name: 'Accessories',  emoji: '🔌', count: 2 },
-  ];
 
   readonly trustItems = [
     { icon: '🚀', title: 'Free Express Delivery', desc: 'Orders above Rs. 999' },

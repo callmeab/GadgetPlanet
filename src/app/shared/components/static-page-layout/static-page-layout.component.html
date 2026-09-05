@@ -1,0 +1,55 @@
+<div class="static-page-root">
+
+  <!-- ── Hero Title Banner ──────────────────────────────────── -->
+  <header class="static-hero">
+    <div class="container hero-inner">
+
+      <!-- Breadcrumbs -->
+      <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+        <a routerLink="/" class="crumb-link">Home</a>
+        @if (breadcrumbs.length > 0) {
+          @for (crumb of breadcrumbs; track crumb.label) {
+            <span class="crumb-sep">/</span>
+            @if (crumb.route) {
+              <a [routerLink]="crumb.route" class="crumb-link">{{ crumb.label }}</a>
+            } @else {
+              <span class="crumb-current">{{ crumb.label }}</span>
+            }
+          }
+        } @else {
+          <span class="crumb-sep">/</span>
+          <span class="crumb-current">{{ title }}</span>
+        }
+      </nav>
+
+      <!-- Badge -->
+      @if (badge) {
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          <span>{{ badge }}</span>
+        </div>
+      }
+
+      <!-- Main Heading -->
+      <h1 class="hero-title">{{ title }}</h1>
+
+      <!-- Subtitle -->
+      @if (subtitle) {
+        <p class="hero-subtitle">{{ subtitle }}</p>
+      }
+
+    </div>
+
+    <!-- Ambient Glows -->
+    <div class="hero-ambient-glow hero-ambient-glow--blue"></div>
+    <div class="hero-ambient-glow hero-ambient-glow--orange"></div>
+  </header>
+
+  <!-- ── Main Projected Content Area ────────────────────────── -->
+  <main class="static-content-wrap">
+    <div class="container">
+      <ng-content></ng-content>
+    </div>
+  </main>
+
+</div>

@@ -1,0 +1,299 @@
+@use '../../../../styles/variables' as v;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.category-grid-section {
+  padding: v.$space-16 0;
+  position: relative;
+  background: v.$color-bg;
+}
+
+.container {
+  max-width: v.$container-max;
+  margin: 0 auto;
+  padding: 0 v.$space-6;
+}
+
+// ── Header ─────────────────────────────────────────────────
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: v.$space-8;
+  gap: v.$space-4;
+  flex-wrap: wrap;
+}
+
+.title-col {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+}
+
+.section-title {
+  font-size: v.$font-size-2xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  margin: 0;
+  letter-spacing: v.$letter-spacing-tight;
+}
+
+.section-subtitle {
+  color: v.$color-text-secondary;
+  font-size: v.$font-size-sm;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: v.$space-4;
+}
+
+.mobile-toggle-pills {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  background: v.$color-bg-elevated;
+  padding: 3px;
+  border-radius: v.$radius-full;
+  border: 1px solid v.$color-surface-border;
+}
+
+.toggle-pill {
+  background: transparent;
+  border: none;
+  padding: 4px 10px;
+  border-radius: v.$radius-full;
+  font-size: 11px;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-secondary;
+  cursor: pointer;
+  transition: all v.$transition-fast;
+
+  &--active {
+    background: v.$color-primary;
+    color: #fff;
+  }
+}
+
+.section-link {
+  color: v.$color-primary;
+  text-decoration: none;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  white-space: nowrap;
+  transition: color v.$transition-fast;
+
+  &:hover {
+    color: v.$color-primary-light;
+  }
+}
+
+// ── Categories Container ───────────────────────────────────
+.categories-container {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: v.$space-5;
+  justify-items: center;
+  width: 100%;
+}
+
+// ── Circular Category Tile ─────────────────────────────────
+.cat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  cursor: pointer;
+  width: 100%;
+  max-width: 120px;
+  user-select: none;
+}
+
+.cat-circle-wrap {
+  position: relative;
+  width: 98px;
+  height: 98px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: v.$space-3;
+}
+
+.cat-circle {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid v.$color-surface-border;
+  background: v.$color-bg-card;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  transition:
+    transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.cat-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.cat-circle-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(10, 132, 255, 0.15) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity v.$transition-fast;
+}
+
+.cat-icon-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(22, 22, 22, 0.95);
+  border: 1.5px solid v.$color-surface-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  box-shadow: v.$shadow-sm;
+  transition: transform 0.3s ease;
+}
+
+.cat-pill-badge {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: v.$color-accent;
+  color: #fff;
+  font-size: 9px;
+  font-weight: v.$font-weight-black;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: v.$radius-full;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.45);
+}
+
+.cat-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.cat-label {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  line-height: v.$line-height-snug;
+  transition: color v.$transition-fast;
+}
+
+.cat-count {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+}
+
+// ── Hover Scale Animation ──────────────────────────────────
+.cat-tile:hover {
+  .cat-circle {
+    transform: scale(1.1);
+    border-color: v.$color-primary;
+    box-shadow: 0 0 22px rgba(10, 132, 255, 0.45);
+  }
+
+  .cat-img {
+    transform: scale(1.12);
+  }
+
+  .cat-circle-glow {
+    opacity: 1;
+  }
+
+  .cat-icon-badge {
+    transform: scale(1.12);
+    border-color: v.$color-primary;
+  }
+
+  .cat-label {
+    color: v.$color-primary;
+  }
+}
+
+// ── Responsive Breakpoints ─────────────────────────────────
+@media (max-width: 1024px) {
+  .categories-container {
+    grid-template-columns: repeat(4, 1fr);
+    gap: v.$space-6;
+  }
+
+  .cat-circle-wrap {
+    width: 90px;
+    height: 90px;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-toggle-pills {
+    display: inline-flex;
+  }
+
+  .categories-container.mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: v.$space-4;
+    justify-items: center;
+
+    .cat-tile {
+      max-width: 100px;
+    }
+
+    .cat-circle-wrap {
+      width: 78px;
+      height: 78px;
+    }
+  }
+
+  .categories-container.mode-scroll {
+    display: flex;
+    gap: v.$space-4;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    padding-bottom: v.$space-4;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-tile {
+      flex: 0 0 88px;
+      min-width: 88px;
+      max-width: 88px;
+      scroll-snap-align: start;
+    }
+
+    .cat-circle-wrap {
+      width: 78px;
+      height: 78px;
+    }
+  }
+}

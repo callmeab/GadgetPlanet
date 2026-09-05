@@ -1,68 +1,175 @@
-<footer class="footer">
+<footer class="footer" id="main-mega-footer">
+  <div class="footer-ambient-glow" aria-hidden="true"></div>
+
   <div class="footer-inner">
+
+    <!-- ── Main Grid (Brand + 3 Multi-Column Groups) ────────────── -->
     <div class="footer-grid">
 
-      <!-- Brand Column -->
-      <div class="footer-brand">
-        <a routerLink="/" class="footer-logo">
+      <!-- Brand & Contact Overview Column -->
+      <div class="footer-brand-col">
+        <a routerLink="/" class="footer-logo" id="footer-logo">
           <span class="logo-icon">⚡</span>
           <span class="logo-text">Gadget<span class="logo-accent">Planet</span></span>
         </a>
-        <p class="footer-tagline">Your universe of premium gadgets. Delivered fast, priced right.</p>
-        <div class="footer-social">
+
+        <p class="footer-tagline">
+          Pakistan's premier destination for high-performance personal audio, smart wearables,
+          GaN fast chargers, and cutting-edge tech gear.
+        </p>
+
+        <!-- Customer Helpline & Support Info -->
+        <div class="footer-contact-block">
+          <div class="contact-item">
+            <span class="contact-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+            </span>
+            <div class="contact-text">
+              <span class="contact-label">Helpline:</span>
+              <a href="tel:+923004234387" class="contact-value">+92 (042) 111-GADGET</a>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <span class="contact-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </span>
+            <div class="contact-text">
+              <span class="contact-label">Email:</span>
+              <a href="mailto:support@gadgetplanet.pk" class="contact-value">support&#64;gadgetplanet.pk</a>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <span class="contact-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </span>
+            <div class="contact-text">
+              <span class="contact-label">Hours:</span>
+              <span class="contact-value">Mon - Sat: 9:00 AM - 9:00 PM PKT</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Multi-Column Groups (Desktop Grid / Mobile Accordions) -->
+      @for (group of linkGroups; track group.id) {
+        <div class="footer-col" [class.is-accordion-open]="isAccordionOpen(group.id)">
+          <!-- Accordion Toggle Header (Button on Mobile, Static on Desktop) -->
+          <button
+            type="button"
+            class="footer-col-header"
+            (click)="toggleAccordion(group.id)"
+            [attr.aria-expanded]="isAccordionOpen(group.id)"
+            [id]="'footer-col-toggle-' + group.id"
+          >
+            <h4 class="footer-col-title">{{ group.heading }}</h4>
+            <span class="accordion-chevron" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </span>
+          </button>
+
+          <!-- Collapsible List Container -->
+          <div class="footer-col-body">
+            <ul class="footer-links-list">
+              @for (link of group.links; track link.label) {
+                <li class="footer-links-item">
+                  <a
+                    [routerLink]="link.route"
+                    [queryParams]="link.queryParams"
+                    class="footer-link"
+                  >
+                    <span>{{ link.label }}</span>
+                    @if (link.isNew) {
+                      <span class="link-badge-new">NEW</span>
+                    }
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      }
+
+    </div>
+
+    <!-- ── Divider ──────────────────────────────────────────────── -->
+    <div class="footer-divider" role="separator" aria-hidden="true"></div>
+
+    <!-- ── Mid Bar: Social Links + Payment Methods ──────────────── -->
+    <div class="footer-middle-bar">
+
+      <!-- Social Links Row -->
+      <div class="footer-social-wrap">
+        <span class="middle-bar-title">Connect With Us</span>
+        <div class="footer-social-icons">
           @for (social of socials; track social.name) {
             <a
               [href]="social.url"
-              class="social-link"
+              class="social-pill"
               [attr.aria-label]="social.name"
               target="_blank"
               rel="noopener"
+              [style.--hover-color]="social.hoverColor"
+              [title]="social.name"
             >
-              <span [innerHTML]="social.icon"></span>
+              <span [innerHTML]="social.iconSvg"></span>
             </a>
           }
         </div>
       </div>
 
-      <!-- Links Columns -->
-      @for (col of footerLinks; track col.heading) {
-        <div class="footer-col">
-          <h4 class="footer-col-heading">{{ col.heading }}</h4>
-          <ul class="footer-col-links">
-            @for (link of col.links; track link.label) {
-              <li>
-                <a [routerLink]="link.route" class="footer-link">{{ link.label }}</a>
-              </li>
-            }
-          </ul>
-        </div>
-      }
-
-      <!-- Newsletter Column -->
-      <div class="footer-col footer-col--newsletter">
-        <h4 class="footer-col-heading">Stay in the Loop</h4>
-        <p class="footer-newsletter-text">Get deals, launches &amp; tech news straight to your inbox.</p>
-        <div class="newsletter-form">
-          <input
-            id="footer-email-input"
-            type="email"
-            class="newsletter-input"
-            placeholder="your@email.com"
-          />
-          <button id="footer-subscribe-btn" class="newsletter-btn">Subscribe</button>
+      <!-- Payment Method Badges Row -->
+      <div class="footer-payments-wrap">
+        <span class="middle-bar-title">100% Safe &amp; Secure Payment</span>
+        <div class="payment-badges-row">
+          @for (payment of paymentMethods; track payment.id) {
+            <div
+              class="payment-badge"
+              [class.payment-badge--security]="payment.type === 'security'"
+              [class.payment-badge--wallet]="payment.type === 'wallet'"
+              [class.payment-badge--cod]="payment.type === 'cod'"
+              [title]="payment.name"
+            >
+              @if (payment.type === 'security') {
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              }
+              <span class="payment-badge-text">{{ payment.shortName }}</span>
+            </div>
+          }
         </div>
       </div>
 
     </div>
 
-    <!-- Bottom Bar -->
-    <div class="footer-bottom">
-      <p class="footer-copy">© {{ currentYear }} GadgetPlanet. All rights reserved.</p>
-      <div class="footer-legal">
-        <a routerLink="/" class="footer-link footer-link--sm">Privacy Policy</a>
-        <a routerLink="/" class="footer-link footer-link--sm">Terms of Service</a>
-        <a routerLink="/" class="footer-link footer-link--sm">Cookie Settings</a>
+    <!-- ── Bottom Bar: Copyright & Legal ────────────────────────── -->
+    <div class="footer-bottom-bar">
+      <div class="bottom-copy-wrap">
+        <p class="footer-copy">
+          © {{ currentYear }} GadgetPlanet Technologies (Pvt) Ltd. All rights reserved.
+        </p>
+        <span class="currency-tag">Prices shown in PKR (Rs.)</span>
+      </div>
+
+      <div class="footer-legal-links">
+        @for (legal of legalLinks; track legal.label) {
+          <a [routerLink]="legal.route" class="legal-link">{{ legal.label }}</a>
+        }
       </div>
     </div>
+
   </div>
 </footer>

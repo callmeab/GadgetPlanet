@@ -1,0 +1,70 @@
+<gp-static-page-layout
+  title="About GadgetPlanet"
+  subtitle="Engineering the future of personal audio, high-speed charging & smart digital lifestyle in Pakistan."
+  badge="OUR ORIGIN &amp; MISSION"
+>
+  <div class="about-page-content">
+
+    <!-- ── Intro & Story Section ──────────────────────────────── -->
+    <section class="about-story-section">
+      <div class="story-text-col">
+        <h2 class="section-title">Born from a Passion for <span class="accent-text">Pure Sound</span></h2>
+        <p class="section-lead">
+          GadgetPlanet was founded in 2024 by a team of audio engineers, gamers, and tech obsessives in Lahore who were frustrated with overpriced, gray-market gadget imports with zero warranty support.
+        </p>
+        <p class="section-body">
+          We asked ourselves a simple question: Why should tech lovers in Pakistan compromise between exorbitant imported prices and unverified counterfeit electronics? GadgetPlanet bridges that gap by curating official, state-of-the-art consumer hardware—backed by an authentic 1-Year Brand Claim Warranty and nationwide cash-on-delivery.
+        </p>
+      </div>
+
+      <div class="story-highlight-card">
+        <div class="card-glow"></div>
+        <span class="highlight-badge">⚡ OUR CORE VISION</span>
+        <blockquote class="highlight-quote">
+          “To democratize world-class acoustics, durable fast chargers, and smart wearable tech for every music lover, gamer, and digital creator across Pakistan.”
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- ── Milestone Stats Grid ───────────────────────────────── -->
+    <section class="about-stats-section">
+      <div class="stats-grid">
+        @for (stat of stats; track stat.label) {
+          <div class="stat-card">
+            <span class="stat-num">{{ stat.value }}</span>
+            <strong class="stat-title">{{ stat.label }}</strong>
+            <span class="stat-sub">{{ stat.sub }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- ── 4 Core Pillars Grid ────────────────────────────────── -->
+    <section class="about-pillars-section">
+      <h2 class="section-title text-center">What Sets GadgetPlanet Apart</h2>
+      <p class="section-desc text-center">Our commitment to superior build quality and unmatched customer assurance.</p>
+
+      <div class="pillars-grid">
+        @for (pillar of pillars; track pillar.title) {
+          <div class="pillar-card">
+            <span class="pillar-icon">{{ pillar.icon }}</span>
+            <h3 class="pillar-title">{{ pillar.title }}</h3>
+            <p class="pillar-desc">{{ pillar.desc }}</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- ── Bottom CTA ─────────────────────────────────────────── -->
+    <section class="about-cta-section">
+      <div class="cta-inner">
+        <h3 class="cta-title">Ready to Upgrade Your Tech Universe?</h3>
+        <p class="cta-desc">Explore our top-rated noise-cancelling earbuds, waterproof Bluetooth speakers, and smartwatch collections.</p>
+        <a routerLink="/products" class="cta-browse-btn">
+          Explore Latest Collections →
+        </a>
+      </div>
+    </section>
+
+  </div>
+</gp-static-page-layout>

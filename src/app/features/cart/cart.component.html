@@ -1,141 +1,366 @@
-<div class="cart-page container" id="cart-page">
+<div class="cart-page-wrapper" id="cart-page">
+  <div class="container">
 
-  <h1 class="cart-title">Shopping Cart</h1>
+    <!-- ── Page Header ───────────────────────────────────────── -->
+    <header class="cart-header">
+      <h1 class="cart-title">
+        Shopping Cart
+        @if (!cartStore.isEmpty()) {
+          <span class="cart-count-badge">({{ cartStore.count() }} {{ cartStore.count() === 1 ? 'item' : 'items' }})</span>
+        }
+      </h1>
+    </header>
 
-  @if (!cartStore.isEmpty()) {
+    @if (!cartStore.isEmpty()) {
+      <div class="cart-layout-grid">
 
-    <div class="cart-layout">
+        <!-- ── Left Column: Items List & Coupon ──────────────── -->
+        <div class="cart-main-col">
 
-      <!-- ── Cart Items ──────────────────────────────────── -->
-      <div class="cart-items">
-
-        @for (item of cartStore.items(); track item.product.id) {
-          <div class="cart-item" [id]="'cart-item-' + item.product.id">
-
-            <!-- Image -->
-            <div class="cart-item-image">
-              <img [src]="item.product.images[0]" [alt]="item.product.name" />
-            </div>
-
-            <!-- Info -->
-            <div class="cart-item-info">
-              <p class="cart-item-brand">{{ item.product.brand }}</p>
-              <a [routerLink]="['/products', item.product.id]" class="cart-item-name">
-                {{ item.product.name }}
-              </a>
-              <div class="cart-item-meta">
-                @if (!item.product.inStock) {
-                  <span class="cart-item-oos">Out of Stock</span>
-                }
-              </div>
-            </div>
-
-            <!-- Controls -->
-            <div class="cart-item-controls">
-              <!-- Quantity -->
-              <div class="qty-controls">
-                <button
-                  class="qty-btn"
-                  (click)="decreaseQty(item.product.id, item.quantity)"
-                  [id]="'cart-qty-dec-' + item.product.id"
-                >−</button>
-                <span class="qty-value">{{ item.quantity }}</span>
-                <button
-                  class="qty-btn"
-                  (click)="increaseQty(item.product.id, item.quantity)"
-                  [id]="'cart-qty-inc-' + item.product.id"
-                >+</button>
-              </div>
-
-              <!-- Price -->
-              <div class="cart-item-price-col">
-                <span class="cart-item-price">
-                  Rs. {{ ((item.product.discountPrice ?? item.product.price) * item.quantity) | number:'1.0-0' }}
+          <!-- Free Shipping Progress Meter -->
+          <div class="free-shipping-card">
+            <div class="shipping-info-row">
+              <span class="shipping-icon">🚚</span>
+              @if (cartStore.total() >= 999) {
+                <span class="shipping-msg shipping-msg--success">
+                  🎉 Congratulations! You have unlocked <strong>FREE Express Shipping</strong>!
                 </span>
-                @if (item.product.discountPrice) {
-                  <span class="cart-item-unit-price">Rs. {{ item.product.discountPrice | number:'1.0-0' }} each</span>
-                }
-              </div>
+              } @else {
+                <span class="shipping-msg">
+                  Add <strong>Rs. {{ cartStore.freeShippingRemaining() | number:'1.0-0' }}</strong> more to unlock <strong>FREE Shipping</strong>!
+                </span>
+              }
+            </div>
+            <div class="shipping-bar-track">
+              <div
+                class="shipping-bar-fill"
+                [style.width]="cartStore.freeShippingPercent() + '%'"
+                [class.is-complete]="cartStore.total() >= 999"
+              ></div>
+            </div>
+          </div>
 
-              <!-- Remove -->
+          <!-- Items Table Card -->
+          <div class="cart-items-card">
+            <div class="cart-table-header">
+              <span class="col-product">Product</span>
+              <span class="col-price">Unit Price</span>
+              <span class="col-qty">Quantity</span>
+              <span class="col-total">Subtotal</span>
+              <span class="col-action"></span>
+            </div>
+
+            <div class="cart-items-list">
+              @for (item of cartStore.items(); track item.product.id) {
+                <div class="cart-item-row" [id]="'cart-row-' + item.product.id">
+
+                  <!-- Product Info -->
+                  <div class="item-product-col">
+                    <a [routerLink]="['/products', item.product.id]" class="item-thumb-link">
+                      <img [src]="item.product.images[0]" [alt]="item.product.name" class="item-img" />
+                    </a>
+                    <div class="item-meta">
+                      <span class="item-brand">{{ item.product.brand }}</span>
+                      <a [routerLink]="['/products', item.product.id]" class="item-title">
+                        {{ item.product.name }}
+                      </a>
+                      @if (item.variant) {
+                        <span class="item-variant">Color: {{ item.variant }}</span>
+                      }
+                      @if (item.product.inStock) {
+                        <span class="item-stock-tag">In Stock • Ready to ship</span>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Unit Price -->
+                  <div class="item-unit-col">
+                    <span class="item-unit-price">
+                      Rs. {{ (item.product.discountPrice ?? item.product.price) | number:'1.0-0' }}
+                    </span>
+                    @if (item.product.discountPrice) {
+                      <span class="item-orig-price">Rs. {{ item.product.price | number:'1.0-0' }}</span>
+                    }
+                  </div>
+
+                  <!-- Quantity Stepper -->
+                  <div class="item-qty-col">
+                    <div class="cart-stepper">
+                      <button
+                        type="button"
+                        class="stepper-btn"
+                        (click)="decreaseQty(item.product.id, item.quantity)"
+                        aria-label="Decrease quantity"
+                        [id]="'cart-dec-' + item.product.id"
+                      >
+                        −
+                      </button>
+                      <span class="stepper-count">{{ item.quantity }}</span>
+                      <button
+                        type="button"
+                        class="stepper-btn"
+                        (click)="increaseQty(item.product.id, item.quantity)"
+                        aria-label="Increase quantity"
+                        [id]="'cart-inc-' + item.product.id"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Line Subtotal -->
+                  <div class="item-subtotal-col">
+                    <span class="item-total-price">
+                      Rs. {{ ((item.product.discountPrice ?? item.product.price) * item.quantity) | number:'1.0-0' }}
+                    </span>
+                  </div>
+
+                  <!-- Remove Action -->
+                  <div class="item-action-col">
+                    <button
+                      type="button"
+                      class="item-delete-btn"
+                      (click)="removeItem(item.product.id)"
+                      [attr.aria-label]="'Remove ' + item.product.name + ' from cart'"
+                      title="Remove item"
+                      [id]="'cart-del-' + item.product.id"
+                    >
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      </svg>
+                    </button>
+                  </div>
+
+                </div>
+              }
+            </div>
+
+            <!-- Cart Table Bottom Actions -->
+            <div class="cart-table-footer">
+              <a routerLink="/products" class="continue-shopping-link">
+                ← Continue Shopping
+              </a>
               <button
-                class="cart-remove-btn"
-                (click)="removeItem(item.product.id)"
-                [id]="'cart-remove-' + item.product.id"
-                aria-label="Remove item"
+                type="button"
+                class="clear-all-btn"
+                (click)="clearCart()"
+                id="cart-clear-all-btn"
               >
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="3 6 5 6 21 6" />
-                  <path d="M19 6l-1 14H6L5 6" />
-                  <path d="M10 11v6M14 11v6" />
-                  <path d="M9 6V4h6v2" />
-                </svg>
+                Clear Entire Bag
               </button>
             </div>
+          </div>
+
+          <!-- Coupon Code Card -->
+          <div class="coupon-section-card">
+            <div class="coupon-header">
+              <span class="coupon-icon">🏷️</span>
+              <div>
+                <h4 class="coupon-title">Have a Promotional Code?</h4>
+                <p class="coupon-sub">Enter your voucher or choose from available offers below.</p>
+              </div>
+            </div>
+
+            @if (cartStore.appliedCoupon(); as applied) {
+              <!-- Applied Coupon Pill -->
+              <div class="applied-coupon-banner">
+                <div class="applied-info">
+                  <span class="applied-badge">✓ APPLIED</span>
+                  <strong>{{ applied.code }}</strong>
+                  <span>— {{ applied.label }}</span>
+                </div>
+                <button
+                  type="button"
+                  class="remove-coupon-btn"
+                  (click)="removeCoupon()"
+                  title="Remove coupon"
+                >
+                  ✕ Remove
+                </button>
+              </div>
+            } @else {
+              <!-- Coupon Input Form -->
+              <div class="coupon-input-row">
+                <input
+                  type="text"
+                  class="coupon-input"
+                  id="cart-coupon-input"
+                  placeholder="Enter code (e.g. PLANETVIP500)..."
+                  [value]="couponInput()"
+                  (input)="onCouponInput($event)"
+                  (keyup.enter)="applyCouponCode()"
+                />
+                <button
+                  type="button"
+                  class="coupon-apply-btn"
+                  (click)="applyCouponCode()"
+                  [disabled]="isApplyingCoupon()"
+                  id="cart-coupon-apply-btn"
+                >
+                  {{ isApplyingCoupon() ? 'Applying...' : 'Apply' }}
+                </button>
+              </div>
+
+              @if (cartStore.couponError()) {
+                <div class="coupon-error-banner" role="alert">
+                  <span>{{ cartStore.couponError() }}</span>
+                </div>
+              }
+
+              <!-- Preset Suggestion Chips -->
+              <div class="coupon-presets-row">
+                <span class="presets-label">Available Offers:</span>
+                @for (preset of couponPresets; track preset.code) {
+                  <button
+                    type="button"
+                    class="preset-coupon-btn"
+                    (click)="applyCouponCode(preset.code)"
+                  >
+                    <strong>{{ preset.code }}</strong> ({{ preset.label }})
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+        </div>
+
+        <!-- ── Right Column: Order Summary Card ──────────────── -->
+        <div class="cart-summary-col">
+          <div class="order-summary-card" id="order-summary-card">
+            <h2 class="summary-heading">Order Summary</h2>
+
+            <div class="summary-breakdown">
+              <div class="breakdown-row">
+                <span>Items Subtotal ({{ cartStore.count() }})</span>
+                <span class="row-val">Rs. {{ cartStore.total() | number:'1.0-0' }}</span>
+              </div>
+
+              <div class="breakdown-row">
+                <span>Estimated Shipping</span>
+                @if (cartStore.shippingFee() === 0) {
+                  <span class="free-shipping-badge">FREE</span>
+                } @else {
+                  <span class="row-val">Rs. {{ cartStore.shippingFee() | number:'1.0-0' }}</span>
+                }
+              </div>
+
+              @if (cartStore.discountAmount() > 0) {
+                <div class="breakdown-row breakdown-row--discount">
+                  <span>Coupon Discount ({{ cartStore.appliedCoupon()?.code }})</span>
+                  <span class="discount-val">- Rs. {{ cartStore.discountAmount() | number:'1.0-0' }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="summary-divider"></div>
+
+            <div class="summary-total-row">
+              <div>
+                <strong class="total-label">Grand Total</strong>
+                <span class="total-tax-note">Inclusive of GST &amp; all taxes</span>
+              </div>
+              <span class="total-amount">Rs. {{ cartStore.grandTotal() | number:'1.0-0' }}</span>
+            </div>
+
+            <!-- Checkout CTA -->
+            <gp-button
+              id="full-cart-checkout-btn"
+              variant="accent"
+              size="lg"
+              [fullWidth]="true"
+              (click)="proceedToCheckout()"
+            >
+              Proceed to Checkout →
+            </gp-button>
+
+            @if (checkoutSuccess()) {
+              <div class="checkout-demo-alert">
+                <span>🎉 Checkout flow ready! Total Rs. {{ cartStore.grandTotal() | number:'1.0-0' }}.</span>
+              </div>
+            }
+
+            <!-- Trust & Payment Icons -->
+            <div class="summary-trust-perks">
+              <div class="perk-item">
+                <span class="perk-icon">🔒</span>
+                <span>256-Bit SSL Encrypted Checkout</span>
+              </div>
+              <div class="perk-item">
+                <span class="perk-icon">🛡️</span>
+                <span>Official 1-Year Brand Warranty</span>
+              </div>
+              <div class="perk-item">
+                <span class="perk-icon">🔄</span>
+                <span>30-Day Easy Replacement Policy</span>
+              </div>
+            </div>
+
+            <div class="summary-payments-row">
+              <span class="pay-pill">VISA</span>
+              <span class="pay-pill">Mastercard</span>
+              <span class="pay-pill">COD</span>
+              <span class="pay-pill">JazzCash</span>
+              <span class="pay-pill">Easypaisa</span>
+            </div>
 
           </div>
-        }
-
-        <!-- Actions Row -->
-        <div class="cart-actions-row">
-          <gp-button id="cart-clear-btn" variant="ghost" size="sm" (click)="clearCart()">
-            Clear Cart
-          </gp-button>
-          <gp-button id="cart-continue-btn" variant="secondary" size="sm" routerLink="/products">
-            Continue Shopping
-          </gp-button>
         </div>
+
       </div>
 
-      <!-- ── Order Summary ───────────────────────────────── -->
-      <div class="cart-summary">
-        <div class="summary-card">
-          <h2 class="summary-title">Order Summary</h2>
+    } @else {
 
-          <div class="summary-rows">
-            <div class="summary-row">
-              <span>Subtotal ({{ cartStore.count() }} items)</span>
-              <span>Rs. {{ cartStore.total() | number:'1.0-0' }}</span>
-            </div>
-            <div class="summary-row">
-              <span>Delivery</span>
-              <span class="summary-free">{{ cartStore.total() >= 999 ? 'FREE' : 'Rs. 99' }}</span>
-            </div>
-            <div class="summary-row summary-row--discount">
-              <span>Discount Applied</span>
-              <span>– Included</span>
-            </div>
-          </div>
-
-          <div class="summary-divider"></div>
-
-          <div class="summary-total">
-            <span>Total</span>
-            <span>Rs. {{ grandTotal() | number:'1.0-0' }}</span>
-          </div>
-
-          <gp-button id="cart-checkout-btn" variant="accent" size="lg" [fullWidth]="true">
-            Proceed to Checkout
-          </gp-button>
-
-          <p class="summary-secure">🔒 Secure checkout — UPI, Cards, EMI available</p>
+      <!-- ── Empty State ─────────────────────────────────────── -->
+      <div class="cart-empty-view" id="full-cart-empty-state">
+        <div class="empty-halo-wrap">
+          <span class="empty-cart-icon">🛒</span>
+          <div class="empty-ambient-glow"></div>
         </div>
+        <h2 class="empty-view-title">Your Cart is Currently Empty</h2>
+        <p class="empty-view-desc">
+          You haven't added any gadgets to your shopping bag yet. Explore our latest drops,
+          top-rated noise-cancelling earbuds, and smartwatches to get started!
+        </p>
+        <a routerLink="/products" class="empty-browse-cta" id="empty-cart-browse-btn">
+          Explore Best Sellers →
+        </a>
       </div>
 
+    }
+
+  </div>
+
+  <!-- ── Floating Undo Snackbar ──────────────────────────────── -->
+  @if (cartStore.showUndoSnackbar() && cartStore.lastRemovedItem(); as removed) {
+    <div class="undo-snackbar" id="cart-undo-snackbar" role="status" aria-live="polite">
+      <div class="snackbar-content">
+        <span class="snackbar-icon">🗑️</span>
+        <span class="snackbar-text">
+          <strong>{{ removed.product.name }}</strong> was removed from your bag.
+        </span>
+      </div>
+      <button
+        type="button"
+        class="snackbar-undo-btn"
+        (click)="undoRemove()"
+        id="cart-undo-btn"
+      >
+        Undo
+      </button>
     </div>
-
-  } @else {
-
-    <!-- ── Empty State ─────────────────────────────────── -->
-    <div class="cart-empty" id="cart-empty">
-      <div class="cart-empty-icon">🛒</div>
-      <h2 class="cart-empty-title">Your cart is empty</h2>
-      <p class="cart-empty-text">Looks like you haven't added anything yet. Let's fix that!</p>
-      <gp-button id="cart-browse-btn" variant="primary" size="lg" routerLink="/products">
-        Browse Products
-      </gp-button>
-    </div>
-
   }
+
+  <!-- ── "You May Also Like" Upsell Carousel ─────────────────── -->
+  <div class="cart-upsell-section">
+    <gp-product-carousel-section
+      title="You May Also Like"
+      subtitle="Frequently paired additions loved by GadgetPlanet customers"
+      [products]="upsellProducts()"
+      viewAllRoute="/products"
+      id="cart-upsell-carousel"
+    ></gp-product-carousel-section>
+  </div>
 
 </div>

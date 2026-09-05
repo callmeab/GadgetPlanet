@@ -1,0 +1,85 @@
+<section class="category-grid-section">
+  <div class="container">
+
+    <!-- Section Header -->
+    <div class="section-header">
+      <div class="title-col">
+        <h2 class="section-title">{{ title }}</h2>
+        <p class="section-subtitle">{{ subtitle }}</p>
+      </div>
+
+      <div class="header-actions">
+        <!-- Mobile View Toggle (Visible only on mobile) -->
+        <div class="mobile-toggle-pills" role="radiogroup" aria-label="Category layout mode">
+          <button
+            type="button"
+            class="toggle-pill"
+            [class.toggle-pill--active]="mobileViewMode() === 'scroll'"
+            (click)="setMobileViewMode('scroll')"
+            aria-label="Scroll layout"
+          >
+            ↔ Scroll
+          </button>
+          <button
+            type="button"
+            class="toggle-pill"
+            [class.toggle-pill--active]="mobileViewMode() === 'grid'"
+            (click)="setMobileViewMode('grid')"
+            aria-label="Grid layout"
+          >
+            ⊞ Grid
+          </button>
+        </div>
+
+        <a [routerLink]="viewAllRoute" class="section-link" id="categories-view-all">
+          View all categories →
+        </a>
+      </div>
+    </div>
+
+    <!-- Category Tiles Track / Grid -->
+    <div
+      class="categories-container"
+      [class.mode-scroll]="mobileViewMode() === 'scroll'"
+      [class.mode-grid]="mobileViewMode() === 'grid'"
+      #scrollContainer
+    >
+      @for (cat of categories; track cat.id) {
+        <a
+          [routerLink]="viewAllRoute"
+          [queryParams]="{ category: cat.name }"
+          class="cat-tile"
+          [id]="'cat-tile-' + cat.id"
+        >
+          <!-- Circular Thumbnail Wrap -->
+          <div class="cat-circle-wrap">
+            <div class="cat-circle">
+              <img
+                [src]="cat.image"
+                [alt]="cat.label"
+                class="cat-img"
+                loading="lazy"
+              />
+              <div class="cat-circle-glow"></div>
+            </div>
+
+            <!-- Emoji Icon Overlay -->
+            <span class="cat-icon-badge" aria-hidden="true">{{ cat.icon }}</span>
+
+            <!-- Feature Tag Badge -->
+            @if (cat.badge) {
+              <span class="cat-pill-badge">{{ cat.badge }}</span>
+            }
+          </div>
+
+          <!-- Label & Count -->
+          <div class="cat-meta">
+            <span class="cat-label">{{ cat.label }}</span>
+            <span class="cat-count">{{ cat.itemCount }} Products</span>
+          </div>
+        </a>
+      }
+    </div>
+
+  </div>
+</section>

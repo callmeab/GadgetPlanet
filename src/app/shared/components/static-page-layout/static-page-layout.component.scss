@@ -1,0 +1,152 @@
+@use '../../../../styles/variables' as v;
+
+.static-page-root {
+  background-color: v.$color-bg;
+  min-height: calc(100vh - v.$header-height);
+}
+
+.container {
+  max-width: v.$container-max;
+  margin: 0 auto;
+  padding: 0 v.$space-6;
+
+  @media (max-width: 640px) {
+    padding: 0 v.$space-4;
+  }
+}
+
+// ── Hero Title Banner ────────────────────────────────────────
+.static-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0f1622 0%, #0d0d0d 100%);
+  padding: v.$space-8 0 v.$space-12;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  @media (max-width: 640px) {
+    padding: v.$space-6 0 v.$space-8;
+  }
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 860px;
+}
+
+// Breadcrumbs
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+  font-size: v.$font-size-xs;
+  margin-bottom: v.$space-5;
+  flex-wrap: wrap;
+
+  .crumb-link {
+    color: v.$color-text-muted;
+    text-decoration: none;
+    transition: color v.$transition-fast;
+
+    &:hover {
+      color: v.$color-primary-light;
+    }
+  }
+
+  .crumb-sep {
+    color: v.$color-surface-border;
+  }
+
+  .crumb-current {
+    color: v.$color-text-secondary;
+    font-weight: v.$font-weight-medium;
+  }
+}
+
+// Badge
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  background: rgba(10, 132, 255, 0.12);
+  border: 1px solid rgba(10, 132, 255, 0.3);
+  padding: 4px 12px;
+  border-radius: v.$radius-full;
+  font-size: 11px;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-primary-light;
+  letter-spacing: v.$letter-spacing-wider;
+  margin-bottom: v.$space-3;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: v.$color-primary;
+  box-shadow: 0 0 8px v.$color-primary;
+}
+
+// Main Title
+.hero-title {
+  font-size: v.$font-size-4xl;
+  font-weight: v.$font-weight-black;
+  color: v.$color-text-primary;
+  letter-spacing: v.$letter-spacing-tight;
+  line-height: v.$line-height-tight;
+  margin: 0 0 v.$space-3;
+
+  @media (max-width: 768px) {
+    font-size: v.$font-size-3xl;
+  }
+
+  @media (max-width: 480px) {
+    font-size: v.$font-size-2xl;
+  }
+}
+
+.hero-subtitle {
+  font-size: v.$font-size-base;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-base;
+  margin: 0;
+  max-width: 720px;
+
+  @media (max-width: 640px) {
+    font-size: v.$font-size-sm;
+  }
+}
+
+// Ambient Glows
+.hero-ambient-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  opacity: 0.25;
+
+  &--blue {
+    top: -20%;
+    right: 5%;
+    width: 380px;
+    height: 380px;
+    background: v.$color-primary;
+  }
+
+  &--orange {
+    bottom: -30%;
+    left: -5%;
+    width: 320px;
+    height: 320px;
+    background: v.$color-accent;
+  }
+}
+
+// ── Main Content Container ───────────────────────────────────
+.static-content-wrap {
+  padding: v.$space-12 0 v.$space-24;
+
+  @media (max-width: 640px) {
+    padding: v.$space-8 0 v.$space-16;
+  }
+}

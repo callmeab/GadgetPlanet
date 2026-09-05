@@ -1,0 +1,160 @@
+<gp-static-page-layout
+  title="Contact Support"
+  subtitle="Need assistance with an order, product recommendations, or official warranty claims? Reach out to our Lahore support crew."
+  badge="CUSTOMER HELPLINE"
+>
+  <div class="contact-page-content">
+    <div class="contact-grid">
+
+      <!-- ── Left Column: Contact Methods & Hours ────────────── -->
+      <div class="contact-info-col">
+        <h2 class="col-title">Get in Touch</h2>
+        <p class="col-desc">Our customer experience champions are available 6 days a week to assist you.</p>
+
+        <div class="contact-cards-list">
+          <!-- Phone -->
+          <div class="info-card">
+            <span class="info-icon">📞</span>
+            <div class="info-body">
+              <strong>Official Helpline</strong>
+              <a href="tel:+923004234387" class="info-link">+92 (042) 111-GADGET</a>
+              <span class="info-sub">Mon – Sat: 9:00 AM – 9:00 PM PKT</span>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="info-card">
+            <span class="info-icon">✉️</span>
+            <div class="info-body">
+              <strong>Email Support</strong>
+              <a href="mailto:support@gadgetplanet.pk" class="info-link">support&#64;gadgetplanet.pk</a>
+              <span class="info-sub">Typical reply in under 2 hours</span>
+            </div>
+          </div>
+
+          <!-- Head Office -->
+          <div class="info-card">
+            <span class="info-icon">🏢</span>
+            <div class="info-body">
+              <strong>Service Center &amp; Headquarters</strong>
+              <p class="info-text">Plot 42-B, Sector Y Commercial, Phase 3, DHA, Lahore, Punjab, Pakistan</p>
+              <span class="info-sub">Walk-ins welcome for warranty drop-offs</span>
+            </div>
+          </div>
+
+          <!-- WhatsApp -->
+          <div class="info-card info-card--highlight">
+            <span class="info-icon">💬</span>
+            <div class="info-body">
+              <strong>WhatsApp Live Chat</strong>
+              <a href="https://wa.me/923004234387" target="_blank" rel="noopener" class="info-link info-link--accent">
+                Chat on WhatsApp (+92 300 4234387) →
+              </a>
+              <span class="info-sub">Fastest response for order status &amp; pincode queries</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Right Column: Message Form ───────────────────────── -->
+      <div class="contact-form-col">
+        <div class="form-card">
+
+          @if (isSent()) {
+            <!-- Sent Confirmation -->
+            <div class="form-success-view">
+              <div class="success-icon-wrap">
+                <span class="success-emoji">🎉</span>
+              </div>
+              <h3 class="success-title">Message Received!</h3>
+              <p class="success-desc">
+                Thank you for reaching out. A support ticket has been created and assigned to an audio specialist.
+                We will email you back shortly!
+              </p>
+              <button type="button" class="send-another-btn" (click)="sendAnother()">
+                Send Another Message
+              </button>
+            </div>
+          } @else {
+            <!-- Message Form -->
+            <h3 class="form-heading">Send Us a Direct Message</h3>
+            <p class="form-subheading">Fill out the details below and we will respond to your email promptly.</p>
+
+            <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form" novalidate>
+              <div class="form-row-2">
+                <div class="form-field">
+                  <label for="contact-name" class="field-label">Your Name</label>
+                  <input
+                    type="text"
+                    id="contact-name"
+                    formControlName="name"
+                    class="field-input"
+                    [class.is-invalid]="isFieldInvalid('name')"
+                    placeholder="e.g. Bilal Khan"
+                  />
+                </div>
+
+                <div class="form-field">
+                  <label for="contact-email" class="field-label">Email Address</label>
+                  <input
+                    type="email"
+                    id="contact-email"
+                    formControlName="email"
+                    class="field-input"
+                    [class.is-invalid]="isFieldInvalid('email')"
+                    placeholder="e.g. bilal@example.com"
+                  />
+                </div>
+              </div>
+
+              <div class="form-row-2">
+                <div class="form-field">
+                  <label for="contact-phone" class="field-label">Mobile Number (Optional)</label>
+                  <input
+                    type="tel"
+                    id="contact-phone"
+                    formControlName="phone"
+                    class="field-input"
+                    [class.is-invalid]="isFieldInvalid('phone')"
+                    placeholder="e.g. 0300-1234567"
+                  />
+                </div>
+
+                <div class="form-field">
+                  <label for="contact-subject" class="field-label">Topic / Subject</label>
+                  <select id="contact-subject" formControlName="subject" class="field-input">
+                    @for (subj of subjects; track subj) {
+                      <option [value]="subj">{{ subj }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="contact-message" class="field-label">How can we help you?</label>
+                <textarea
+                  id="contact-message"
+                  formControlName="message"
+                  class="field-textarea"
+                  [class.is-invalid]="isFieldInvalid('message')"
+                  rows="5"
+                  placeholder="Please describe your inquiry, order number, or gadget issue in detail..."
+                ></textarea>
+              </div>
+
+              <button type="submit" class="contact-submit-btn" [disabled]="isSubmitting()">
+                @if (isSubmitting()) {
+                  <span>Dispatching Message...</span>
+                } @else {
+                  <span>Send Message →</span>
+                }
+              </button>
+            </form>
+          }
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</gp-static-page-layout>

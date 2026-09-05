@@ -2,30 +2,14 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './layout/header/header.component';
 import { FooterComponent } from './layout/footer/footer.component';
+import { CartDrawerComponent } from './shared/components/cart-drawer/cart-drawer.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, CartDrawerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="app-shell">
-      <gp-header></gp-header>
-      <main class="app-main" role="main">
-        <router-outlet></router-outlet>
-      </main>
-      <gp-footer></gp-footer>
-    </div>
-  `,
-  styles: [`
-    .app-shell {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    .app-main {
-      flex: 1;
-    }
-  `],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.scss',
 })
 export class AppComponent {}

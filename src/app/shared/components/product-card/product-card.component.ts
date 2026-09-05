@@ -25,6 +25,7 @@ import { ButtonComponent } from '../button/button.component';
 })
 export class ProductCardComponent implements OnInit {
   @Input({ required: true }) product!: Product;
+  @Input() showMoveToCart: boolean = false;
 
   private readonly router = inject(Router);
   private readonly cartStore = inject(CartStore);
@@ -38,6 +39,21 @@ export class ProductCardComponent implements OnInit {
   addToCart(event: Event): void {
     event.stopPropagation();
     this.cartStore.addToCart(this.product);
+  }
+
+  moveToCart(event: Event): void {
+    event.stopPropagation();
+    this.wishlistStore.moveToCart(this.product);
+  }
+
+  onQuickAction(event: Event): void {
+    if (this.inCart()) {
+      this.goToCart();
+    } else if (this.showMoveToCart) {
+      this.moveToCart(event);
+    } else {
+      this.addToCart(event);
+    }
   }
 
   goToCart(): void {

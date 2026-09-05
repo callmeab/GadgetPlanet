@@ -1,0 +1,125 @@
+<gp-static-page-layout
+  title="Warranty &amp; Return Policy"
+  subtitle="Transparent, hassle-free protection backed by official manufacturer service center coverage across Pakistan."
+  badge="100% PEACE OF MIND"
+>
+  <div class="policy-page-content">
+
+    <!-- ── 1. Brand Warranty Overview ─────────────────────────── -->
+    <section class="policy-section">
+      <div class="section-badge">1. OFFICIAL WARRANTY</div>
+      <h2 class="section-heading">1-Year Official Brand Warranty</h2>
+      <p class="section-lead">
+        All electronic products, Bluetooth earphones, wireless speakers, smartwatches, and GaN fast chargers purchased directly from GadgetPlanet include an official <strong>1-Year Limited Hardware Warranty</strong> from the date of delivery.
+      </p>
+
+      <div class="coverage-grid">
+        <div class="coverage-card coverage-card--covered">
+          <h4 class="coverage-title">✅ What is Covered:</h4>
+          <ul class="coverage-list">
+            <li>Internal circuit failure and motherboards defects.</li>
+            <li>Acoustic driver malfunction, distortion, or dead sound in earphones/speakers.</li>
+            <li>Bluetooth pairing or wireless connection dropouts.</li>
+            <li>Charging case failure or failure to hold standard battery charge.</li>
+            <li>Touch sensor, microphone, and button defects under normal usage.</li>
+          </ul>
+        </div>
+
+        <div class="coverage-card coverage-card--excluded">
+          <h4 class="coverage-title">❌ What is Not Covered:</h4>
+          <ul class="coverage-list">
+            <li>Physical damage, cracked casings, broken bands, or accidental drops.</li>
+            <li>Water or liquid submersion beyond the certified IP rating.</li>
+            <li>Damage caused by using unauthorized non-standard high-voltage adapters.</li>
+            <li>Tampering, dismantling, or unauthorized third-party repairs.</li>
+            <li>Normal cosmetic wear, scratches, or cosmetic discoloration over time.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 2. 30-Day Easy Replacement ─────────────────────────── -->
+    <section class="policy-section">
+      <div class="section-badge">2. UNBOXING GUARANTEE</div>
+      <h2 class="section-heading">30-Day Easy Replacement Guarantee</h2>
+      <p class="section-lead">
+        We want you to be completely thrilled with your gadget. If your item arrives dead-on-arrival (DOA), has packaging transit damage, or exhibits any defect within 30 days of receiving your parcel:
+      </p>
+
+      <div class="perks-summary-box">
+        <div class="perk-col">
+          <span class="perk-icon">📦</span>
+          <strong>No Restocking Fees</strong>
+          <p>Zero penalty or administrative fees on genuine replacements.</p>
+        </div>
+        <div class="perk-col">
+          <span class="perk-icon">🔄</span>
+          <strong>Free Reverse Pickup</strong>
+          <p>Our courier partner collects the defective unit from your doorstep.</p>
+        </div>
+        <div class="perk-col">
+          <span class="perk-icon">⚡</span>
+          <strong>48-Hour Turnaround</strong>
+          <p>New unit dispatched immediately once verification is completed.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 3. Step-by-Step Claim Procedure ────────────────────── -->
+    <section class="policy-section">
+      <div class="section-badge">3. STEP-BY-STEP PROCESS</div>
+      <h2 class="section-heading">How to File a Warranty Claim</h2>
+      <p class="section-lead">Filing a claim is completely digital, painless, and fast.</p>
+
+      <div class="claim-steps-grid">
+        @for (step of claimSteps; track step.step) {
+          <div class="step-card">
+            <span class="step-num">{{ step.step }}</span>
+            <h4 class="step-title">{{ step.title }}</h4>
+            <p class="step-desc">{{ step.desc }}</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- ── 4. Refunds & Store Credit ──────────────────────────── -->
+    <section class="policy-section">
+      <div class="section-badge">4. REFUND TIMELINE</div>
+      <h2 class="section-heading">Refunds &amp; Store Credits</h2>
+      <p class="section-lead">
+        In the rare event that an exact replacement item is permanently out of stock or discontinued by the manufacturer, customers are offered a full refund or equivalent GadgetPlanet store voucher.
+      </p>
+      <div class="refund-details-table">
+        <div class="refund-row">
+          <span class="refund-method">Credit / Debit Card Orders</span>
+          <span class="refund-time">5 to 7 business days directly to issuing bank account</span>
+        </div>
+        <div class="refund-row">
+          <span class="refund-method">JazzCash / Easypaisa Orders</span>
+          <span class="refund-time">24 to 48 hours to original mobile wallet account</span>
+        </div>
+        <div class="refund-row">
+          <span class="refund-method">Cash on Delivery (COD) Orders</span>
+          <span class="refund-time">Instant store credit voucher or direct IBFT bank transfer</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Claim CTA Card ─────────────────────────────────────── -->
+    <section class="claim-cta-card">
+      <div class="cta-inner">
+        <h3 class="cta-heading">Need to initiate a claim today?</h3>
+        <p class="cta-sub">Our dedicated customer claim team in Lahore is ready to assist you right now.</p>
+        <div class="cta-btn-group">
+          <a routerLink="/contact" class="cta-primary-btn">
+            File a Claim Request →
+          </a>
+          <a href="https://wa.me/923004234387" target="_blank" rel="noopener" class="cta-whatsapp-btn">
+            💬 WhatsApp Claim Desk
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</gp-static-page-layout>

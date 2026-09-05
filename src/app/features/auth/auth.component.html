@@ -1,0 +1,491 @@
+<div class="auth-page-wrapper" id="auth-page">
+  <div class="auth-split-container">
+
+    <!-- ── Left: Brand Promo Panel (Hidden on Mobile) ────────── -->
+    <aside class="auth-promo-panel" aria-label="Brand Overview">
+      <div class="promo-content">
+
+        <!-- Brand Header -->
+        <div class="promo-brand-badge">
+          <span class="badge-dot"></span>
+          <span>GADGETPLANET MEMBER ZONE</span>
+        </div>
+
+        <h2 class="promo-headline">
+          Power Your <span class="gradient-text">Sonic &amp; Digital</span> Universe
+        </h2>
+
+        <p class="promo-desc">
+          Join 150,000+ sound lovers, competitive gamers, and tech creators across Pakistan.
+          Unlock exclusive drops, fast express delivery, and official brand warranties.
+        </p>
+
+        <!-- Perks List -->
+        <div class="promo-perks-list">
+          <div class="promo-perk-card">
+            <span class="perk-emoji">🎧</span>
+            <div class="perk-text">
+              <strong>VIP Sound Drops</strong>
+              <p>Priority early access to limited-edition ANC earbuds, watches &amp; speakers.</p>
+            </div>
+          </div>
+
+          <div class="promo-perk-card">
+            <span class="perk-emoji">⚡</span>
+            <div class="perk-text">
+              <strong>Lightning Fast Dispatch</strong>
+              <p>Same-day dispatch in Lahore &amp; Karachi; express 24-48H courier nationwide.</p>
+            </div>
+          </div>
+
+          <div class="promo-perk-card">
+            <span class="perk-emoji">🛡️</span>
+            <div class="perk-text">
+              <strong>1-Year Official Warranty</strong>
+              <p>100% authentic devices backed by direct local service center coverage.</p>
+            </div>
+          </div>
+
+          <div class="promo-perk-card promo-perk-card--highlight">
+            <span class="perk-emoji">🎁</span>
+            <div class="perk-text">
+              <strong>Rs. 500 Welcome Voucher</strong>
+              <p>Automatically loaded to your bag upon creating a new account.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Social Proof Quote -->
+        <blockquote class="promo-quote">
+          <p>“GadgetPlanet delivered my ANC earbuds in less than 24 hours. The sound quality and genuine warranty support are top notch!”</p>
+          <cite>— Zain A., Lahore (Verified Member)</cite>
+        </blockquote>
+
+      </div>
+
+      <!-- Ambient Glows -->
+      <div class="promo-ambient-glow promo-ambient-glow--blue"></div>
+      <div class="promo-ambient-glow promo-ambient-glow--orange"></div>
+    </aside>
+
+    <!-- ── Right: Form Panel ─────────────────────────────────── -->
+    <main class="auth-form-panel">
+      <div class="form-panel-inner">
+
+        <!-- Top Navigation -->
+        <div class="panel-top-bar">
+          <a routerLink="/" class="back-link">
+            ← Back to Store
+          </a>
+          <a routerLink="/" class="brand-mini-logo">
+            <span class="logo-txt">GADGET<strong class="accent-txt">PLANET</strong></span>
+          </a>
+        </div>
+
+        <!-- Segmented Mode Switcher -->
+        <div class="auth-tabs-nav" role="tablist">
+          <button
+            type="button"
+            role="tab"
+            class="tab-btn"
+            [class.is-active]="authMode() === 'login'"
+            [attr.aria-selected]="authMode() === 'login'"
+            (click)="switchMode('login')"
+            id="auth-tab-login"
+          >
+            Log In
+          </button>
+          <button
+            type="button"
+            role="tab"
+            class="tab-btn"
+            [class.is-active]="authMode() === 'signup'"
+            [attr.aria-selected]="authMode() === 'signup'"
+            (click)="switchMode('signup')"
+            id="auth-tab-signup"
+          >
+            Create Account
+          </button>
+        </div>
+
+        <!-- Success Alert Banner -->
+        @if (submitSuccess()) {
+          <div class="auth-success-banner" role="alert">
+            <div class="success-icon">✓</div>
+            <div class="success-msg">
+              <strong>Success!</strong>
+              <p>{{ submitSuccess() }}</p>
+            </div>
+            <button
+              type="button"
+              class="success-dismiss"
+              (click)="dismissSuccess()"
+              aria-label="Dismiss alert"
+            >
+              ✕
+            </button>
+          </div>
+        }
+
+        <!-- ====================================================== -->
+        <!-- ── LOGIN FORM ──────────────────────────────────────── -->
+        <!-- ====================================================== -->
+        @if (authMode() === 'login') {
+          <form
+            [formGroup]="loginForm"
+            (ngSubmit)="onLoginSubmit()"
+            class="auth-form"
+            id="auth-login-form"
+            novalidate
+          >
+            <div class="form-header">
+              <h1 class="form-heading">Welcome Back</h1>
+              <p class="form-subheading">
+                Sign in to access your orders, saved addresses, and wishlist.
+              </p>
+            </div>
+
+            <!-- Login Method Toggle (Password vs OTP) -->
+            <div class="method-toggle-row">
+              <button
+                type="button"
+                class="method-pill"
+                [class.is-selected]="loginMethod() === 'password'"
+                (click)="setLoginMethod('password')"
+              >
+                Password Login
+              </button>
+              <button
+                type="button"
+                class="method-pill"
+                [class.is-selected]="loginMethod() === 'otp'"
+                (click)="setLoginMethod('otp')"
+              >
+                Instant OTP
+              </button>
+            </div>
+
+            <!-- Identifier Field (Email / Phone) -->
+            <div class="form-field">
+              <label for="login-identifier" class="field-label">
+                Email Address or Phone Number
+              </label>
+              <div
+                class="field-input-wrap"
+                [class.has-error]="isFieldInvalid(loginForm, 'identifier')"
+              >
+                <span class="field-prefix-icon">👤</span>
+                <input
+                  type="text"
+                  id="login-identifier"
+                  formControlName="identifier"
+                  placeholder="e.g. 0300-1234567 or you@example.com"
+                  autocomplete="username"
+                />
+              </div>
+              @if (isFieldInvalid(loginForm, 'identifier')) {
+                <span class="field-error-msg">
+                  ⚠️ {{ getFieldError(loginForm, 'identifier') }}
+                </span>
+              }
+            </div>
+
+            <!-- Password Method -->
+            @if (loginMethod() === 'password') {
+              <div class="form-field">
+                <div class="field-label-row">
+                  <label for="login-password" class="field-label">Password</label>
+                  <a href="javascript:void(0)" class="forgot-link" (click)="$event.preventDefault()">
+                    Forgot Password?
+                  </a>
+                </div>
+                <div
+                  class="field-input-wrap"
+                  [class.has-error]="isFieldInvalid(loginForm, 'password')"
+                >
+                  <span class="field-prefix-icon">🔒</span>
+                  <input
+                    [type]="showPassword() ? 'text' : 'password'"
+                    id="login-password"
+                    formControlName="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    class="eye-btn"
+                    (click)="togglePasswordVisibility()"
+                    [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                  >
+                    {{ showPassword() ? '👁️' : '🙈' }}
+                  </button>
+                </div>
+                @if (isFieldInvalid(loginForm, 'password')) {
+                  <span class="field-error-msg">
+                    ⚠️ {{ getFieldError(loginForm, 'password') }}
+                  </span>
+                }
+              </div>
+            }
+
+            <!-- OTP Method -->
+            @if (loginMethod() === 'otp') {
+              <div class="form-field">
+                <div class="field-label-row">
+                  <label for="login-otp" class="field-label">6-Digit Verification Code</label>
+                  <span class="otp-resend">Resend in 45s</span>
+                </div>
+                <div
+                  class="field-input-wrap"
+                  [class.has-error]="isFieldInvalid(loginForm, 'otp')"
+                >
+                  <span class="field-prefix-icon">🔢</span>
+                  <input
+                    type="text"
+                    id="login-otp"
+                    formControlName="otp"
+                    placeholder="Enter 6-digit code (e.g. 849201)"
+                    maxlength="6"
+                    autocomplete="one-time-code"
+                  />
+                </div>
+                @if (isFieldInvalid(loginForm, 'otp')) {
+                  <span class="field-error-msg">
+                    ⚠️ {{ getFieldError(loginForm, 'otp') }}
+                  </span>
+                }
+              </div>
+            }
+
+            <!-- Remember Me -->
+            <div class="form-options-row">
+              <label class="custom-checkbox">
+                <input type="checkbox" formControlName="rememberMe" id="login-remember-me" />
+                <span class="checkbox-box"></span>
+                <span class="checkbox-label">Keep me signed in on this device</span>
+              </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="auth-submit-btn"
+              [disabled]="isSubmitting()"
+              id="login-submit-btn"
+            >
+              @if (isSubmitting()) {
+                <span class="spinner-dot"></span>
+                <span>Authenticating...</span>
+              } @else {
+                <span>Continue to GadgetPlanet →</span>
+              }
+            </button>
+
+            <!-- Social Divider -->
+            <div class="social-divider">
+              <span>or quick continue with</span>
+            </div>
+
+            <!-- Social Buttons -->
+            <div class="social-btn-grid">
+              <button type="button" class="social-btn" (click)="$event.preventDefault()">
+                <span class="social-icon">G</span>
+                <span>Google</span>
+              </button>
+              <button type="button" class="social-btn" (click)="$event.preventDefault()">
+                <span class="social-icon"></span>
+                <span>Apple</span>
+              </button>
+            </div>
+
+            <!-- Toggle Mode -->
+            <p class="auth-toggle-text">
+              Don't have an account yet?
+              <button
+                type="button"
+                class="auth-toggle-link"
+                (click)="switchMode('signup')"
+                id="login-to-signup-link"
+              >
+                Sign Up for Free
+              </button>
+            </p>
+
+          </form>
+        }
+
+        <!-- ====================================================== -->
+        <!-- ── SIGNUP FORM ─────────────────────────────────────── -->
+        <!-- ====================================================== -->
+        @if (authMode() === 'signup') {
+          <form
+            [formGroup]="signupForm"
+            (ngSubmit)="onSignupSubmit()"
+            class="auth-form"
+            id="auth-signup-form"
+            novalidate
+          >
+            <div class="form-header">
+              <h1 class="form-heading">Create an Account</h1>
+              <p class="form-subheading">
+                Sign up in 30 seconds and receive a <strong>Rs. 500 welcome voucher</strong> on your first order.
+              </p>
+            </div>
+
+            <!-- Name Field -->
+            <div class="form-field">
+              <label for="signup-name" class="field-label">Full Name</label>
+              <div
+                class="field-input-wrap"
+                [class.has-error]="isFieldInvalid(signupForm, 'name')"
+              >
+                <span class="field-prefix-icon">✍️</span>
+                <input
+                  type="text"
+                  id="signup-name"
+                  formControlName="name"
+                  placeholder="e.g. Ali Ahmed"
+                  autocomplete="name"
+                />
+              </div>
+              @if (isFieldInvalid(signupForm, 'name')) {
+                <span class="field-error-msg">
+                  ⚠️ {{ getFieldError(signupForm, 'name') }}
+                </span>
+              }
+            </div>
+
+            <!-- Email Field -->
+            <div class="form-field">
+              <label for="signup-email" class="field-label">Email Address</label>
+              <div
+                class="field-input-wrap"
+                [class.has-error]="isFieldInvalid(signupForm, 'email')"
+              >
+                <span class="field-prefix-icon">✉️</span>
+                <input
+                  type="email"
+                  id="signup-email"
+                  formControlName="email"
+                  placeholder="e.g. ali@example.com"
+                  autocomplete="email"
+                />
+              </div>
+              @if (isFieldInvalid(signupForm, 'email')) {
+                <span class="field-error-msg">
+                  ⚠️ {{ getFieldError(signupForm, 'email') }}
+                </span>
+              }
+            </div>
+
+            <!-- Phone Field -->
+            <div class="form-field">
+              <label for="signup-phone" class="field-label">Mobile Number</label>
+              <div
+                class="field-input-wrap"
+                [class.has-error]="isFieldInvalid(signupForm, 'phone')"
+              >
+                <span class="field-prefix-icon">📱</span>
+                <input
+                  type="tel"
+                  id="signup-phone"
+                  formControlName="phone"
+                  placeholder="e.g. 03001234567"
+                  autocomplete="tel"
+                />
+              </div>
+              @if (isFieldInvalid(signupForm, 'phone')) {
+                <span class="field-error-msg">
+                  ⚠️ {{ getFieldError(signupForm, 'phone') }}
+                </span>
+              }
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-field">
+              <label for="signup-password" class="field-label">Create Password</label>
+              <div
+                class="field-input-wrap"
+                [class.has-error]="isFieldInvalid(signupForm, 'password')"
+              >
+                <span class="field-prefix-icon">🔑</span>
+                <input
+                  [type]="showSignupPassword() ? 'text' : 'password'"
+                  id="signup-password"
+                  formControlName="password"
+                  placeholder="Minimum 8 characters"
+                  autocomplete="new-password"
+                />
+                <button
+                  type="button"
+                  class="eye-btn"
+                  (click)="toggleSignupPasswordVisibility()"
+                  [attr.aria-label]="showSignupPassword() ? 'Hide password' : 'Show password'"
+                >
+                  {{ showSignupPassword() ? '👁️' : '🙈' }}
+                </button>
+              </div>
+              @if (isFieldInvalid(signupForm, 'password')) {
+                <span class="field-error-msg">
+                  ⚠️ {{ getFieldError(signupForm, 'password') }}
+                </span>
+              } @else {
+                <span class="field-hint">Must be at least 8 characters long.</span>
+              }
+            </div>
+
+            <!-- Terms Checkbox -->
+            <div class="form-field">
+              <label class="custom-checkbox custom-checkbox--terms">
+                <input type="checkbox" formControlName="terms" id="signup-terms" />
+                <span class="checkbox-box"></span>
+                <span class="checkbox-label">
+                  I agree to GadgetPlanet's
+                  <a href="javascript:void(0)" class="inline-link" (click)="$event.preventDefault()">Terms of Service</a>
+                  and
+                  <a href="javascript:void(0)" class="inline-link" (click)="$event.preventDefault()">Privacy Policy</a>.
+                </span>
+              </label>
+              @if (isFieldInvalid(signupForm, 'terms')) {
+                <span class="field-error-msg">
+                  ⚠️ {{ getFieldError(signupForm, 'terms') }}
+                </span>
+              }
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              class="auth-submit-btn"
+              [disabled]="isSubmitting()"
+              id="signup-submit-btn"
+            >
+              @if (isSubmitting()) {
+                <span class="spinner-dot"></span>
+                <span>Creating Account...</span>
+              } @else {
+                <span>Create Account &amp; Claim Rs. 500 →</span>
+              }
+            </button>
+
+            <!-- Toggle Mode -->
+            <p class="auth-toggle-text">
+              Already have an account?
+              <button
+                type="button"
+                class="auth-toggle-link"
+                (click)="switchMode('login')"
+                id="signup-to-login-link"
+              >
+                Log In
+              </button>
+            </p>
+
+          </form>
+        }
+
+      </div>
+    </main>
+
+  </div>
+</div>

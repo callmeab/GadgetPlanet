@@ -1,0 +1,265 @@
+@use '../../../../styles/variables' as v;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.lifestyle-section {
+  padding: v.$space-16 0;
+  position: relative;
+  background: v.$color-bg;
+}
+
+.container {
+  max-width: v.$container-max;
+  margin: 0 auto;
+  padding: 0 v.$space-6;
+}
+
+// ── Header ─────────────────────────────────────────────────
+.section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: v.$space-8;
+  gap: v.$space-4;
+  flex-wrap: wrap;
+}
+
+.title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+}
+
+.section-title {
+  font-size: v.$font-size-2xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  margin: 0;
+  letter-spacing: v.$letter-spacing-tight;
+}
+
+.section-subtitle {
+  color: v.$color-text-secondary;
+  font-size: v.$font-size-sm;
+  margin: 0;
+}
+
+.section-link {
+  color: v.$color-primary;
+  text-decoration: none;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  white-space: nowrap;
+  transition: color v.$transition-fast;
+
+  &:hover {
+    color: v.$color-primary-light;
+  }
+}
+
+// ── 2x2 Banner Grid ────────────────────────────────────────
+.lifestyle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: v.$space-6;
+}
+
+// ── Lifestyle Banner Card ──────────────────────────────────
+.lifestyle-card {
+  position: relative;
+  border-radius: v.$radius-2xl;
+  overflow: hidden;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: v.$space-8;
+  text-decoration: none;
+  border: 1px solid v.$color-surface-border;
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.4s ease,
+    box-shadow 0.4s ease;
+  user-select: none;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: var(--card-accent, #{v.$color-primary});
+    box-shadow:
+      0 16px 40px rgba(0, 0, 0, 0.6),
+      0 0 30px rgba(0, 0, 0, 0.4);
+
+    .lifestyle-img {
+      transform: scale(1.07);
+    }
+
+    .lifestyle-ambient-glow {
+      opacity: 0.38;
+    }
+
+    .lifestyle-cta {
+      background: var(--card-accent, #{v.$color-primary});
+      border-color: var(--card-accent, #{v.$color-primary});
+      color: #fff;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+
+      .cta-arrow {
+        transform: translateX(4px);
+      }
+    }
+  }
+}
+
+// Background Image & Overlays
+.lifestyle-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.lifestyle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lifestyle-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(13, 13, 13, 0.12) 0%,
+    rgba(13, 13, 13, 0.5) 45%,
+    rgba(13, 13, 13, 0.95) 100%
+  );
+}
+
+.lifestyle-ambient-glow {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: var(--card-accent, #{v.$color-primary});
+  filter: blur(100px);
+  opacity: 0.16;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+// Content Elements
+.lifestyle-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-4;
+}
+
+.lifestyle-meta-top {
+  display: flex;
+  align-items: center;
+  gap: v.$space-3;
+}
+
+.lifestyle-tag {
+  font-size: 11px;
+  font-weight: v.$font-weight-black;
+  letter-spacing: v.$letter-spacing-wider;
+  color: var(--card-accent, #{v.$color-primary});
+  text-transform: uppercase;
+}
+
+.lifestyle-badge {
+  font-size: 10px;
+  font-weight: v.$font-weight-bold;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  padding: 2px 8px;
+  border-radius: v.$radius-full;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.04em;
+}
+
+.lifestyle-text {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+.lifestyle-title {
+  font-size: clamp(v.$font-size-xl, 2.2vw, v.$font-size-3xl);
+  font-weight: v.$font-weight-black;
+  color: #fff;
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: v.$letter-spacing-tight;
+}
+
+.lifestyle-subtitle {
+  font-size: v.$font-size-sm;
+  line-height: v.$line-height-base;
+  color: rgba(255, 255, 255, 0.78);
+  margin: 0;
+  max-width: 480px;
+}
+
+.lifestyle-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-bold;
+  color: #fff;
+  padding: v.$space-3 v.$space-5;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: v.$radius-full;
+  width: fit-content;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease;
+
+  .cta-arrow {
+    display: inline-flex;
+    align-items: center;
+    transition: transform 0.3s ease;
+  }
+}
+
+// ── Responsive Layout ──────────────────────────────────────────
+@media (max-width: 768px) {
+  .lifestyle-grid {
+    grid-template-columns: 1fr;
+    gap: v.$space-5;
+  }
+
+  .lifestyle-card {
+    min-height: 320px;
+    padding: v.$space-6;
+  }
+
+  .lifestyle-title {
+    font-size: 1.45rem;
+  }
+
+  .lifestyle-subtitle {
+    font-size: v.$font-size-xs;
+  }
+
+  .lifestyle-cta {
+    width: 100%;
+    justify-content: center;
+  }
+}

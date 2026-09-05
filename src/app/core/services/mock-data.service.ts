@@ -251,6 +251,74 @@ export class MockDataService {
     return this.products.find(p => p.id === id);
   }
 
+  getProductByIdOrSlug(idOrSlug: string): Product | undefined {
+    if (!idOrSlug) return undefined;
+    const target = idOrSlug.toLowerCase().trim();
+    return this.products.find(p => {
+      if (p.id.toLowerCase() === target) return true;
+      const slug = p.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      return slug === target || p.name.toLowerCase() === target;
+    });
+  }
+
+  getRelatedProducts(currentId: string, category: string, limit = 6): Product[] {
+    const sameCat = this.products.filter(p => p.id !== currentId && p.category === category);
+    const otherCat = this.products.filter(p => p.id !== currentId && p.category !== category);
+    return [...sameCat, ...otherCat].slice(0, limit);
+  }
+
+  getProductReviews(productId: string): ProductReview[] {
+    return [
+      {
+        id: 'r1',
+        author: 'Hamza Tariq',
+        rating: 5,
+        date: '2 days ago',
+        title: 'Outstanding sound quality and deep bass!',
+        comment:
+          'I upgraded from my previous pair and the difference is night and day. The ANC completely silences noise during my commute, and the battery life easily lasted throughout the week. Absolutely worth every rupee.',
+        verifiedBuyer: true,
+        likes: 24,
+      },
+      {
+        id: 'r2',
+        author: 'Ayesha Khan',
+        rating: 5,
+        date: '1 week ago',
+        title: 'Premium build, looks and feels high-end',
+        comment:
+          'Packaging was top-notch, and delivery was super quick to Lahore (took just 2 days). The matte finish looks extremely sleek and premium. Mic quality for Zoom calls is crisp and clear.',
+        verifiedBuyer: true,
+        likes: 18,
+      },
+      {
+        id: 'r3',
+        author: 'Zubair Ahmed',
+        rating: 4,
+        date: '2 weeks ago',
+        title: 'Great value for money gadget',
+        comment:
+          'Overall fantastic gadget for the price point. Fast charging works like a charm. Giving 4 stars only because the companion app took a minute to pair initially, but smooth sailing ever since.',
+        verifiedBuyer: true,
+        likes: 9,
+      },
+      {
+        id: 'r4',
+        author: 'Bilal Farooq',
+        rating: 5,
+        date: '3 weeks ago',
+        title: 'Exceeded all expectations!',
+        comment:
+          'Purchased during the flash deal and couldn’t be happier. Zero audio latency when gaming, and the ear fit is snug and comfortable even after 4 hours of continuous wear.',
+        verifiedBuyer: true,
+        likes: 15,
+      },
+    ];
+  }
+
   getProductsByCategory(category: string): Product[] {
     return this.products.filter(p => p.category === category);
   }
@@ -287,4 +355,15 @@ export class MockDataService {
         p.description.toLowerCase().includes(q)
     );
   }
+}
+
+export interface ProductReview {
+  id: string;
+  author: string;
+  rating: number;
+  date: string;
+  title: string;
+  comment: string;
+  verifiedBuyer: boolean;
+  likes: number;
 }
