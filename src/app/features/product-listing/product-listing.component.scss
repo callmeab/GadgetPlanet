@@ -1,4 +1,15 @@
+// ============================================================
+// GadgetPlanet — Product Listing Component Styles
+// Strict Mobile-First Architecture
+// Breakpoints:
+//   Mobile:  0–639px (Base styles)
+//   Tablet:  640px–1023px  (@include bp.tablet)
+//   Laptop:  1024px–1439px (@include bp.laptop)
+//   Desktop: 1440px+       (@include bp.desktop)
+// ============================================================
+
 @use '../../../styles/variables' as v;
+@use '../../../styles/breakpoints' as bp;
 
 :host {
   display: block;
@@ -8,20 +19,35 @@
   min-height: 100vh;
 }
 
+// ── Global Fluid Container ────────────────────────────────────
 .container {
+  width: 100%;
   max-width: v.$container-max;
   margin: 0 auto;
-  padding: 0 v.$space-6;
+  padding: 0 clamp(12px, 3.5vw, 16px);
 
-  @media (max-width: 640px) {
-    padding: 0 v.$space-4;
+  @include bp.tablet {
+    padding: 0 v.$space-5; // 20px
+  }
+
+  @include bp.laptop {
+    padding: 0 v.$space-6; // 24px
+  }
+
+  @include bp.desktop {
+    max-width: v.$container-wide; // 1440px
+    padding: 0 v.$space-8; // 32px
   }
 }
 
-// ── Breadcrumb ────────────────────────────────────────────────
+// ── Breadcrumb Navigation ─────────────────────────────────────
 .listing-breadcrumb {
-  padding: v.$space-4 0 v.$space-2;
+  padding: v.$space-3 0 v.$space-2;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  @include bp.tablet {
+    padding: v.$space-4 0 v.$space-2;
+  }
 }
 
 .breadcrumb-list {
@@ -31,11 +57,25 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  font-size: v.$font-size-xs;
+  font-size: clamp(11px, 2vw, 13px);
   flex-wrap: wrap;
+  overflow-wrap: break-word;
+}
+
+.breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+
+  &--active {
+    color: v.$color-text-primary;
+    font-weight: v.$font-weight-medium;
+  }
 }
 
 .breadcrumb-link {
+  min-height: 44px; // 44px touch target on touch devices
+  display: inline-flex;
+  align-items: center;
   color: v.$color-text-muted;
   text-decoration: none;
   transition: color v.$transition-fast;
@@ -47,17 +87,13 @@
 
 .breadcrumb-separator {
   color: rgba(255, 255, 255, 0.2);
-}
-
-.breadcrumb-item--active {
-  color: v.$color-text-primary;
-  font-weight: v.$font-weight-medium;
+  user-select: none;
 }
 
 // ── Category Header (boAt Style) ──────────────────────────────
 .category-header {
   position: relative;
-  padding: v.$space-8 0 v.$space-10;
+  padding: clamp(v.$space-5, 4vw, v.$space-8) 0 clamp(v.$space-6, 5vw, v.$space-10);
   background: linear-gradient(180deg, #121214 0%, v.$color-bg 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   overflow: hidden;
@@ -65,11 +101,11 @@
 
 .category-ambient-glow {
   position: absolute;
-  top: -100px;
+  top: -80px;
   left: 50%;
   transform: translateX(-50%);
-  width: 700px;
-  height: 250px;
+  width: min(700px, 90vw);
+  height: 220px;
   background: radial-gradient(
     ellipse at center,
     rgba(10, 132, 255, 0.12) 0%,
@@ -87,50 +123,56 @@
 .category-title-row {
   display: flex;
   align-items: center;
-  gap: v.$space-3;
+  gap: clamp(8px, 2vw, 14px);
   flex-wrap: wrap;
   margin-bottom: v.$space-2;
 }
 
 .category-icon {
-  font-size: 28px;
+  font-size: clamp(22px, 3.5vw, 28px);
+  line-height: 1;
 }
 
 .category-title {
-  font-size: clamp(v.$font-size-2xl, 3vw, v.$font-size-3xl);
+  font-size: clamp(1.35rem, 3.5vw + 0.5rem, 2.25rem);
   font-weight: v.$font-weight-black;
   color: #fff;
   letter-spacing: v.$letter-spacing-tight;
   margin: 0;
+  line-height: 1.2;
 }
 
 .category-count-badge {
-  font-size: v.$font-size-xs;
+  font-size: clamp(11px, 1.5vw, 13px);
   font-weight: v.$font-weight-bold;
   color: v.$color-primary-light;
   background: rgba(10, 132, 255, 0.12);
   border: 1px solid rgba(10, 132, 255, 0.25);
-  padding: 3px 10px;
+  padding: 4px 10px;
   border-radius: v.$radius-full;
   letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .category-description {
-  font-size: v.$font-size-sm;
+  font-size: clamp(0.8125rem, 1.2vw + 0.4rem, 0.9375rem);
   color: v.$color-text-secondary;
   max-width: 680px;
   line-height: v.$line-height-base;
-  margin: 0 0 v.$space-6;
+  margin: 0 0 clamp(v.$space-4, 3vw, v.$space-6);
 }
 
-// Category Chips Track
+// ── Native Touch Swipe Category Chips Track ───────────────────
 .category-chips-track {
   display: flex;
   align-items: center;
-  gap: v.$space-2;
+  gap: clamp(6px, 1.5vw, 10px);
   overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 16px;
+  padding-bottom: 6px;
+  scrollbar-width: none; // Native swipe gesture support, no mouse arrows required
 
   &::-webkit-scrollbar {
     display: none;
@@ -140,17 +182,21 @@
 .category-chip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: v.$space-2;
-  padding: 7px 16px;
+  min-height: 44px; // Strictly 44x44px minimum touch target
+  padding: 8px clamp(12px, 2vw, 18px);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: v.$radius-full;
   color: v.$color-text-secondary;
-  font-size: v.$font-size-xs;
+  font-size: clamp(12px, 1.2vw, 13px);
   font-weight: v.$font-weight-semibold;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
+  scroll-snap-align: start;
+  flex-shrink: 0;
   transition: all v.$transition-fast;
 
   &:hover {
@@ -167,34 +213,50 @@
   }
 }
 
-// ── Main Layout: Sidebar + Content ───────────────────────────
+.chip-icon {
+  font-size: 14px;
+}
+
+.chip-name {
+  line-height: 1;
+}
+
+// ── Main Page Layout (Sidebar + Content) ──────────────────────
 .listing-layout {
   display: grid;
-  grid-template-columns: 270px 1fr;
-  gap: v.$space-8;
-  padding: v.$space-8 0 v.$space-20;
+  // Mobile base: 1 column (sidebar hidden, drawer used)
+  grid-template-columns: 1fr;
+  gap: clamp(16px, 3vw, 32px);
+  padding: clamp(v.$space-4, 3vw, v.$space-8) 0 clamp(v.$space-12, 8vw, v.$space-20);
   align-items: start;
 
-  @media (max-width: 1023px) {
-    grid-template-columns: 1fr;
+  @include bp.laptop {
+    // Laptop (1024px-1439px): Sidebar + Content
+    grid-template-columns: minmax(250px, 270px) 1fr;
+  }
+
+  @include bp.desktop {
+    // Desktop (1440px+): 280px Sidebar + Content
+    grid-template-columns: 280px 1fr;
   }
 }
 
-// ── Left Sidebar (Desktop & Tablet) ──────────────────────────
+// ── Left Sidebar (Desktop & Laptop View) ───────────────────────
 .listing-sidebar {
-  background: #111114;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: v.$radius-xl;
-  padding: v.$space-6;
-  position: sticky;
-  top: 90px;
-  max-height: calc(100vh - 110px);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  display: none; // Hidden on mobile and tablet (0-1023px)
 
-  @media (max-width: 1023px) {
-    display: none; // Handled by mobile drawer
+  @include bp.laptop {
+    display: block;
+    background: #111114;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: v.$radius-xl;
+    padding: v.$space-6;
+    position: sticky;
+    top: 90px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   }
 }
 
@@ -221,7 +283,10 @@
   font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;
   cursor: pointer;
-  padding: 0;
+  padding: 8px 0;
+  min-height: 44px; // 44px touch target
+  display: inline-flex;
+  align-items: center;
   transition: opacity v.$transition-fast;
 
   &:hover {
@@ -229,7 +294,7 @@
   }
 }
 
-// Active Filter Pills in Sidebar
+// Active Filter Pills
 .active-filters-box {
   display: flex;
   flex-wrap: wrap;
@@ -242,23 +307,35 @@
 .active-filter-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   background: rgba(10, 132, 255, 0.12);
   border: 1px solid rgba(10, 132, 255, 0.3);
   color: v.$color-primary-light;
   font-size: 11px;
   font-weight: v.$font-weight-medium;
-  padding: 2px 8px;
+  padding: 4px 10px;
   border-radius: v.$radius-full;
+  min-height: 32px;
 
   .remove-pill-btn {
+    position: relative;
     background: none;
     border: none;
     color: inherit;
-    font-size: 10px;
+    font-size: 11px;
     cursor: pointer;
     padding: 0;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    // Expand tap target to 44x44px invisibly
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -12px;
+    }
 
     &:hover {
       color: #fff;
@@ -266,10 +343,10 @@
   }
 }
 
-// Sidebar Filter Sections
+// Filter Accordion Sections
 .filter-section {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  padding: v.$space-4 0;
+  padding: v.$space-2 0;
 
   &:first-of-type {
     padding-top: 0;
@@ -286,9 +363,10 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  min-height: 48px; // Touch friendly accordion trigger
   background: none;
   border: none;
-  padding: 0;
+  padding: 8px 0;
   cursor: pointer;
   font-family: inherit;
   text-align: left;
@@ -311,7 +389,7 @@
 }
 
 .filter-section-body {
-  padding-top: v.$space-3;
+  padding-bottom: v.$space-3;
   animation: filterBodyIn 0.2s ease;
 }
 
@@ -326,7 +404,7 @@
   }
 }
 
-// ── Price Slider ──────────────────────────────────────────────
+// ── Price Slider & Presets ────────────────────────────────────
 .price-slider-wrap {
   display: flex;
   flex-direction: column;
@@ -354,17 +432,18 @@
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 6px;
+  height: 8px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: v.$radius-full;
   outline: none;
   cursor: pointer;
+  margin: 10px 0;
 
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px; // 24px thumb for effortless touch drag
     border-radius: 50%;
     background: v.$color-primary;
     border: 2px solid #fff;
@@ -372,24 +451,37 @@
     transition: transform 0.15s ease;
 
     &:hover {
-      transform: scale(1.2);
+      transform: scale(1.15);
     }
+  }
+
+  &::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: v.$color-primary;
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(10, 132, 255, 0.6);
   }
 }
 
 .price-presets-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 
 .preset-chip {
+  min-height: 40px; // Accessible touch target
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: v.$radius-sm;
   color: v.$color-text-secondary;
   font-size: 11px;
-  padding: 5px 8px;
+  padding: 6px 8px;
   cursor: pointer;
   text-align: center;
   transition: all v.$transition-fast;
@@ -400,34 +492,31 @@
   }
 
   &--active {
-    background: rgba(10, 132, 255, 0.15);
+    background: rgba(10, 132, 255, 0.18);
     border-color: v.$color-primary;
     color: v.$color-primary-light;
     font-weight: v.$font-weight-bold;
   }
 }
 
-// ── Checkboxes ────────────────────────────────────────────────
+// ── Checkboxes (Brand & Features) ─────────────────────────────
 .checkbox-list {
   display: flex;
   flex-direction: column;
-  gap: v.$space-2;
-  max-height: 220px;
-  overflow-y: auto;
-  scrollbar-width: thin;
+  gap: 4px;
 }
 
 .custom-checkbox-row {
   display: flex;
   align-items: center;
-  gap: v.$space-2;
+  gap: v.$space-3;
+  min-height: 44px; // 44px touch target on mobile/tablet
   cursor: pointer;
   user-select: none;
-  font-size: v.$font-size-xs;
-  color: v.$color-text-secondary;
+  padding: 4px 0;
   transition: color v.$transition-fast;
 
-  &:hover {
+  &:hover .checkbox-label-text {
     color: #fff;
   }
 }
@@ -435,8 +524,7 @@
 .custom-checkbox-input {
   position: absolute;
   opacity: 0;
-  width: 0;
-  height: 0;
+  pointer-events: none;
 
   &:checked + .checkbox-box {
     background: v.$color-primary;
@@ -447,12 +535,17 @@
       transform: scale(1);
     }
   }
+
+  &:focus-visible + .checkbox-box {
+    outline: 2px solid v.$color-primary;
+    outline-offset: 2px;
+  }
 }
 
 .checkbox-box {
-  width: 18px;
-  height: 18px;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: v.$radius-xs;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.15);
   display: flex;
@@ -464,21 +557,24 @@
   .check-icon {
     color: #fff;
     opacity: 0;
-    transform: scale(0.5);
-    transition: all 0.15s ease;
+    transform: scale(0.6);
+    transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }
 
 .checkbox-label-text {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-secondary;
   flex: 1;
+  transition: color v.$transition-fast;
 }
 
 .checkbox-count {
-  color: v.$color-text-muted;
   font-size: 11px;
+  color: v.$color-text-muted;
 }
 
-// ── Rating Pills ──────────────────────────────────────────────
+// ── Customer Rating Filter Pills ──────────────────────────────
 .rating-pills-list {
   display: flex;
   flex-direction: column;
@@ -488,8 +584,8 @@
 .rating-pill {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 6px 12px;
+  min-height: 44px; // 44px touch target
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: v.$radius-sm;
@@ -498,26 +594,29 @@
   font-family: inherit;
   cursor: pointer;
   transition: all v.$transition-fast;
+  text-align: left;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.07);
     color: #fff;
   }
 
   &--active {
-    background: rgba(255, 214, 10, 0.12);
-    border-color: #ffd60a;
-    color: #ffd60a;
+    background: rgba(10, 132, 255, 0.15);
+    border-color: v.$color-primary;
+    color: v.$color-primary-light;
     font-weight: v.$font-weight-bold;
   }
 }
 
-// ── Toggle Switch ─────────────────────────────────────────────
+// ── Availability Toggle Switch ────────────────────────────────
 .toggle-switch-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 44px; // 44px touch target
   cursor: pointer;
+  padding: 6px 0;
 }
 
 .toggle-info {
@@ -528,7 +627,7 @@
 
 .toggle-title {
   font-size: v.$font-size-xs;
-  font-weight: v.$font-weight-semibold;
+  font-weight: v.$font-weight-medium;
   color: v.$color-text-primary;
 }
 
@@ -544,8 +643,7 @@
 .toggle-checkbox {
   position: absolute;
   opacity: 0;
-  width: 0;
-  height: 0;
+  pointer-events: none;
 
   &:checked + .toggle-track {
     background: v.$color-primary;
@@ -554,86 +652,100 @@
       transform: translateX(18px);
     }
   }
+
+  &:focus-visible + .toggle-track {
+    outline: 2px solid v.$color-primary;
+    outline-offset: 2px;
+  }
 }
 
 .toggle-track {
   width: 40px;
   height: 22px;
-  background: rgba(255, 255, 255, 0.12);
   border-radius: v.$radius-full;
+  background: rgba(255, 255, 255, 0.12);
   position: relative;
-  transition: background 0.25s ease;
+  transition: background v.$transition-fast;
 }
 
 .toggle-thumb {
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
-  background: #fff;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
+  background: #fff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-  transition: transform 0.25s ease;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-// ── Top Toolbar ───────────────────────────────────────────────
+// ── Main Content Area ─────────────────────────────────────────
 .listing-main-content {
-  min-width: 0;
+  min-width: 0; // Prevents CSS grid child blowouts
 }
 
+// ── Top Bar Toolbar ───────────────────────────────────────────
 .listing-top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: v.$space-3 v.$space-4;
-  background: #111114;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: v.$radius-lg;
-  margin-bottom: v.$space-6;
-  gap: v.$space-4;
+  padding: clamp(10px, 2vw, 16px) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: clamp(16px, 3vw, 24px);
   flex-wrap: wrap;
+  gap: 12px;
 }
 
 .top-bar-left {
   display: flex;
   align-items: center;
-  gap: v.$space-4;
+  gap: clamp(8px, 2vw, 16px);
+  flex-wrap: wrap;
 }
 
+// Mobile Filter Open Button (Visible on Mobile & Tablet)
 .mobile-filter-open-btn {
-  display: none;
+  display: inline-flex;
   align-items: center;
   gap: v.$space-2;
+  min-height: 44px; // 44px touch target
+  min-width: 44px;
   background: rgba(10, 132, 255, 0.12);
   border: 1px solid rgba(10, 132, 255, 0.3);
   color: v.$color-primary-light;
-  padding: 6px 14px;
+  padding: 8px 16px;
   border-radius: v.$radius-full;
-  font-size: v.$font-size-xs;
+  font-size: clamp(12px, 1.5vw, 13px);
   font-weight: v.$font-weight-bold;
   font-family: inherit;
   cursor: pointer;
+  transition: all v.$transition-fast;
 
-  @media (max-width: 1023px) {
-    display: inline-flex;
+  &:hover {
+    background: rgba(10, 132, 255, 0.2);
+  }
+
+  @include bp.laptop {
+    display: none; // Hidden on Laptop & Desktop since Left Sidebar is visible
   }
 }
 
 .filter-counter-badge {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: v.$color-primary;
   color: #fff;
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: v.$font-weight-bold;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .products-showing-text {
-  font-size: v.$font-size-xs;
+  font-size: clamp(11px, 1.2vw, 13px);
   color: v.$color-text-muted;
 
   strong {
@@ -644,7 +756,8 @@
 .top-bar-right {
   display: flex;
   align-items: center;
-  gap: v.$space-4;
+  gap: clamp(10px, 2vw, 16px);
+  flex-wrap: wrap;
 }
 
 .sort-select-wrapper {
@@ -654,12 +767,13 @@
 }
 
 .sort-label {
-  font-size: v.$font-size-xs;
-  color: v.$color-text-muted;
-  white-space: nowrap;
+  display: none; // Hidden on mobile to save horizontal space
 
-  @media (max-width: 640px) {
-    display: none;
+  @include bp.tablet {
+    display: inline-block;
+    font-size: v.$font-size-xs;
+    color: v.$color-text-muted;
+    white-space: nowrap;
   }
 }
 
@@ -669,14 +783,15 @@
 
 .custom-select {
   appearance: none;
+  min-height: 44px; // 44px touch target on mobile/touch screens
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: v.$radius-sm;
   color: #fff;
-  font-size: v.$font-size-xs;
+  font-size: clamp(12px, 1.2vw, 13px);
   font-weight: v.$font-weight-medium;
   font-family: inherit;
-  padding: 6px 28px 6px 12px;
+  padding: 8px 32px 8px 14px;
   outline: none;
   cursor: pointer;
   transition: border-color v.$transition-fast;
@@ -693,7 +808,7 @@
 
 .select-chevron {
   position: absolute;
-  right: 8px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
@@ -702,17 +817,18 @@
   align-items: center;
 }
 
+// Grid / List Mode Toggle (Hidden on mobile; defaults to 2-col grid)
 .view-mode-toggle {
-  display: flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: v.$radius-sm;
-  padding: 2px;
-  gap: 2px;
+  display: none;
 
-  @media (max-width: 640px) {
-    display: none; // Default to mobile 2-col grid
+  @include bp.tablet {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: v.$radius-sm;
+    padding: 2px;
+    gap: 2px;
   }
 }
 
@@ -720,8 +836,10 @@
   background: none;
   border: none;
   color: v.$color-text-muted;
-  padding: 4px 6px;
-  border-radius: 3px;
+  min-width: 44px;
+  min-height: 44px; // 44x44px touch target
+  padding: 6px;
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -738,20 +856,30 @@
   }
 }
 
-// ── Products Display Layout ───────────────────────────────────
+// ── Fluid Responsive Product Grid & List ──────────────────────
 .products-container {
   &--grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: v.$space-5;
+    // Mobile Base (0–639px): 2 Fluid Columns with adaptive gap
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(8px, 2.5vw, 14px);
 
-    @media (max-width: 1400px) {
-      grid-template-columns: repeat(3, 1fr);
+    @include bp.tablet {
+      // Tablet (640px–1023px): 2 to 3 fluid columns
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: v.$space-4;
     }
 
-    @media (max-width: 900px) {
-      grid-template-columns: repeat(2, 1fr);
-      gap: v.$space-3;
+    @include bp.laptop {
+      // Laptop (1024px–1439px): 3 columns beside 270px sidebar
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: v.$space-5;
+    }
+
+    @include bp.desktop {
+      // Desktop (1440px+): 4 columns beside 280px sidebar
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: v.$space-6;
     }
   }
 
@@ -775,7 +903,7 @@
   display: flex;
   flex-direction: column;
   aspect-ratio: 3 / 4;
-  padding: v.$space-4;
+  padding: clamp(10px, 2vw, v.$space-4);
   gap: v.$space-3;
 }
 
@@ -793,6 +921,7 @@
   flex-direction: column;
   gap: v.$space-2;
   flex: 1;
+  min-height: 0;
 }
 
 .skeleton-pill {
@@ -844,23 +973,25 @@
   }
 }
 
-// ── Load More Container ───────────────────────────────────────
+// ── Pagination / Load More ────────────────────────────────────
 .load-more-container {
   display: flex;
   justify-content: center;
-  margin-top: v.$space-12;
+  margin-top: clamp(v.$space-8, 5vw, v.$space-12);
 }
 
 .load-more-btn {
+  min-height: 48px; // 48px touch target
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: v.$space-3;
-  padding: v.$space-3 v.$space-8;
+  padding: 12px clamp(20px, 4vw, 36px);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: v.$radius-full;
   color: #fff;
-  font-size: v.$font-size-sm;
+  font-size: clamp(13px, 1.5vw, 14px);
   font-weight: v.$font-weight-bold;
   font-family: inherit;
   cursor: pointer;
@@ -897,7 +1028,7 @@
 // ── Empty State ───────────────────────────────────────────────
 .listing-empty-state {
   text-align: center;
-  padding: v.$space-16 v.$space-6;
+  padding: clamp(v.$space-8, 6vw, v.$space-16) v.$space-6;
   background: #121215;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: v.$radius-2xl;
@@ -913,7 +1044,7 @@
 }
 
 .empty-icon {
-  font-size: 52px;
+  font-size: clamp(40px, 6vw, 52px);
   position: relative;
   z-index: 1;
 }
@@ -929,14 +1060,14 @@
 }
 
 .empty-title {
-  font-size: v.$font-size-xl;
+  font-size: clamp(v.$font-size-lg, 2.5vw, v.$font-size-xl);
   font-weight: v.$font-weight-bold;
   color: #fff;
   margin: 0 0 v.$space-2;
 }
 
 .empty-desc {
-  font-size: v.$font-size-sm;
+  font-size: clamp(13px, 1.5vw, 14px);
   color: v.$color-text-secondary;
   max-width: 480px;
   margin: 0 auto v.$space-6;
@@ -944,7 +1075,8 @@
 }
 
 .empty-reset-btn {
-  padding: v.$space-3 v.$space-6;
+  min-height: 48px; // 48px touch target
+  padding: 12px v.$space-6;
   background: v.$color-primary;
   color: #fff;
   border: none;
@@ -961,22 +1093,26 @@
   }
 }
 
-// ── Mobile Sticky Bar (<768px) ────────────────────────────────
+// ── Mobile Sticky Filter & Sort Bar (0–1023px) ────────────────
 .mobile-sticky-bar {
-  display: none;
+  display: block; // Visible on mobile and tablet
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 900;
-  padding: v.$space-3 v.$space-4;
+  padding: 12px 16px;
+  // iOS safe area inset support
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  padding-left: calc(16px + env(safe-area-inset-left, 0px));
+  padding-right: calc(16px + env(safe-area-inset-right, 0px));
   background: rgba(13, 13, 13, 0.94);
   backdrop-filter: blur(16px);
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6);
 
-  @media (max-width: 1023px) {
-    display: block;
+  @include bp.laptop {
+    display: none; // Hidden on Laptop & Desktop since Left Sidebar is always open
   }
 }
 
@@ -986,7 +1122,8 @@
   justify-content: center;
   gap: v.$space-2;
   width: 100%;
-  padding: v.$space-3;
+  min-height: 48px; // 48px touch target
+  padding: 12px;
   background: v.$color-primary;
   border: none;
   border-radius: v.$radius-full;
@@ -1003,11 +1140,11 @@
   color: v.$color-primary-dark;
   font-size: 11px;
   font-weight: v.$font-weight-black;
-  padding: 1px 7px;
+  padding: 2px 8px;
   border-radius: v.$radius-full;
 }
 
-// ── Mobile Bottom Sheet Drawer ────────────────────────────────
+// ── Mobile Bottom Sheet Drawer (0–1023px) ─────────────────────
 .mobile-drawer-overlay {
   position: fixed;
   inset: 0;
@@ -1031,6 +1168,12 @@
   flex-direction: column;
   animation: slideUpDrawer 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.8);
+  // Safe area padding
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+
+  @include bp.laptop {
+    display: none; // Never shown on laptop/desktop screens
+  }
 }
 
 @keyframes slideUpDrawer {
@@ -1055,7 +1198,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: v.$space-4 v.$space-6;
+  padding: v.$space-4 clamp(v.$space-4, 3vw, v.$space-6);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -1080,7 +1223,7 @@
 .drawer-header-actions {
   display: flex;
   align-items: center;
-  gap: v.$space-3;
+  gap: v.$space-2;
 }
 
 .drawer-clear-btn {
@@ -1090,25 +1233,34 @@
   font-size: v.$font-size-xs;
   font-weight: v.$font-weight-semibold;
   cursor: pointer;
-  padding: 0;
+  padding: 8px 12px;
+  min-height: 44px; // 44px touch target
+  display: inline-flex;
+  align-items: center;
 }
 
 .drawer-close-btn {
   background: rgba(255, 255, 255, 0.08);
   border: none;
   color: v.$color-text-secondary;
-  width: 32px;
-  height: 32px;
+  width: 44px;  // Upgraded to full 44x44px touch target
+  height: 44px; // Upgraded to full 44x44px touch target
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
+  transition: background v.$transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+  }
 }
 
 .drawer-body {
-  padding: v.$space-5 v.$space-6;
+  padding: v.$space-5 clamp(v.$space-4, 3vw, v.$space-6);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -1144,7 +1296,8 @@
 }
 
 .drawer-sort-chip {
-  padding: 8px 12px;
+  min-height: 44px; // 44px touch target
+  padding: 10px 14px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: v.$radius-sm;
@@ -1153,6 +1306,8 @@
   font-family: inherit;
   text-align: left;
   cursor: pointer;
+  display: flex;
+  align-items: center;
   transition: all v.$transition-fast;
 
   &--active {
@@ -1164,14 +1319,17 @@
 }
 
 .drawer-footer {
-  padding: v.$space-4 v.$space-6;
+  padding: v.$space-4 clamp(v.$space-4, 3vw, v.$space-6);
+  // Safe area inset padding for bottom drawer actions
+  padding-bottom: calc(#{v.$space-4} + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   background: #141418;
 }
 
 .drawer-apply-btn {
   width: 100%;
-  padding: v.$space-3;
+  min-height: 48px; // 48px touch target
+  padding: 12px;
   background: v.$color-primary;
   border: none;
   border-radius: v.$radius-full;

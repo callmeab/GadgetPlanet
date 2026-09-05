@@ -34,7 +34,7 @@
         <p class="category-description">{{ currentCategoryInfo().description }}</p>
 
         <!-- Quick-Switch Category Chips -->
-        <div class="category-chips-track" role="tablist">
+        <div class="category-chips-track" role="tablist" aria-label="Category quick filter">
           @for (cat of categoryList; track cat.slug) {
             <button
               type="button"
@@ -42,6 +42,8 @@
               [class.category-chip--active]="currentCategoryInfo().slug === cat.slug"
               (click)="onCategorySelect(cat.slug)"
               [id]="'quick-cat-' + cat.slug"
+              role="tab"
+              [attr.aria-selected]="currentCategoryInfo().slug === cat.slug"
             >
               <span class="chip-icon">{{ cat.icon }}</span>
               <span class="chip-name">{{ cat.name }}</span>
@@ -56,7 +58,7 @@
   <div class="container">
     <div class="listing-layout">
 
-      <!-- ── Left Sidebar Filters (Desktop & Tablet) ─────────── -->
+      <!-- ── Left Sidebar Filters (Desktop & Laptop) ─────────── -->
       <aside class="listing-sidebar" id="desktop-sidebar-filters">
         <div class="sidebar-top-bar">
           <h3 class="sidebar-heading">Refine By</h3>
@@ -78,25 +80,25 @@
             @if (filterStore.priceMax() < 25000) {
               <span class="active-filter-pill">
                 <span>≤ Rs. {{ filterStore.priceMax().toLocaleString() }}</span>
-                <button type="button" class="remove-pill-btn" (click)="filterStore.setPriceMax(25000)">✕</button>
+                <button type="button" class="remove-pill-btn" (click)="filterStore.setPriceMax(25000)" aria-label="Remove price filter">✕</button>
               </span>
             }
             @for (brand of filterStore.selectedBrands(); track brand) {
               <span class="active-filter-pill">
                 <span>{{ brand }}</span>
-                <button type="button" class="remove-pill-btn" (click)="removeBrand(brand)">✕</button>
+                <button type="button" class="remove-pill-btn" (click)="removeBrand(brand)" [attr.aria-label]="'Remove brand filter ' + brand">✕</button>
               </span>
             }
             @if (filterStore.minRating() !== null) {
               <span class="active-filter-pill">
                 <span>★ {{ filterStore.minRating() }}+</span>
-                <button type="button" class="remove-pill-btn" (click)="filterStore.setRating(null)">✕</button>
+                <button type="button" class="remove-pill-btn" (click)="filterStore.setRating(null)" aria-label="Remove rating filter">✕</button>
               </span>
             }
             @if (filterStore.inStockOnly()) {
               <span class="active-filter-pill">
                 <span>In Stock Only</span>
-                <button type="button" class="remove-pill-btn" (click)="filterStore.toggleInStock()">✕</button>
+                <button type="button" class="remove-pill-btn" (click)="filterStore.toggleInStock()" aria-label="Remove in-stock filter">✕</button>
               </span>
             }
           </div>

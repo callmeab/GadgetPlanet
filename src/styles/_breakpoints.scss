@@ -1,0 +1,118 @@
+// ============================================================
+// GadgetPlanet — Responsive Breakpoints & Mixins
+// Mobile-First Architecture
+// ============================================================
+
+// ── Breakpoint Variables ──────────────────────────────────────
+$bp-mobile-min:    0px;
+$bp-mobile-max:    639px;
+
+$bp-tablet-min:    640px;
+$bp-tablet-max:    1023px;
+
+$bp-laptop-min:    1024px;
+$bp-laptop-max:    1439px;
+
+$bp-desktop-min:   1440px;
+
+// Convenience aliases
+$bp-tablet:        $bp-tablet-min;  // 640px
+$bp-laptop:        $bp-laptop-min;  // 1024px
+$bp-desktop:       $bp-desktop-min; // 1440px
+
+// ── Mobile-First Min-Width Mixins (Recommended) ──────────────
+
+/// Applied at tablet screens (640px) and up
+@mixin tablet {
+  @media (min-width: #{$bp-tablet-min}) {
+    @content;
+  }
+}
+
+/// Applied at laptop screens (1024px) and up
+@mixin laptop {
+  @media (min-width: #{$bp-laptop-min}) {
+    @content;
+  }
+}
+
+/// Applied at desktop / large screens (1440px) and up
+@mixin desktop {
+  @media (min-width: #{$bp-desktop-min}) {
+    @content;
+  }
+}
+
+// ── Dispatcher Mixin ──────────────────────────────────────────
+
+/// Mobile-first or scoped breakpoint responder
+/// Usage: @include respond-to('tablet') { ... }
+@mixin respond-to($bp) {
+  @if $bp == 'tablet' {
+    @media (min-width: #{$bp-tablet-min}) {
+      @content;
+    }
+  } @else if $bp == 'laptop' {
+    @media (min-width: #{$bp-laptop-min}) {
+      @content;
+    }
+  } @else if $bp == 'desktop' {
+    @media (min-width: #{$bp-desktop-min}) {
+      @content;
+    }
+  } @else if $bp == 'mobile-only' {
+    @media (max-width: #{$bp-mobile-max}) {
+      @content;
+    }
+  } @else if $bp == 'tablet-only' {
+    @media (min-width: #{$bp-tablet-min}) and (max-width: #{$bp-tablet-max}) {
+      @content;
+    }
+  } @else if $bp == 'laptop-only' {
+    @media (min-width: #{$bp-laptop-min}) and (max-width: #{$bp-laptop-max}) {
+      @content;
+    }
+  } @else if $bp == 'below-laptop' {
+    @media (max-width: #{$bp-tablet-max}) {
+      @content;
+    }
+  } @else {
+    @warn "Unknown breakpoint name: #{$bp}. Use 'tablet', 'laptop', 'desktop', 'mobile-only', 'tablet-only', 'laptop-only', or 'below-laptop'.";
+  }
+}
+
+// ── Scoped Max-Width Mixins (Special Cases) ───────────────────
+
+/// Specifically for styling exclusive to mobile screens (≤639px)
+@mixin mobile-only {
+  @media (max-width: #{$bp-mobile-max}) {
+    @content;
+  }
+}
+
+/// For styling that applies only before laptop breakpoint (≤1023px)
+@mixin below-laptop {
+  @media (max-width: #{$bp-tablet-max}) {
+    @content;
+  }
+}
+
+// ── Touch Target Helpers ──────────────────────────────────────
+
+/// Ensures accessibility minimum 44x44px touch target on mobile/touch devices
+@mixin touch-target($min-size: 44px) {
+  min-width: $min-size;
+  min-height: $min-size;
+}
+
+// ── iOS Safe Area Insets Helpers ──────────────────────────────
+
+/// Adds safe area padding to sticky bottom elements (iOS home bar)
+@mixin safe-area-bottom($extra-padding: 0px) {
+  padding-bottom: calc(#{$extra-padding} + env(safe-area-inset-bottom, 0px));
+}
+
+/// Adds safe area padding to sticky top elements (iOS notch / dynamic island)
+@mixin safe-area-top($extra-padding: 0px) {
+  padding-top: calc(#{$extra-padding} + env(safe-area-inset-top, 0px));
+}
