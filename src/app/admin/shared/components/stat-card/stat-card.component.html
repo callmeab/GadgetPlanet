@@ -1,0 +1,37 @@
+<div class="stat-card">
+  <div class="stat-card__top">
+    <span class="stat-card__title">{{ title() }}</span>
+    @if (badgeText()) {
+      <span class="stat-card__badge">{{ badgeText() }}</span>
+    } @else if (icon()) {
+      <span class="stat-card__icon">{{ icon() }}</span>
+    }
+  </div>
+
+  <div class="stat-card__main">
+    <span class="stat-card__value">{{ value() }}</span>
+  </div>
+
+  @if (change() !== undefined) {
+    <div class="stat-card__footer">
+      <span
+        class="stat-card__trend"
+        [class.stat-card__trend--up]="isPositive()"
+        [class.stat-card__trend--down]="isNegative()"
+        [class.stat-card__trend--neutral]="!isPositive() && !isNegative()"
+      >
+        @if (isPositive()) {
+          <svg class="trend-arrow" viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+            <path fill-rule="evenodd" d="M12 7a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 9.586 14.586 6H13a1 1 0 01-1-1z" clip-rule="evenodd" />
+          </svg>
+        } @else if (isNegative()) {
+          <svg class="trend-arrow" viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+            <path fill-rule="evenodd" d="M12 13a1 1 0 001 1h4a1 1 0 001-1V9a1 1 0 10-2 0v2.586l-4.293-4.293a1 1 0 00-1.414 0L8 9.586 3.707 5.293a1 1 0 00-1.414 1.414l5 5a1 1 0 001.414 0L11 10.414 14.586 14H13a1 1 0 00-1 1z" clip-rule="evenodd" />
+          </svg>
+        }
+        {{ formattedChange() }}
+      </span>
+      <span class="stat-card__subtext">{{ changeLabel() }}</span>
+    </div>
+  }
+</div>

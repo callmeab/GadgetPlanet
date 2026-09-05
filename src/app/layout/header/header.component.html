@@ -4,6 +4,7 @@
 
 
 
+@if (!isCurrentAdmin()) {
 <!-- ── Mobile Drawer Overlay ─────────────────────────────── -->
 @if (mobileDrawerOpen()) {
   <div class="drawer-overlay" (click)="closeDrawer()" aria-hidden="true"></div>
@@ -333,3 +334,5 @@
     -->
   </div>
 </nav>
+}
+

@@ -1,0 +1,49 @@
+@if (isOpen()) {
+  <div class="modal-backdrop" (click)="onBackdropClick()">
+    <div
+      class="modal-panel"
+      [class.modal-panel--drawer]="mode() === 'drawer'"
+      [class.modal-panel--dialog]="mode() === 'modal'"
+      [class.modal-size-sm]="size() === 'sm'"
+      [class.modal-size-md]="size() === 'md'"
+      [class.modal-size-lg]="size() === 'lg'"
+      [class.modal-size-xl]="size() === 'xl'"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+    >
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="header-titles">
+          @if (title()) {
+            <h3 class="modal-title">{{ title() }}</h3>
+          }
+          @if (subtitle()) {
+            <p class="modal-subtitle">{{ subtitle() }}</p>
+          }
+        </div>
+        <button
+          type="button"
+          class="close-button"
+          (click)="close()"
+          aria-label="Close dialog"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="5" y1="5" x2="15" y2="15"/>
+            <line x1="15" y1="5" x2="5" y2="15"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <ng-content></ng-content>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <ng-content select="[modalFooter]"></ng-content>
+      </div>
+    </div>
+  </div>
+}

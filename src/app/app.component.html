@@ -1,8 +1,14 @@
-<div class="app-shell">
-  <gp-header></gp-header>
-  <main class="app-main" role="main">
+<div class="app-shell" [class.app-shell--admin]="isAdminRoute()">
+  @if (!isAdminRoute()) {
+    <gp-header></gp-header>
+  }
+
+  <main class="app-main" [class.app-main--admin]="isAdminRoute()" role="main">
     <router-outlet></router-outlet>
   </main>
-  <gp-footer></gp-footer>
-  <gp-cart-drawer></gp-cart-drawer>
+
+  @if (!isAdminRoute()) {
+    <gp-footer></gp-footer>
+    <gp-cart-drawer></gp-cart-drawer>
+  }
 </div>

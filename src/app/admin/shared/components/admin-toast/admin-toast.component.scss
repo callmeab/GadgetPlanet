@@ -1,0 +1,124 @@
+@use '../../../styles/admin-variables' as *;
+
+.toast-container {
+  position: fixed;
+  bottom: $admin-space-6;
+  right: $admin-space-6;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-2;
+  pointer-events: none;
+  max-width: calc(100vw - 32px);
+}
+
+.toast-item {
+  pointer-events: auto;
+  min-width: 300px;
+  max-width: 420px;
+  background: $admin-bg-surface;
+  border-radius: $admin-card-radius;
+  border: 1px solid $admin-border;
+  box-shadow: $admin-shadow-lg;
+  padding: $admin-space-3 $admin-space-4;
+  display: flex;
+  align-items: flex-start;
+  gap: $admin-space-3;
+  font-family: $admin-font-family;
+  animation: toastSlideUp $admin-transition-base cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all $admin-transition-fast;
+
+  .toast-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+  }
+
+  .toast-content {
+    flex: 1;
+
+    .toast-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: $admin-text-primary;
+      margin-bottom: 2px;
+      line-height: 1.3;
+    }
+
+    .toast-message {
+      font-size: 13px;
+      color: $admin-text-secondary;
+      line-height: 1.4;
+    }
+  }
+
+  .toast-close {
+    background: transparent;
+    border: none;
+    color: $admin-text-muted;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 2px;
+    line-height: 1;
+    border-radius: 4px;
+    transition: color $admin-transition-fast;
+
+    &:hover {
+      color: $admin-text-primary;
+    }
+  }
+
+  // Types
+  &--success {
+    border-left: 4px solid #10B981;
+    .toast-icon {
+      color: #10B981;
+    }
+  }
+
+  &--error {
+    border-left: 4px solid #EF4444;
+    .toast-icon {
+      color: #EF4444;
+    }
+  }
+
+  &--warning {
+    border-left: 4px solid #F59E0B;
+    .toast-icon {
+      color: #F59E0B;
+    }
+  }
+
+  &--info {
+    border-left: 4px solid $admin-primary;
+    .toast-icon {
+      color: $admin-primary;
+    }
+  }
+}
+
+@keyframes toastSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .toast-container {
+    bottom: $admin-space-4;
+    right: $admin-space-4;
+    left: $admin-space-4;
+
+    .toast-item {
+      min-width: 0;
+      width: 100%;
+    }
+  }
+}

@@ -1,0 +1,471 @@
+@use '../../styles/admin-variables' as *;
+
+.admin-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-6;
+}
+
+// ── Dashboard Header ─────────────────────────────────────────
+.dashboard-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $admin-space-4;
+  flex-wrap: wrap;
+
+  .header-content {
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: $admin-text-primary;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+
+    .page-subtitle {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: $admin-text-secondary;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-2;
+  }
+}
+
+// ── Buttons ──────────────────────────────────────────────────
+.admin-btn {
+  height: 36px;
+  padding: 0 $admin-space-4;
+  font-family: $admin-font-family;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: $admin-inner-radius;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+  user-select: none;
+  text-decoration: none;
+
+  &--primary {
+    background: $admin-primary;
+    color: #FFFFFF;
+    border: 1px solid transparent;
+
+    &:hover {
+      background: $admin-primary-hover;
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+
+  &--secondary {
+    background: $admin-bg-surface;
+    color: $admin-text-primary;
+    border: 1px solid $admin-border;
+
+    &:hover {
+      background: $admin-bg;
+      border-color: $admin-text-muted;
+    }
+  }
+}
+
+// ── KPI Cards Grid ───────────────────────────────────────────
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: $admin-space-4;
+}
+
+// ── Orders Section ───────────────────────────────────────────
+.orders-section {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-3;
+
+  .section-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $admin-space-3;
+    flex-wrap: wrap;
+
+    .status-tab-group {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      background: $admin-bg-muted;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid $admin-border;
+      overflow-x: auto;
+      max-width: 100%;
+
+      .status-tab {
+        background: transparent;
+        border: none;
+        padding: 6px $admin-space-3;
+        font-family: $admin-font-family;
+        font-size: 12px;
+        font-weight: 500;
+        color: $admin-text-secondary;
+        border-radius: $admin-inner-radius;
+        cursor: pointer;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all $admin-transition-fast;
+
+        &:hover {
+          color: $admin-text-primary;
+        }
+
+        &--active {
+          background: $admin-bg-surface;
+          color: $admin-text-primary;
+          font-weight: 600;
+          box-shadow: $admin-shadow-xs;
+        }
+
+        .tab-count {
+          font-size: 11px;
+          font-weight: 600;
+          background: rgba(0, 0, 0, 0.06);
+          padding: 1px 6px;
+          border-radius: 10px;
+        }
+      }
+    }
+  }
+}
+
+// ── Table Custom Cells ───────────────────────────────────────
+.order-id-badge {
+  font-family: monospace, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: $admin-primary;
+  background: $admin-primary-subtle;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.date-cell {
+  font-size: 12px;
+  color: $admin-text-secondary;
+  white-space: nowrap;
+}
+
+.customer-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+
+  .customer-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: $admin-text-primary;
+  }
+
+  .customer-email {
+    font-size: 11px;
+    color: $admin-text-muted;
+  }
+}
+
+.total-cell {
+  font-size: 13px;
+  font-weight: 600;
+  color: $admin-text-primary;
+  white-space: nowrap;
+}
+
+.table-action-link {
+  background: none;
+  border: none;
+  color: $admin-primary;
+  font-family: $admin-font-family;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+
+  &:hover {
+    background: $admin-primary-subtle;
+    text-decoration: underline;
+  }
+}
+
+// ── Drawer Order Details ─────────────────────────────────────
+.drawer-order-details {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+
+  .drawer-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $admin-space-3 $admin-space-4;
+    background: $admin-bg;
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+
+    .status-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .status-label {
+        font-size: 12px;
+        font-weight: 500;
+        color: $admin-text-secondary;
+      }
+    }
+  }
+
+  .quick-status-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .quick-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: $admin-text-secondary;
+    }
+
+    .quick-buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+
+      .status-btn {
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 500;
+        font-family: $admin-font-family;
+        border: 1px solid $admin-border;
+        background: $admin-bg-surface;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all $admin-transition-fast;
+
+        &:hover:not(:disabled) {
+          background: $admin-bg;
+          border-color: $admin-text-muted;
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        &--success:hover:not(:disabled) {
+          background: $admin-status-success-bg;
+          border-color: $admin-status-success-border;
+          color: $admin-status-success-text;
+        }
+
+        &--danger:hover:not(:disabled) {
+          background: $admin-status-danger-bg;
+          border-color: $admin-status-danger-border;
+          color: $admin-status-danger-text;
+        }
+      }
+    }
+  }
+
+  .drawer-grid-panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $admin-space-3;
+
+    .drawer-panel {
+      border: 1px solid $admin-border;
+      border-radius: $admin-inner-radius;
+      padding: $admin-space-3;
+      background: $admin-bg-surface;
+
+      .panel-heading {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: $admin-text-muted;
+        margin: 0 0 $admin-space-2;
+      }
+
+      .panel-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 4px;
+
+        .row-label {
+          color: $admin-text-secondary;
+        }
+
+        .row-val {
+          color: $admin-text-primary;
+          text-align: right;
+          word-break: break-word;
+        }
+      }
+    }
+  }
+
+  .drawer-items-section {
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+    padding: $admin-space-3;
+
+    .panel-heading {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: $admin-text-muted;
+      margin: 0 0 $admin-space-2;
+    }
+
+    .drawer-items-list {
+      display: flex;
+      flex-direction: column;
+
+      .order-item-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid $admin-border-subtle;
+        font-size: 13px;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        .item-info {
+          flex: 1;
+
+          .item-name {
+            font-weight: 500;
+            color: $admin-text-primary;
+          }
+
+          .item-sku {
+            font-size: 11px;
+            color: $admin-text-muted;
+            margin-top: 1px;
+          }
+        }
+
+        .item-calc {
+          font-size: 12px;
+          color: $admin-text-secondary;
+          margin: 0 16px;
+        }
+
+        .item-total {
+          color: $admin-text-primary;
+        }
+      }
+    }
+  }
+
+  .drawer-summary-card {
+    background: $admin-bg;
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+    padding: $admin-space-3 $admin-space-4;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      color: $admin-text-secondary;
+
+      .text-green {
+        color: #059669;
+        font-weight: 600;
+      }
+    }
+
+    .summary-divider {
+      height: 1px;
+      background: $admin-border;
+      margin: 4px 0;
+    }
+
+    .summary-total {
+      font-size: 14px;
+      font-weight: 700;
+      color: $admin-text-primary;
+
+      .total-amount {
+        color: $admin-primary;
+      }
+    }
+  }
+}
+
+// ── New Product Modal Form ───────────────────────────────────
+.new-product-form {
+  display: flex;
+  flex-direction: column;
+
+  .form-alert-error {
+    background: $admin-status-danger-bg;
+    border: 1px solid $admin-status-danger-border;
+    color: $admin-status-danger-text;
+    padding: 8px 12px;
+    border-radius: $admin-inner-radius;
+    font-size: 12px;
+    margin-bottom: $admin-space-3;
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $admin-space-3;
+  }
+}
+
+// Mobile Breakpoints
+@media (max-width: 640px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+
+    .header-actions {
+      justify-content: flex-start;
+    }
+  }
+
+  .drawer-grid-panels {
+    grid-template-columns: 1fr !important;
+  }
+
+  .new-product-form .form-row-2 {
+    grid-template-columns: 1fr;
+  }
+}

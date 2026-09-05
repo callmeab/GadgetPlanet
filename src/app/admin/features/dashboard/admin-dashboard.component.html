@@ -1,0 +1,352 @@
+<div class="admin-dashboard">
+  <!-- ── Page Header ─────────────────────────────────────────── -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <h1 class="page-title">Store Overview</h1>
+      <p class="page-subtitle">Monitor performance, track customer purchases, and manage inventory fulfillment.</p>
+    </div>
+    <div class="header-actions">
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="setStatusFilter('all')">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" width="15" height="15">
+          <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        <span>Refresh</span>
+      </button>
+      <button type="button" class="admin-btn admin-btn--primary" (click)="openNewProductModal()">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/>
+        </svg>
+        <span>Add Product</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── KPI Stat Cards Grid ─────────────────────────────────── -->
+  <section class="kpi-grid" aria-label="Key Performance Indicators">
+    @for (metric of metrics(); track metric.id) {
+      <gp-admin-stat-card
+        [title]="metric.title"
+        [value]="metric.value"
+        [change]="metric.change"
+        [changeLabel]="metric.changeLabel"
+        [badgeText]="metric.badgeText"
+      ></gp-admin-stat-card>
+    }
+  </section>
+
+  <!-- ── Orders Management Section ───────────────────────────── -->
+  <section class="orders-section">
+    <!-- Section Toolbar with Filter Tabs -->
+    <div class="section-toolbar">
+      <div class="status-tab-group" role="tablist">
+        @for (tab of statusTabs; track tab.value) {
+          <button
+            type="button"
+            role="tab"
+            class="status-tab"
+            [class.status-tab--active]="activeStatus() === tab.value"
+            (click)="setStatusFilter(tab.value)"
+          >
+            {{ tab.label }}
+            @if (tab.value === 'all') {
+              <span class="tab-count">{{ orders().length }}</span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Reusable Data Table Component -->
+    <gp-admin-data-table
+      [data]="filteredOrders()"
+      [columns]="columns"
+      searchPlaceholder="Search order #, customer, or total..."
+      [selectable]="true"
+      (rowClick)="openOrderDetails($event)"
+      (bulkAction)="handleBulkAction($event)"
+    >
+      <!-- Custom Cell Template Injection -->
+      <ng-template #customCell let-row let-column="column" let-val="value">
+        @switch (column.key) {
+          @case ('orderNumber') {
+            <span class="order-id-badge">{{ row.orderNumber }}</span>
+          }
+          @case ('date') {
+            <span class="date-cell">{{ row.date | date:'mediumDate' }}</span>
+          }
+          @case ('customerName') {
+            <div class="customer-cell">
+              <span class="customer-name">{{ row.customerName }}</span>
+              <span class="customer-email">{{ row.customerEmail }}</span>
+            </div>
+          }
+          @case ('paymentStatus') {
+            <gp-admin-status-pill [status]="row.paymentStatus" size="sm"></gp-admin-status-pill>
+          }
+          @case ('fulfillmentStatus') {
+            <gp-admin-status-pill [status]="row.fulfillmentStatus" size="sm"></gp-admin-status-pill>
+          }
+          @case ('total') {
+            <span class="total-cell font-mono">{{ row.total | currency:'USD':'symbol':'1.2-2' }}</span>
+          }
+          @case ('actions') {
+            <button
+              type="button"
+              class="table-action-link"
+              (click)="$event.stopPropagation(); openOrderDetails(row)"
+            >
+              View →
+            </button>
+          }
+          @default {
+            <span>{{ val }}</span>
+          }
+        }
+      </ng-template>
+    </gp-admin-data-table>
+  </section>
+
+  <!-- ── Order Details Slide-in Drawer ────────────────────────── -->
+  <gp-admin-modal
+    [isOpen]="isDrawerOpen()"
+    mode="drawer"
+    size="lg"
+    [title]="'Order ' + (selectedOrder()?.orderNumber || '')"
+    [subtitle]="'Placed on ' + (selectedOrder()?.date | date:'mediumDate') + ' via ' + (selectedOrder()?.paymentMethod || '')"
+    (closed)="closeDrawer()"
+  >
+    @if (selectedOrder(); as ord) {
+      <div class="drawer-order-details">
+        <!-- Status & Meta Banners -->
+        <div class="drawer-status-bar">
+          <div class="status-group">
+            <span class="status-label">Payment:</span>
+            <gp-admin-status-pill [status]="ord.paymentStatus"></gp-admin-status-pill>
+          </div>
+          <div class="status-group">
+            <span class="status-label">Fulfillment:</span>
+            <gp-admin-status-pill [status]="ord.fulfillmentStatus"></gp-admin-status-pill>
+          </div>
+        </div>
+
+        <!-- Quick Status Changer Buttons -->
+        <div class="quick-status-actions">
+          <span class="quick-label">Update fulfillment:</span>
+          <div class="quick-buttons">
+            <button
+              type="button"
+              class="status-btn"
+              [disabled]="ord.fulfillmentStatus === 'Processing'"
+              (click)="updateOrderStatus('Processing')"
+            >
+              Processing
+            </button>
+            <button
+              type="button"
+              class="status-btn"
+              [disabled]="ord.fulfillmentStatus === 'Shipped'"
+              (click)="updateOrderStatus('Shipped')"
+            >
+              Shipped
+            </button>
+            <button
+              type="button"
+              class="status-btn status-btn--success"
+              [disabled]="ord.fulfillmentStatus === 'Delivered'"
+              (click)="updateOrderStatus('Delivered')"
+            >
+              Delivered
+            </button>
+            <button
+              type="button"
+              class="status-btn status-btn--danger"
+              [disabled]="ord.fulfillmentStatus === 'Cancelled'"
+              (click)="updateOrderStatus('Cancelled')"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <!-- Customer & Shipping Panels -->
+        <div class="drawer-grid-panels">
+          <div class="drawer-panel">
+            <h4 class="panel-heading">Customer Information</h4>
+            <div class="panel-row">
+              <span class="row-label">Name:</span>
+              <span class="row-val font-semibold">{{ ord.customerName }}</span>
+            </div>
+            <div class="panel-row">
+              <span class="row-label">Email:</span>
+              <span class="row-val">{{ ord.customerEmail }}</span>
+            </div>
+            @if (ord.customerPhone) {
+              <div class="panel-row">
+                <span class="row-label">Phone:</span>
+                <span class="row-val">{{ ord.customerPhone }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="drawer-panel">
+            <h4 class="panel-heading">Shipping & Payment</h4>
+            <div class="panel-row">
+              <span class="row-label">Address:</span>
+              <span class="row-val">{{ ord.shippingAddress }}</span>
+            </div>
+            <div class="panel-row">
+              <span class="row-label">Method:</span>
+              <span class="row-val">{{ ord.paymentMethod }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ordered Items Table -->
+        <div class="drawer-items-section">
+          <h4 class="panel-heading">Ordered Items ({{ ord.itemsCount }})</h4>
+          <div class="drawer-items-list">
+            @for (item of ord.items; track item.sku) {
+              <div class="order-item-row">
+                <div class="item-info">
+                  <div class="item-name">{{ item.productName }}</div>
+                  <div class="item-sku">SKU: {{ item.sku }}</div>
+                </div>
+                <div class="item-calc">
+                  {{ item.quantity }} × {{ item.unitPrice | currency:'USD' }}
+                </div>
+                <div class="item-total font-semibold">
+                  {{ item.totalPrice | currency:'USD' }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Price Breakdown -->
+        <div class="drawer-summary-card">
+          <div class="summary-line">
+            <span>Subtotal</span>
+            <span>{{ ord.total | currency:'USD' }}</span>
+          </div>
+          <div class="summary-line">
+            <span>Shipping</span>
+            <span class="text-green">Free</span>
+          </div>
+          <div class="summary-line">
+            <span>Estimated Taxes</span>
+            <span>$0.00</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-line summary-total">
+            <span>Total Paid</span>
+            <span class="total-amount">{{ ord.total | currency:'USD' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Drawer Footer Actions -->
+    <div modalFooter>
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="closeDrawer()">
+        Close
+      </button>
+      <button
+        type="button"
+        class="admin-btn admin-btn--primary"
+        (click)="updateOrderStatus('Delivered')"
+      >
+        Mark Delivered
+      </button>
+    </div>
+  </gp-admin-modal>
+
+  <!-- ── New Product Modal ────────────────────────────────────── -->
+  <gp-admin-modal
+    [isOpen]="isProductModalOpen()"
+    mode="modal"
+    size="md"
+    title="Add New Catalog Product"
+    subtitle="Quickly add an inventory item to the GadgetPlanet storefront."
+    (closed)="closeNewProductModal()"
+  >
+    <div class="new-product-form">
+      @if (productFormError()) {
+        <div class="form-alert-error" role="alert">
+          {{ productFormError() }}
+        </div>
+      }
+
+      <gp-admin-form-field label="Product Title" forId="prod-name" [required]="true" hint="Customer visible product title">
+        <input
+          id="prod-name"
+          type="text"
+          placeholder="e.g. Sony WH-1000XM5 Wireless Headphones"
+          [value]="newProductName()"
+          (input)="newProductName.set($any($event.target).value)"
+        />
+      </gp-admin-form-field>
+
+      <div class="form-row-2">
+        <gp-admin-form-field label="SKU Code" forId="prod-sku" [required]="true">
+          <input
+            id="prod-sku"
+            type="text"
+            placeholder="e.g. SON-XM5-BLK"
+            [value]="newProductSku()"
+            (input)="newProductSku.set($any($event.target).value)"
+          />
+        </gp-admin-form-field>
+
+        <gp-admin-form-field label="Category" forId="prod-cat">
+          <select
+            id="prod-cat"
+            [value]="newProductCategory()"
+            (change)="newProductCategory.set($any($event.target).value)"
+          >
+            <option value="Audio">Audio</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Peripherals">Peripherals</option>
+            <option value="Workspace">Workspace</option>
+            <option value="Docks & Hubs">Docks & Hubs</option>
+          </select>
+        </gp-admin-form-field>
+      </div>
+
+      <div class="form-row-2">
+        <gp-admin-form-field label="Unit Price (USD)" forId="prod-price" [required]="true">
+          <input
+            id="prod-price"
+            type="number"
+            min="1"
+            step="0.01"
+            placeholder="99.99"
+            [value]="newProductPrice() ?? ''"
+            (input)="newProductPrice.set(+$any($event.target).value)"
+          />
+        </gp-admin-form-field>
+
+        <gp-admin-form-field label="Initial Stock Units" forId="prod-stock">
+          <input
+            id="prod-stock"
+            type="number"
+            min="0"
+            step="1"
+            placeholder="10"
+            [value]="newProductStock() ?? 0"
+            (input)="newProductStock.set(+$any($event.target).value)"
+          />
+        </gp-admin-form-field>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div modalFooter>
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="closeNewProductModal()">
+        Cancel
+      </button>
+      <button type="button" class="admin-btn admin-btn--primary" (click)="saveProduct()">
+        Save Product
+      </button>
+    </div>
+  </gp-admin-modal>
+</div>

@@ -1,0 +1,9 @@
+<span
+  class="status-pill status-pill--{{ variant() }} status-pill--{{ size() }}"
+  [attr.data-status]="status()"
+>
+  @if (showDot()) {
+    <span class="status-dot"></span>
+  }
+  <span class="status-text">{{ displayLabel() }}</span>
+</span>

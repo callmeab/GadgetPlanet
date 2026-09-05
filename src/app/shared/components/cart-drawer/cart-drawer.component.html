@@ -1,3 +1,4 @@
+@if (!isCurrentAdmin()) {
 @if (cartStore.isDrawerOpen()) {
   <!-- ── Backdrop Overlay ────────────────────────────────────── -->
   <div
@@ -200,3 +201,5 @@
 
   </div>
 }
+}
+

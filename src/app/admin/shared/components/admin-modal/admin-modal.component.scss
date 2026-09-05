@@ -1,0 +1,163 @@
+@use '../../../styles/admin-variables' as *;
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(2px);
+  display: flex;
+  animation: backdropFadeIn $admin-transition-base ease-out;
+
+  &:has(.modal-panel--dialog) {
+    align-items: center;
+    justify-content: center;
+    padding: $admin-space-4;
+  }
+
+  &:has(.modal-panel--drawer) {
+    justify-content: flex-end;
+  }
+}
+
+.modal-panel {
+  background: $admin-bg-surface;
+  display: flex;
+  flex-direction: column;
+  box-shadow: $admin-shadow-modal;
+  font-family: $admin-font-family;
+  overflow: hidden;
+
+  // Dialog Mode
+  &--dialog {
+    border-radius: $admin-card-radius;
+    border: 1px solid $admin-border;
+    max-height: calc(100vh - 48px);
+    animation: modalPopIn $admin-transition-base cubic-bezier(0.16, 1, 0.3, 1);
+
+    &.modal-size-sm { width: 100%; max-width: 420px; }
+    &.modal-size-md { width: 100%; max-width: 560px; }
+    &.modal-size-lg { width: 100%; max-width: 740px; }
+    &.modal-size-xl { width: 100%; max-width: 960px; }
+  }
+
+  // Drawer Mode
+  &--drawer {
+    height: 100vh;
+    border-left: 1px solid $admin-border;
+    box-shadow: $admin-shadow-drawer;
+    animation: drawerSlideIn $admin-transition-base cubic-bezier(0.16, 1, 0.3, 1);
+
+    &.modal-size-sm { width: 100%; max-width: 380px; }
+    &.modal-size-md { width: 100%; max-width: 480px; }
+    &.modal-size-lg { width: 100%; max-width: 620px; }
+    &.modal-size-xl { width: 100%; max-width: 800px; }
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: $admin-space-4 $admin-space-5;
+  border-bottom: 1px solid $admin-border;
+  background: $admin-bg-surface;
+
+  .header-titles {
+    flex: 1;
+
+    .modal-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: $admin-text-primary;
+      line-height: 1.3;
+    }
+
+    .modal-subtitle {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: $admin-text-secondary;
+      line-height: 1.4;
+    }
+  }
+
+  .close-button {
+    background: transparent;
+    border: none;
+    color: $admin-text-muted;
+    cursor: pointer;
+    padding: $admin-space-1;
+    border-radius: $admin-inner-radius;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all $admin-transition-fast;
+    margin-left: $admin-space-2;
+
+    &:hover {
+      color: $admin-text-primary;
+      background: $admin-bg-muted;
+    }
+  }
+}
+
+.modal-body {
+  padding: $admin-space-5;
+  overflow-y: auto;
+  flex: 1;
+  color: $admin-text-primary;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $admin-space-2;
+  padding: $admin-space-3 $admin-space-5;
+  border-top: 1px solid $admin-border;
+  background: $admin-bg;
+
+  &:empty {
+    display: none;
+  }
+}
+
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes drawerSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+// Mobile Breakpoints
+@media (max-width: 640px) {
+  .modal-panel--dialog {
+    max-width: 100% !important;
+    margin: 0 $admin-space-2;
+  }
+
+  .modal-panel--drawer {
+    max-width: 100% !important;
+  }
+}

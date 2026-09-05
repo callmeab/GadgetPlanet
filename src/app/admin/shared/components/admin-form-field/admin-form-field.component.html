@@ -1,0 +1,25 @@
+<div class="form-field-group" [class.has-error]="!!error()">
+  @if (label()) {
+    <label class="form-field-label" [attr.for]="forId() || null">
+      <span>{{ label() }}</span>
+      @if (required()) {
+        <span class="required-indicator" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+
+  <div class="form-field-control">
+    <ng-content></ng-content>
+  </div>
+
+  @if (error()) {
+    <p class="form-field-error" role="alert">
+      <svg viewBox="0 0 16 16" fill="currentColor" width="12" height="12">
+        <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm-.75 4a.75.75 0 011.5 0v3.5a.75.75 0 01-1.5 0V5zm.75 6.5a.875.875 0 110-1.75.875.875 0 010 1.75z"/>
+      </svg>
+      <span>{{ error() }}</span>
+    </p>
+  } @else if (hint()) {
+    <p class="form-field-hint">{{ hint() }}</p>
+  }
+</div>

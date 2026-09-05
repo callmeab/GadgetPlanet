@@ -1,0 +1,104 @@
+@use '../../../styles/admin-variables' as a;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.stat-card {
+  background: a.$admin-bg-surface;
+  border: 1px solid a.$admin-border;
+  border-radius: a.$admin-card-radius;
+  padding: a.$admin-space-5;
+  box-shadow: a.$admin-shadow-sm;
+  display: flex;
+  flex-direction: column;
+  gap: a.$admin-space-2;
+  transition: box-shadow a.$admin-transition-base, border-color a.$admin-transition-base;
+
+  &:hover {
+    box-shadow: a.$admin-shadow-md;
+    border-color: #d1d5db;
+  }
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: a.$admin-space-2;
+  }
+
+  &__title {
+    font-family: a.$admin-font-family;
+    font-size: 13px;
+    font-weight: 500;
+    color: a.$admin-text-secondary;
+    letter-spacing: 0.01em;
+  }
+
+  &__badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: a.$admin-primary;
+    background: a.$admin-primary-subtle;
+    border: 1px solid a.$admin-primary-border;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    line-height: 1;
+  }
+
+  &__icon {
+    font-size: 16px;
+    color: a.$admin-text-muted;
+  }
+
+  &__main {
+    margin: a.$admin-space-1 0;
+  }
+
+  &__value {
+    font-family: a.$admin-font-family;
+    font-size: clamp(22px, 2.2vw, 28px);
+    font-weight: 700;
+    color: a.$admin-text-primary;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-weight: 600;
+    line-height: 1;
+
+    .trend-arrow {
+      flex-shrink: 0;
+    }
+
+    &--up {
+      color: #059669; // Emerald green
+    }
+
+    &--down {
+      color: #DC2626; // Red
+    }
+
+    &--neutral {
+      color: a.$admin-text-muted;
+    }
+  }
+
+  &__subtext {
+    color: a.$admin-text-muted;
+    font-size: 12px;
+  }
+}

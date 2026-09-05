@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 import { CartStore } from '../../stores/cart.store';
 
 @Component({
@@ -14,6 +16,25 @@ import { CartStore } from '../../stores/cart.store';
 export class CartDrawerComponent {
   readonly cartStore = inject(CartStore);
   private readonly router = inject(Router);
+
+  private readonly navEnd = toSignal(
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd))
+  );
+
+  readonly isCurrentAdmin = computed<boolean>(() => {
+    const nav = this.navEnd();
+    if (nav && 'url' in nav) {
+      const url = (nav as NavigationEnd).urlAfterRedirects || (nav as NavigationEnd).url;
+      if (url && (url.startsWith('/admin') || url.includes('/admin'))) return true;
+    }
+    if (this.router.url && (this.router.url.startsWith('/admin') || this.router.url.includes('/admin'))) {
+      return true;
+    }
+    if (typeof window !== 'undefined') {
+      return window.location.pathname.includes('/admin') || window.location.href.includes('/admin');
+    }
+    return false;
+  });
 
   close(): void {
     this.cartStore.closeDrawer();

@@ -1,0 +1,493 @@
+@use '../../../styles/admin-variables' as *;
+
+.data-table-wrapper {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  box-shadow: $admin-shadow-xs;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Toolbar ──────────────────────────────────────────────────
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $admin-space-3;
+  padding: $admin-space-3 $admin-space-4;
+  border-bottom: 1px solid $admin-border;
+  background: $admin-bg-surface;
+  min-height: 56px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 320px;
+  min-width: 200px;
+
+  .search-icon {
+    position: absolute;
+    left: $admin-space-3;
+    width: 16px;
+    height: 16px;
+    color: $admin-text-muted;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    height: 36px;
+    padding: 0 $admin-space-8 0 34px;
+    font-family: $admin-font-family;
+    font-size: 13px;
+    color: $admin-text-primary;
+    background: $admin-bg;
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+    transition: all $admin-transition-fast;
+
+    &::placeholder {
+      color: $admin-text-muted;
+    }
+
+    &:focus {
+      outline: none;
+      background: $admin-bg-surface;
+      border-color: $admin-primary;
+      box-shadow: 0 0 0 3px $admin-primary-subtle;
+    }
+  }
+
+  .clear-search-btn {
+    position: absolute;
+    right: $admin-space-2;
+    background: none;
+    border: none;
+    color: $admin-text-muted;
+    font-size: 12px;
+    cursor: pointer;
+    padding: $admin-space-1;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      color: $admin-text-primary;
+      background: $admin-bg-muted;
+    }
+  }
+}
+
+.bulk-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: $admin-space-2;
+  background: $admin-primary-subtle;
+  border: 1px solid $admin-primary-border;
+  padding: $admin-space-1 $admin-space-3;
+  border-radius: $admin-inner-radius;
+  animation: fadeIn $admin-transition-fast ease-in;
+
+  .selected-count-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: $admin-primary;
+    padding-right: $admin-space-2;
+    border-right: 1px solid $admin-primary-border;
+  }
+
+  .bulk-btn {
+    padding: 4px $admin-space-2;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: $admin-font-family;
+    border: 1px solid $admin-border;
+    background: $admin-bg-surface;
+    color: $admin-text-primary;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all $admin-transition-fast;
+
+    &:hover {
+      background: $admin-bg;
+      border-color: $admin-text-muted;
+    }
+
+    &--danger {
+      color: $admin-status-danger-text;
+      border-color: $admin-status-danger-border;
+      background: $admin-status-danger-bg;
+
+      &:hover {
+        background: #fee2e2;
+      }
+    }
+  }
+
+  .bulk-clear-btn {
+    background: none;
+    border: none;
+    color: $admin-text-secondary;
+    font-size: 12px;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 4px;
+
+    &:hover {
+      color: $admin-text-primary;
+    }
+  }
+}
+
+.custom-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: $admin-space-2;
+}
+
+// ── Responsive Table ─────────────────────────────────────────
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: $admin-font-family;
+
+  thead {
+    background: $admin-bg;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    th {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: $admin-text-secondary;
+      padding: $admin-space-3 $admin-space-4;
+      border-bottom: 1px solid $admin-border;
+      white-space: nowrap;
+      user-select: none;
+
+      &.th-checkbox {
+        width: 44px;
+        text-align: center;
+        padding-right: 0;
+      }
+
+      &.th-sortable {
+        cursor: pointer;
+
+        &:hover {
+          color: $admin-text-primary;
+          background: #EEF2F6;
+        }
+      }
+
+      &.th-sorted {
+        color: $admin-primary;
+      }
+
+      &.th-align-right {
+        text-align: right;
+        .th-content {
+          justify-content: flex-end;
+        }
+      }
+
+      &.th-align-center {
+        text-align: center;
+        .th-content {
+          justify-content: center;
+        }
+      }
+
+      .th-content {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .sort-indicator {
+        display: inline-flex;
+        align-items: center;
+        color: inherit;
+
+        .sort-neutral {
+          color: $admin-text-muted;
+          opacity: 0.5;
+        }
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      height: $admin-table-row-height;
+      border-bottom: 1px solid $admin-border-subtle;
+      transition: background-color $admin-transition-fast;
+      cursor: pointer;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &:hover {
+        background-color: $admin-bg-hover;
+      }
+
+      &.row-selected {
+        background-color: $admin-primary-subtle;
+      }
+
+      td {
+        padding: $admin-space-2 $admin-space-4;
+        font-size: 13px;
+        color: $admin-text-primary;
+        vertical-align: middle;
+
+        &.td-checkbox {
+          width: 44px;
+          text-align: center;
+          padding-right: 0;
+        }
+
+        &.td-align-right {
+          text-align: right;
+        }
+
+        &.td-align-center {
+          text-align: center;
+        }
+
+        .cell-text {
+          color: $admin-text-primary;
+        }
+      }
+    }
+
+    .empty-row {
+      cursor: default;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
+
+    .table-empty-state {
+      padding: $admin-space-10 $admin-space-4;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: $admin-space-2;
+
+      .empty-icon {
+        font-size: 32px;
+      }
+
+      .empty-msg {
+        margin: 0;
+        font-size: 14px;
+        color: $admin-text-secondary;
+      }
+    }
+  }
+}
+
+// ── Checkboxes ───────────────────────────────────────────────
+.admin-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid $admin-border;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  vertical-align: middle;
+  position: relative;
+  background: $admin-bg-surface;
+  transition: all $admin-transition-fast;
+
+  &:hover {
+    border-color: $admin-text-secondary;
+  }
+
+  &:checked {
+    background-color: $admin-primary;
+    border-color: $admin-primary;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 4px;
+      height: 8px;
+      border: solid #FFFFFF;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+
+  &:indeterminate {
+    background-color: $admin-primary;
+    border-color: $admin-primary;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 6px;
+      width: 8px;
+      height: 2px;
+      background: #FFFFFF;
+    }
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px $admin-primary-subtle;
+  }
+}
+
+// ── Pagination Footer ────────────────────────────────────────
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $admin-space-3 $admin-space-4;
+  border-top: 1px solid $admin-border;
+  background: $admin-bg-surface;
+  font-size: 13px;
+  color: $admin-text-secondary;
+  flex-wrap: wrap;
+  gap: $admin-space-3;
+
+  .pagination-info {
+    font-size: 12px;
+
+    strong {
+      color: $admin-text-primary;
+      font-weight: 600;
+    }
+  }
+
+  .pagination-actions {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-4;
+    flex-wrap: wrap;
+  }
+
+  .page-size-picker {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-2;
+
+    .page-size-label {
+      font-size: 12px;
+      color: $admin-text-secondary;
+    }
+
+    .page-size-select {
+      height: 30px;
+      padding: 0 6px;
+      font-size: 12px;
+      font-family: $admin-font-family;
+      color: $admin-text-primary;
+      border: 1px solid $admin-border;
+      border-radius: 4px;
+      background: $admin-bg-surface;
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+        border-color: $admin-primary;
+      }
+    }
+  }
+
+  .page-buttons {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-2;
+
+    .page-nav-btn {
+      height: 30px;
+      padding: 0 $admin-space-3;
+      font-family: $admin-font-family;
+      font-size: 12px;
+      font-weight: 500;
+      color: $admin-text-primary;
+      background: $admin-bg-surface;
+      border: 1px solid $admin-border;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all $admin-transition-fast;
+
+      &:hover:not(:disabled) {
+        background: $admin-bg;
+        border-color: $admin-text-muted;
+      }
+
+      &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+    }
+
+    .page-current {
+      font-size: 12px;
+      color: $admin-text-secondary;
+      padding: 0 $admin-space-1;
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Mobile Breakpoint Adjustments
+@media (max-width: 640px) {
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+
+    .search-box {
+      max-width: 100%;
+    }
+  }
+
+  .table-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .pagination-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+}

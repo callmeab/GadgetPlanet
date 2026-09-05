@@ -112,6 +112,11 @@ export const routes: Routes = [
     title: 'Warranty & Return Policy — GadgetPlanet',
   },
   {
+    path: 'admin',
+    loadChildren: () =>
+      import('./admin/admin.routes').then(m => m.ADMIN_ROUTES),
+  },
+  {
     path: '**',
     redirectTo: '',
     pathMatch: 'full',

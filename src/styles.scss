@@ -100,3 +100,24 @@ button, input, textarea, select {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+// ── Admin Route Storefront Layout Suppression ──────────────
+// Ensures customer-facing header, footer, and cart drawer are strictly hidden on /admin/*
+body.admin-page gp-header,
+body.admin-page gp-footer,
+body.admin-page gp-cart-drawer,
+[data-admin="true"] gp-header,
+[data-admin="true"] gp-footer,
+[data-admin="true"] gp-cart-drawer,
+.app-shell--admin gp-header,
+.app-shell--admin gp-footer,
+.app-shell--admin gp-cart-drawer {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+

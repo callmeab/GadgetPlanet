@@ -1,0 +1,196 @@
+<div class="data-table-wrapper">
+  <!-- ── Top Toolbar: Search & Bulk Action Bar ───────────────── -->
+  <div class="table-toolbar">
+    <div class="search-box">
+      <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="9" r="6"/>
+        <line x1="13.5" y1="13.5" x2="18" y2="18"/>
+      </svg>
+      <input
+        type="text"
+        class="search-input"
+        [placeholder]="searchPlaceholder()"
+        [value]="searchQuery()"
+        (input)="onSearchInput($event)"
+      />
+      @if (searchQuery()) {
+        <button type="button" class="clear-search-btn" (click)="clearSearch()" aria-label="Clear search">
+          ✕
+        </button>
+      }
+    </div>
+
+    <!-- Bulk Actions Banner when rows are selected -->
+    @if (selectedCount() > 0) {
+      <div class="bulk-actions-bar">
+        <span class="selected-count-badge">
+          {{ selectedCount() }} selected
+        </span>
+        <button type="button" class="bulk-btn" (click)="triggerBulkAction('export')">
+          Export
+        </button>
+        <button type="button" class="bulk-btn bulk-btn--danger" (click)="triggerBulkAction('delete')">
+          Delete
+        </button>
+        <button type="button" class="bulk-clear-btn" (click)="clearAllSelected()">
+          Deselect all
+        </button>
+      </div>
+    } @else {
+      <!-- Custom actions projected into table header -->
+      <div class="custom-toolbar-actions">
+        <ng-content select="[tableActions]"></ng-content>
+      </div>
+    }
+  </div>
+
+  <!-- ── Table Container ─────────────────────────────────────── -->
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          @if (selectable()) {
+            <th class="th-checkbox">
+              <input
+                type="checkbox"
+                class="admin-checkbox"
+                [checked]="isAllSelected()"
+                [indeterminate]="isSomeSelected()"
+                (change)="toggleSelectAll()"
+                aria-label="Select all rows"
+              />
+            </th>
+          }
+
+          @for (col of columns(); track col.key) {
+            <th
+              [style.width]="col.width"
+              [class.th-sortable]="col.sortable !== false"
+              [class.th-sorted]="sortColumn() === col.key"
+              [class.th-align-right]="col.align === 'right'"
+              [class.th-align-center]="col.align === 'center'"
+              (click)="toggleSort(col.key, col.sortable)"
+            >
+              <div class="th-content">
+                <span>{{ col.title }}</span>
+                @if (col.sortable !== false) {
+                  <span class="sort-indicator">
+                    @if (sortColumn() === col.key) {
+                      @if (sortDirection() === 'asc') {
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+                          <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                        </svg>
+                      } @else {
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+                          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                      }
+                    } @else {
+                      <svg class="sort-neutral" viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+                        <path d="M5 8l5-5 5 5H5zM5 12l5 5 5-5H5z"/>
+                      </svg>
+                    }
+                  </span>
+                }
+              </div>
+            </th>
+          }
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (row of paginatedData(); track row[keyField()]) {
+          <tr
+            [class.row-selected]="isRowSelected(row)"
+            (click)="onRowClicked(row)"
+          >
+            @if (selectable()) {
+              <td class="td-checkbox" (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
+                  class="admin-checkbox"
+                  [checked]="isRowSelected(row)"
+                  (change)="toggleSelectRow(row, $event)"
+                  aria-label="Select row"
+                />
+              </td>
+            }
+
+            @for (col of columns(); track col.key) {
+              <td
+                [class.td-align-right]="col.align === 'right'"
+                [class.td-align-center]="col.align === 'center'"
+              >
+                <!-- Render custom cell template if projected, otherwise fallback to text -->
+                @if (customCellTemplate) {
+                  <ng-container
+                    [ngTemplateOutlet]="customCellTemplate"
+                    [ngTemplateOutletContext]="{ $implicit: row, column: col, value: row[col.key] }"
+                  ></ng-container>
+                } @else {
+                  <span class="cell-text">{{ row[col.key] }}</span>
+                }
+              </td>
+            }
+          </tr>
+        } @empty {
+          <tr class="empty-row">
+            <td [attr.colspan]="columns().length + (selectable() ? 1 : 0)">
+              <div class="table-empty-state">
+                <span class="empty-icon">📂</span>
+                <p class="empty-msg">{{ emptyMessage() }}</p>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Bottom Footer: Pagination Controls ──────────────────── -->
+  <div class="table-pagination">
+    <div class="pagination-info">
+      Showing <strong>{{ startIndex() }}</strong>–<strong>{{ endIndex() }}</strong> of <strong>{{ totalItems() }}</strong> results
+    </div>
+
+    <div class="pagination-actions">
+      <div class="page-size-picker">
+        <label for="admin-table-page-size" class="page-size-label">Rows per page:</label>
+        <select
+          id="admin-table-page-size"
+          class="page-size-select"
+          [value]="pageSize()"
+          (change)="onPageSizeChange($event)"
+        >
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="page-buttons">
+        <button
+          type="button"
+          class="page-nav-btn"
+          [disabled]="currentPage() === 1"
+          (click)="prevPage()"
+          aria-label="Previous page"
+        >
+          ‹ Previous
+        </button>
+
+        <span class="page-current">Page {{ currentPage() }} of {{ totalPages() }}</span>
+
+        <button
+          type="button"
+          class="page-nav-btn"
+          [disabled]="currentPage() === totalPages() || totalItems() === 0"
+          (click)="nextPage()"
+          aria-label="Next page"
+        >
+          Next ›
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

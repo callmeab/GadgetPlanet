@@ -1,0 +1,73 @@
+@use '../../../styles/admin-variables' as a;
+
+:host {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: a.$admin-font-family;
+  font-weight: 500;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  line-height: 1;
+  transition: all a.$admin-transition-fast;
+
+  // Sizes
+  &--sm {
+    padding: 3px 8px;
+    font-size: 11px;
+    .status-dot { width: 5px; height: 5px; }
+  }
+
+  &--md {
+    padding: 4px 10px;
+    font-size: 12px;
+    .status-dot { width: 6px; height: 6px; }
+  }
+
+  .status-dot {
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  // Variants
+  &--success {
+    background: a.$admin-status-success-bg;
+    color: a.$admin-status-success-text;
+    border-color: a.$admin-status-success-border;
+    .status-dot { background: #10B981; }
+  }
+
+  &--warning {
+    background: a.$admin-status-warning-bg;
+    color: a.$admin-status-warning-text;
+    border-color: a.$admin-status-warning-border;
+    .status-dot { background: #F59E0B; }
+  }
+
+  &--danger {
+    background: a.$admin-status-danger-bg;
+    color: a.$admin-status-danger-text;
+    border-color: a.$admin-status-danger-border;
+    .status-dot { background: #EF4444; }
+  }
+
+  &--info {
+    background: a.$admin-status-info-bg;
+    color: a.$admin-status-info-text;
+    border-color: a.$admin-status-info-border;
+    .status-dot { background: #3B82F6; }
+  }
+
+  &--neutral {
+    background: a.$admin-status-neutral-bg;
+    color: a.$admin-status-neutral-text;
+    border-color: a.$admin-status-neutral-border;
+    .status-dot { background: #9CA3AF; }
+  }
+}
