@@ -9,6 +9,15 @@ export interface AdminKpiMetric {
   badgeText?: string;
 }
 
+export interface AdminOrderTimelineEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  type: 'placed' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'note';
+  user?: string;
+}
+
 export interface AdminOrderItem {
   productName: string;
   sku: string;
@@ -26,12 +35,23 @@ export interface AdminOrder {
   customerPhone?: string;
   date: string;
   total: number;
+  subtotal?: number;
+  shippingFee?: number;
+  tax?: number;
+  discount?: number;
   paymentStatus: 'Paid' | 'Pending' | 'Refunded' | 'Failed';
-  fulfillmentStatus: 'Delivered' | 'Processing' | 'Shipped' | 'Cancelled';
+  fulfillmentStatus: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   paymentMethod: string;
   shippingAddress: string;
+  city?: string;
+  country?: string;
+  postalCode?: string;
+  carrier?: string;
+  trackingNumber?: string;
   itemsCount: number;
   items: AdminOrderItem[];
+  notes?: string;
+  timeline?: AdminOrderTimelineEvent[];
 }
 
 export interface ProductVariantOption {
@@ -171,7 +191,7 @@ export class AdminMockDataService {
     ]
   };
 
-  // Orders Mock Data (20+ realistic orders)
+  // Orders Mock Data (Diverse fulfillment statuses: Pending, Processing, Shipped, Delivered, Cancelled)
   readonly orders = signal<AdminOrder[]>([
     {
       id: '1',
@@ -180,15 +200,32 @@ export class AdminMockDataService {
       customerEmail: 'ahmad.khan@example.com',
       customerPhone: '+92 300 1234567',
       date: '2026-09-05',
+      subtotal: 349.99,
+      shippingFee: 0,
+      tax: 0,
+      discount: 0,
       total: 349.99,
       paymentStatus: 'Paid',
       fulfillmentStatus: 'Delivered',
       paymentMethod: 'Credit Card',
-      shippingAddress: 'House 45, Street 12, F-8/2, Islamabad',
+      shippingAddress: 'House 45, Street 12, F-8/2',
+      city: 'Islamabad',
+      country: 'Pakistan',
+      postalCode: '44000',
+      carrier: 'TCS Express',
+      trackingNumber: 'TCS-928410294',
+      notes: 'Customer requested leave package at front desk with security guard.',
       itemsCount: 2,
       items: [
-        { productName: 'Sony WH-1000XM5 Wireless Headphones', sku: 'SON-XM5-BLK', quantity: 1, unitPrice: 299.99, totalPrice: 299.99 },
-        { productName: 'Anker 65W GaN Fast Charger', sku: 'ANK-65W-WHT', quantity: 1, unitPrice: 50.00, totalPrice: 50.00 }
+        { productName: 'Sony WH-1000XM5 Wireless Headphones', sku: 'SON-XM5-BLK', quantity: 1, unitPrice: 299.99, totalPrice: 299.99, imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&q=80' },
+        { productName: 'Anker 65W GaN Fast Charger', sku: 'ANK-65W-WHT', quantity: 1, unitPrice: 50.00, totalPrice: 50.00, imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=100&q=80' }
+      ],
+      timeline: [
+        { id: 't1', title: 'Package Delivered', description: 'Delivered to recipient in Islamabad by courier (TCS Express).', date: '2026-09-05T14:30:00Z', type: 'delivered' },
+        { id: 't2', title: 'Out for Delivery', description: 'Package out for local delivery in Islamabad hub.', date: '2026-09-05T09:15:00Z', type: 'shipped' },
+        { id: 't3', title: 'Order Shipped', description: 'Dispatched via TCS Express. Tracking ID: TCS-928410294.', date: '2026-09-04T16:00:00Z', type: 'shipped' },
+        { id: 't4', title: 'Payment Confirmed', description: 'Card payment of $349.99 captured successfully.', date: '2026-09-04T11:05:00Z', type: 'paid' },
+        { id: 't5', title: 'Order Placed', description: 'Customer placed order through online checkout.', date: '2026-09-04T11:00:00Z', type: 'placed' }
       ]
     },
     {
@@ -198,14 +235,29 @@ export class AdminMockDataService {
       customerEmail: 'f.zahra@example.com',
       customerPhone: '+92 321 7654321',
       date: '2026-09-05',
+      subtotal: 129.50,
+      shippingFee: 10.00,
+      tax: 0,
+      discount: 10.00,
       total: 129.50,
       paymentStatus: 'Paid',
       fulfillmentStatus: 'Processing',
       paymentMethod: 'JazzCash',
-      shippingAddress: 'Apartment 3B, DHA Phase 5, Lahore',
+      shippingAddress: 'Apartment 3B, DHA Phase 5',
+      city: 'Lahore',
+      country: 'Pakistan',
+      postalCode: '54792',
+      carrier: 'Leopard Courier',
+      trackingNumber: 'LEO-771239841',
+      notes: 'Priority shipping requested for birthday gift.',
       itemsCount: 1,
       items: [
-        { productName: 'Logitech MX Master 3S Wireless Mouse', sku: 'LOG-MX3S-GRY', quantity: 1, unitPrice: 129.50, totalPrice: 129.50 }
+        { productName: 'Logitech MX Master 3S Wireless Mouse', sku: 'LOG-MX3S-GRY', quantity: 1, unitPrice: 129.50, totalPrice: 129.50, imageUrl: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=100&q=80' }
+      ],
+      timeline: [
+        { id: 't21', title: 'Packing in Warehouse', description: 'Item picked and packed into dispatch box.', date: '2026-09-05T12:00:00Z', type: 'processing' },
+        { id: 't22', title: 'Payment Confirmed', description: 'Received via JazzCash mobile wallet.', date: '2026-09-05T10:45:00Z', type: 'paid' },
+        { id: 't23', title: 'Order Placed', description: 'Customer placed order through mobile storefront.', date: '2026-09-05T10:42:00Z', type: 'placed' }
       ]
     },
     {
@@ -215,16 +267,28 @@ export class AdminMockDataService {
       customerEmail: 'bilal.tariq@example.com',
       customerPhone: '+92 333 9876543',
       date: '2026-09-04',
+      subtotal: 589.00,
+      shippingFee: 0,
+      tax: 0,
+      discount: 0,
       total: 589.00,
       paymentStatus: 'Pending',
-      fulfillmentStatus: 'Processing',
+      fulfillmentStatus: 'Pending',
       paymentMethod: 'Cash on Delivery (COD)',
-      shippingAddress: 'Plot 108, Block C, Gulshan-e-Iqbal, Karachi',
+      shippingAddress: 'Plot 108, Block C, Gulshan-e-Iqbal',
+      city: 'Karachi',
+      country: 'Pakistan',
+      postalCode: '75300',
+      carrier: 'Call Courier',
+      notes: 'Please verify phone number before dispatch.',
       itemsCount: 3,
       items: [
-        { productName: 'Keychron Q1 Pro Wireless Mechanical Keyboard', sku: 'KEY-Q1P-RGB', quantity: 1, unitPrice: 199.00, totalPrice: 199.00 },
-        { productName: 'BenQ ScreenBar Pro Monitor Light', sku: 'BNQ-SCR-PRO', quantity: 1, unitPrice: 140.00, totalPrice: 140.00 },
-        { productName: 'CalDigit TS4 Thunderbolt 4 Dock', sku: 'CAL-TS4-SIL', quantity: 1, unitPrice: 250.00, totalPrice: 250.00 }
+        { productName: 'Keychron Q1 Pro Wireless Keyboard', sku: 'KEY-Q1P-RGB', quantity: 1, unitPrice: 199.00, totalPrice: 199.00, imageUrl: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=100&q=80' },
+        { productName: 'BenQ ScreenBar Pro Monitor Light', sku: 'BNQ-SCR-PRO', quantity: 1, unitPrice: 140.00, totalPrice: 140.00, imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=100&q=80' },
+        { productName: 'CalDigit TS4 Thunderbolt 4 Dock', sku: 'CAL-TS4-SIL', quantity: 1, unitPrice: 250.00, totalPrice: 250.00, imageUrl: 'https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=100&q=80' }
+      ],
+      timeline: [
+        { id: 't31', title: 'Order Verification Required', description: 'COD order waiting for customer phone confirmation.', date: '2026-09-04T17:10:00Z', type: 'placed' }
       ]
     },
     {
@@ -234,14 +298,28 @@ export class AdminMockDataService {
       customerEmail: 'zainab.b@example.com',
       customerPhone: '+92 345 5551234',
       date: '2026-09-04',
+      subtotal: 89.99,
+      shippingFee: 0,
+      tax: 0,
+      discount: 0,
       total: 89.99,
       paymentStatus: 'Paid',
       fulfillmentStatus: 'Shipped',
       paymentMethod: 'Easypaisa',
-      shippingAddress: 'Street 4, Sector G-11/3, Islamabad',
+      shippingAddress: 'Street 4, Sector G-11/3',
+      city: 'Islamabad',
+      country: 'Pakistan',
+      postalCode: '44000',
+      carrier: 'TCS Express',
+      trackingNumber: 'TCS-889912301',
       itemsCount: 1,
       items: [
-        { productName: 'Apple MagSafe Battery Pack', sku: 'APP-MAG-BAT', quantity: 1, unitPrice: 89.99, totalPrice: 89.99 }
+        { productName: 'Apple MagSafe Battery Pack 5000mAh', sku: 'APP-MAG-BAT', quantity: 1, unitPrice: 89.99, totalPrice: 89.99, imageUrl: 'https://images.unsplash.com/photo-1609592424368-e6922d56c4d7?w=100&q=80' }
+      ],
+      timeline: [
+        { id: 't41', title: 'Handed to Courier', description: 'Dispatched via TCS Express. Tracking ID: TCS-889912301.', date: '2026-09-04T15:20:00Z', type: 'shipped' },
+        { id: 't42', title: 'Payment Confirmed', description: 'Payment of $89.99 received via Easypaisa.', date: '2026-09-04T14:10:00Z', type: 'paid' },
+        { id: 't43', title: 'Order Placed', description: 'Order created online.', date: '2026-09-04T14:00:00Z', type: 'placed' }
       ]
     },
     {
@@ -251,15 +329,27 @@ export class AdminMockDataService {
       customerEmail: 'hamza.ali@example.com',
       customerPhone: '+92 312 4443322',
       date: '2026-09-04',
+      subtotal: 420.00,
+      shippingFee: 0,
+      tax: 0,
+      discount: 0,
       total: 420.00,
       paymentStatus: 'Paid',
       fulfillmentStatus: 'Delivered',
       paymentMethod: 'Credit Card',
-      shippingAddress: 'Model Town, Block B, Lahore',
+      shippingAddress: 'Model Town, Block B',
+      city: 'Lahore',
+      country: 'Pakistan',
+      postalCode: '54700',
+      carrier: 'TCS Express',
+      trackingNumber: 'TCS-998811223',
       itemsCount: 2,
       items: [
-        { productName: 'DJI Mic 2 Wireless Microphone System', sku: 'DJI-MIC-2', quantity: 1, unitPrice: 349.00, totalPrice: 349.00 },
-        { productName: 'SanDisk 256GB Extreme PRO UHS-II SDXC', sku: 'SND-SD-256', quantity: 1, unitPrice: 71.00, totalPrice: 71.00 }
+        { productName: 'DJI Mic 2 Wireless Microphone System', sku: 'DJI-MIC-2', quantity: 1, unitPrice: 349.00, totalPrice: 349.00, imageUrl: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=100&q=80' },
+        { productName: 'SanDisk 256GB Extreme PRO SDXC', sku: 'SND-SD-256', quantity: 1, unitPrice: 71.00, totalPrice: 71.00, imageUrl: 'https://images.unsplash.com/photo-1609592424368-e6922d56c4d7?w=100&q=80' }
+      ],
+      timeline: [
+        { id: 't51', title: 'Delivered to Customer', description: 'Signed and accepted by Hamza Ali.', date: '2026-09-04T18:40:00Z', type: 'delivered' }
       ]
     },
     {
@@ -269,14 +359,26 @@ export class AdminMockDataService {
       customerEmail: 'sara.s@example.com',
       customerPhone: '+92 301 9988776',
       date: '2026-09-03',
+      subtotal: 45.00,
+      shippingFee: 0,
+      tax: 0,
+      discount: 0,
       total: 45.00,
       paymentStatus: 'Refunded',
       fulfillmentStatus: 'Cancelled',
       paymentMethod: 'JazzCash',
-      shippingAddress: 'Clifton Block 2, Karachi',
+      shippingAddress: 'Clifton Block 2',
+      city: 'Karachi',
+      country: 'Pakistan',
+      postalCode: '75600',
+      notes: 'Customer requested cancellation due to duplicate purchase.',
       itemsCount: 1,
       items: [
-        { productName: 'Belkin 3-in-1 Braided Charging Cable', sku: 'BLK-CAB-3IN1', quantity: 1, unitPrice: 45.00, totalPrice: 45.00 }
+        { productName: 'Belkin 3-in-1 Braided Cable', sku: 'BLK-CAB-3IN1', quantity: 1, unitPrice: 45.00, totalPrice: 45.00, imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=100&q=80' }
+      ],
+      timeline: [
+        { id: 't61', title: 'Order Cancelled & Refunded', description: 'Full refund of $45.00 processed back to JazzCash wallet.', date: '2026-09-03T16:20:00Z', type: 'cancelled' },
+        { id: 't62', title: 'Order Placed', description: 'Order created online.', date: '2026-09-03T15:10:00Z', type: 'placed' }
       ]
     },
     {
@@ -454,9 +556,73 @@ export class AdminMockDataService {
     return this.products().find(p => p.id === id);
   }
 
-  updateOrderStatus(orderId: string, status: AdminOrder['fulfillmentStatus']): void {
+  updateOrderStatus(orderId: string, status: AdminOrder['fulfillmentStatus'], note?: string): void {
     this.orders.update(list =>
-      list.map(ord => (ord.id === orderId ? { ...ord, fulfillmentStatus: status } : ord))
+      list.map(ord => {
+        if (ord.id !== orderId) return ord;
+
+        let eventType: AdminOrderTimelineEvent['type'] = 'processing';
+        if (status === 'Delivered') eventType = 'delivered';
+        else if (status === 'Shipped') eventType = 'shipped';
+        else if (status === 'Cancelled') eventType = 'cancelled';
+        else if (status === 'Pending') eventType = 'placed';
+
+        const newEvent: AdminOrderTimelineEvent = {
+          id: `t-${Date.now()}`,
+          title: `Order Status: ${status}`,
+          description: note || `Fulfillment status updated to ${status} by admin.`,
+          date: new Date().toISOString(),
+          type: eventType,
+        };
+
+        const timeline = ord.timeline ? [newEvent, ...ord.timeline] : [newEvent];
+
+        return {
+          ...ord,
+          fulfillmentStatus: status,
+          timeline,
+        };
+      })
+    );
+  }
+
+  updateOrderNotes(orderId: string, notes: string): void {
+    this.orders.update(list =>
+      list.map(ord => {
+        if (ord.id !== orderId) return ord;
+
+        const newEvent: AdminOrderTimelineEvent = {
+          id: `t-${Date.now()}`,
+          title: 'Internal Note Added',
+          description: notes,
+          date: new Date().toISOString(),
+          type: 'note',
+        };
+
+        const timeline = ord.timeline ? [newEvent, ...ord.timeline] : [newEvent];
+
+        return {
+          ...ord,
+          notes,
+          timeline,
+        };
+      })
+    );
+  }
+
+  addOrderTimelineEvent(orderId: string, event: Omit<AdminOrderTimelineEvent, 'id'>): void {
+    this.orders.update(list =>
+      list.map(ord => {
+        if (ord.id !== orderId) return ord;
+        const newEvent: AdminOrderTimelineEvent = {
+          ...event,
+          id: `t-${Date.now()}`,
+        };
+        return {
+          ...ord,
+          timeline: [newEvent, ...(ord.timeline || [])],
+        };
+      })
     );
   }
 

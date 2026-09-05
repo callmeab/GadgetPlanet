@@ -51,10 +51,18 @@ export const ADMIN_ROUTES: Routes = [
       {
         path: 'orders',
         loadComponent: () =>
-          import('./features/dashboard/admin-dashboard.component').then(
-            m => m.AdminDashboardComponent
+          import('./features/orders/admin-orders.component').then(
+            m => m.AdminOrdersComponent
           ),
         title: 'Orders — GadgetPlanet Admin',
+      },
+      {
+        path: 'orders/:id',
+        loadComponent: () =>
+          import(
+            './features/orders/order-detail/admin-order-detail.component'
+          ).then(m => m.AdminOrderDetailComponent),
+        title: 'Order Details — GadgetPlanet Admin',
       },
       {
         path: 'customers',

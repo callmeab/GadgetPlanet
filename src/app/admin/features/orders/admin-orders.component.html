@@ -1,0 +1,655 @@
+<div class="admin-orders-page">
+  <!-- 1. Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="title-with-badge">
+        <h1 class="page-title">Orders</h1>
+        <span class="count-badge">{{ totalCatalogOrders() }}</span>
+      </div>
+      <p class="page-subtitle">
+        Manage customer orders, fulfillment statuses, payment processing, and shipments.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn btn-secondary btn-export"
+        (click)="exportOrdersToCsv()"
+        title="Export filtered orders to CSV"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+          <path d="M4 14v2a2 2 0 002 2h8a2 2 0 002-2v-2M7 10l3 3 3-3M10 3v10"/>
+        </svg>
+        <span>Export CSV</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. Filter Tabs at Top (All / Pending / Processing / Shipped / Delivered / Cancelled) -->
+  <nav class="order-tabs-nav" aria-label="Order status filter tabs">
+    <div class="tabs-track">
+      @for (tab of tabs; track tab) {
+        <button
+          type="button"
+          class="tab-btn"
+          [class.tab-active]="activeTab() === tab"
+          (click)="setTab(tab)"
+        >
+          <span>{{ tab }}</span>
+          <span class="tab-count-badge" [class.badge-active]="activeTab() === tab">
+            {{ tabCounts()[tab] }}
+          </span>
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- 3. Search & Filter Bar -->
+  <section class="filters-card">
+    <div class="filters-row">
+      <!-- Search Input -->
+      <div class="search-field">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+          <circle cx="9" cy="9" r="6"/>
+          <line x1="13.5" y1="13.5" x2="18" y2="18"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by order ID, customer name, email, or city..."
+          [value]="searchQuery()"
+          (input)="onSearchChange($any($event.target).value)"
+          id="orderSearchInput"
+        />
+        @if (searchQuery()) {
+          <button
+            type="button"
+            class="clear-search-btn"
+            (click)="onSearchChange('')"
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        }
+      </div>
+
+      <!-- Payment Status Filter -->
+      <div class="filter-select-group">
+        <label class="filter-label" for="paymentFilterSelect">Payment Status</label>
+        <select
+          id="paymentFilterSelect"
+          class="filter-select"
+          [value]="paymentFilter()"
+          (change)="onPaymentFilterChange($any($event.target).value)"
+        >
+          <option value="all">All Payment Statuses</option>
+          <option value="Paid">Paid</option>
+          <option value="Pending">Pending Payment</option>
+          <option value="Refunded">Refunded</option>
+          <option value="Failed">Failed</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Active Filter Summary -->
+    <div class="filters-summary-row">
+      <div class="results-count">
+        Showing <strong>{{ totalItems() }}</strong> of {{ totalCatalogOrders() }} orders
+      </div>
+
+      @if (hasActiveFilters()) {
+        <div class="active-chips">
+          @if (searchQuery()) {
+            <span class="filter-chip">
+              Search: "{{ searchQuery() }}"
+              <button type="button" (click)="onSearchChange('')">&times;</button>
+            </span>
+          }
+          @if (paymentFilter() !== 'all') {
+            <span class="filter-chip">
+              Payment: {{ paymentFilter() }}
+              <button type="button" (click)="onPaymentFilterChange('all')">&times;</button>
+            </span>
+          }
+          <button type="button" class="btn-clear-all" (click)="resetFilters()">
+            Clear all
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 4. Bulk Actions Bar -->
+  @if (selectedCount() > 0) {
+    <aside class="bulk-actions-bar" aria-label="Bulk actions bar">
+      <div class="bulk-bar-info">
+        <span class="selection-indicator">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="check-icon">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+          <strong>{{ selectedCount() }}</strong> orders selected
+        </span>
+        <button type="button" class="btn-link" (click)="clearSelection()">
+          Deselect all
+        </button>
+      </div>
+
+      <div class="bulk-bar-actions">
+        <!-- Status Change Dropdown -->
+        <div class="actions-dropdown-wrapper">
+          <button
+            type="button"
+            class="btn btn-sm btn-bulk-secondary"
+            (click)="toggleBulkStatusDropdown($event)"
+            id="bulkOrderStatusBtn"
+          >
+            <span>Update Fulfillment</span>
+            <svg viewBox="0 0 20 20" fill="currentColor" class="chevron-icon">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          @if (isBulkStatusDropdownOpen()) {
+            <div class="dropdown-menu dropdown-menu-bulk" (click)="$event.stopPropagation()">
+              <button type="button" class="dropdown-item" (click)="applyBulkStatus('Processing')">
+                <span class="status-dot dot-info"></span>
+                Mark as Processing
+              </button>
+              <button type="button" class="dropdown-item" (click)="applyBulkStatus('Shipped')">
+                <span class="status-dot dot-info"></span>
+                Mark as Shipped
+              </button>
+              <button type="button" class="dropdown-item" (click)="applyBulkStatus('Delivered')">
+                <span class="status-dot dot-success"></span>
+                Mark as Delivered
+              </button>
+              <button type="button" class="dropdown-item" (click)="applyBulkStatus('Cancelled')">
+                <span class="status-dot dot-danger"></span>
+                Mark as Cancelled
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Bulk Delete -->
+        <button
+          type="button"
+          class="btn btn-sm btn-bulk-danger"
+          (click)="confirmBulkDelete()"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+            <path d="M4 6h12M8 6V4a2 2 0 012-2h0a2 2 0 012 2v2M5 6l1 11a2 2 0 002 2h4a2 2 0 002-2l1-11"/>
+          </svg>
+          <span>Delete</span>
+        </button>
+      </div>
+    </aside>
+  }
+
+  <!-- 5. Orders Table / Cards Card -->
+  <main class="orders-content-card">
+    @if (filteredOrders().length === 0) {
+      <!-- Empty State -->
+      <div class="empty-state">
+        <div class="empty-state-icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M8 12h32l-3 24H11L8 12zM16 12V8a4 4 0 014-4h8a4 4 0 014 4v4"/>
+            <line x1="20" y1="22" x2="28" y2="22"/>
+          </svg>
+        </div>
+        <h3 class="empty-title">No orders found</h3>
+        <p class="empty-desc">
+          @if (activeTab() !== 'All') {
+            There are currently no orders in "{{ activeTab() }}" status.
+          } @else {
+            No orders match your search criteria.
+          }
+        </p>
+        <button type="button" class="btn btn-secondary" (click)="setTab('All'); resetFilters()">
+          Show All Orders
+        </button>
+      </div>
+    } @else {
+      <!-- Desktop Table (>= 768px) -->
+      <div class="desktop-table-container">
+        <table class="admin-data-table" aria-label="Customer orders table">
+          <thead>
+            <tr>
+              <!-- Checkbox -->
+              <th class="col-checkbox">
+                <input
+                  type="checkbox"
+                  class="custom-checkbox"
+                  [checked]="isAllSelected()"
+                  [indeterminate]="isIndeterminate()"
+                  (change)="toggleSelectAll()"
+                  aria-label="Select all orders"
+                />
+              </th>
+
+              <!-- Order ID -->
+              <th class="col-order-id sortable" (click)="setSort('orderNumber')">
+                <div class="th-content">
+                  <span>Order</span>
+                  @if (sortColumn() === 'orderNumber') {
+                    <span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </div>
+              </th>
+
+              <!-- Date -->
+              <th class="col-date sortable" (click)="setSort('date')">
+                <div class="th-content">
+                  <span>Date</span>
+                  @if (sortColumn() === 'date') {
+                    <span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </div>
+              </th>
+
+              <!-- Customer -->
+              <th class="col-customer sortable" (click)="setSort('customerName')">
+                <div class="th-content">
+                  <span>Customer</span>
+                  @if (sortColumn() === 'customerName') {
+                    <span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </div>
+              </th>
+
+              <!-- Items Count -->
+              <th class="col-items text-center">Items</th>
+
+              <!-- Total -->
+              <th class="col-total sortable text-right" (click)="setSort('total')">
+                <div class="th-content content-right">
+                  <span>Total</span>
+                  @if (sortColumn() === 'total') {
+                    <span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </div>
+              </th>
+
+              <!-- Payment Status Pill -->
+              <th class="col-payment text-center">Payment</th>
+
+              <!-- Fulfillment Status Pill -->
+              <th class="col-fulfillment text-center sortable" (click)="setSort('fulfillmentStatus')">
+                <div class="th-content content-center">
+                  <span>Fulfillment</span>
+                  @if (sortColumn() === 'fulfillmentStatus') {
+                    <span class="sort-indicator">{{ sortDirection() === 'asc' ? '↑' : '↓' }}</span>
+                  }
+                </div>
+              </th>
+
+              <!-- Actions -->
+              <th class="col-actions text-right">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (order of paginatedOrders(); track order.id) {
+              <tr
+                class="table-row"
+                [class.row-selected]="selectedIds().has(order.id)"
+                (click)="viewOrderDetail(order.id)"
+              >
+                <!-- Checkbox -->
+                <td class="col-checkbox" (click)="$event.stopPropagation()">
+                  <input
+                    type="checkbox"
+                    class="custom-checkbox"
+                    [checked]="selectedIds().has(order.id)"
+                    (change)="toggleSelectRow(order.id)"
+                    [attr.aria-label]="'Select order ' + order.orderNumber"
+                  />
+                </td>
+
+                <!-- Order ID Link -->
+                <td class="col-order-id">
+                  <span class="order-id-link font-mono">
+                    #{{ order.orderNumber }}
+                  </span>
+                </td>
+
+                <!-- Date -->
+                <td class="col-date">
+                  <span class="date-text">{{ order.date | date:'mediumDate' }}</span>
+                </td>
+
+                <!-- Customer Info -->
+                <td class="col-customer">
+                  <div class="customer-cell">
+                    <span class="customer-name">{{ order.customerName }}</span>
+                    <span class="customer-email">{{ order.customerEmail }}</span>
+                  </div>
+                </td>
+
+                <!-- Items Count -->
+                <td class="col-items text-center">
+                  <span class="items-count-badge" [title]="order.itemsCount + ' item(s)'">
+                    {{ order.itemsCount }} {{ order.itemsCount === 1 ? 'item' : 'items' }}
+                  </span>
+                </td>
+
+                <!-- Total -->
+                <td class="col-total text-right">
+                  <span class="total-value">{{ order.total | currency:'USD':'symbol':'1.2-2' }}</span>
+                </td>
+
+                <!-- Payment Status -->
+                <td class="col-payment text-center">
+                  <gp-admin-status-pill [status]="order.paymentStatus" size="sm"></gp-admin-status-pill>
+                </td>
+
+                <!-- Fulfillment Status -->
+                <td class="col-fulfillment text-center">
+                  <gp-admin-status-pill [status]="order.fulfillmentStatus" size="sm"></gp-admin-status-pill>
+                </td>
+
+                <!-- Actions -->
+                <td class="col-actions text-right" (click)="$event.stopPropagation()">
+                  <div class="action-buttons-group">
+                    <!-- View Details Button -->
+                    <button
+                      type="button"
+                      class="icon-action-btn"
+                      (click)="viewOrderDetail(order.id, $event)"
+                      title="View order details"
+                      aria-label="View order details"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                        <path d="M2.458 10C3.732 6.943 6.523 5 10 5c3.477 0 6.268 1.943 7.542 5-1.274 3.057-4.065 5-7.542 5-3.477 0-6.268-1.943-7.542-5z"/>
+                      </svg>
+                    </button>
+
+                    <!-- Quick Update Dropdown -->
+                    <div class="actions-dropdown-wrapper">
+                      <button
+                        type="button"
+                        class="icon-action-btn"
+                        (click)="toggleRowDropdown(order.id, $event)"
+                        title="Quick change status"
+                        aria-label="Quick change status"
+                      >
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                          <circle cx="10" cy="5" r="1.5"/>
+                          <circle cx="10" cy="10" r="1.5"/>
+                          <circle cx="10" cy="15" r="1.5"/>
+                        </svg>
+                      </button>
+
+                      @if (activeDropdownId() === order.id) {
+                        <div class="dropdown-menu row-dropdown" (click)="$event.stopPropagation()">
+                          <button
+                            type="button"
+                            class="dropdown-item"
+                            (click)="quickUpdateStatus(order, 'Processing', $event)"
+                          >
+                            <span class="status-dot dot-info"></span>
+                            Mark as Processing
+                          </button>
+                          <button
+                            type="button"
+                            class="dropdown-item"
+                            (click)="quickUpdateStatus(order, 'Shipped', $event)"
+                          >
+                            <span class="status-dot dot-info"></span>
+                            Mark as Shipped
+                          </button>
+                          <button
+                            type="button"
+                            class="dropdown-item"
+                            (click)="quickUpdateStatus(order, 'Delivered', $event)"
+                          >
+                            <span class="status-dot dot-success"></span>
+                            Mark as Delivered
+                          </button>
+
+                          <div class="dropdown-divider"></div>
+
+                          <button
+                            type="button"
+                            class="dropdown-item item-danger"
+                            (click)="quickUpdateStatus(order, 'Cancelled', $event)"
+                          >
+                            <span class="status-dot dot-danger"></span>
+                            Cancel Order
+                          </button>
+
+                          <button
+                            type="button"
+                            class="dropdown-item item-danger"
+                            (click)="confirmSingleDelete(order, $event)"
+                          >
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="dropdown-item-icon">
+                              <path d="M4 6h12M8 6V4a2 2 0 012-2h0a2 2 0 012 2v2M5 6l1 11a2 2 0 002 2h4a2 2 0 002-2l1-11"/>
+                            </svg>
+                            Delete Order
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 6. Mobile Stacked Card List (< 768px) -->
+      <div class="mobile-cards-list" aria-label="Customer orders mobile list">
+        @for (order of paginatedOrders(); track order.id) {
+          <article
+            class="order-card"
+            [class.card-selected]="selectedIds().has(order.id)"
+          >
+            <!-- Card Header: Checkbox + Order # + Date -->
+            <div class="card-header-row">
+              <div class="header-id-group">
+                <input
+                  type="checkbox"
+                  class="custom-checkbox"
+                  [checked]="selectedIds().has(order.id)"
+                  (change)="toggleSelectRow(order.id, $event)"
+                  [attr.aria-label]="'Select order ' + order.orderNumber"
+                />
+                <span class="card-order-number font-mono" (click)="viewOrderDetail(order.id)">
+                  #{{ order.orderNumber }}
+                </span>
+              </div>
+              <span class="card-date">{{ order.date | date:'shortDate' }}</span>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="card-customer-info">
+              <span class="customer-name">{{ order.customerName }}</span>
+              <span class="customer-email">{{ order.customerEmail }}</span>
+            </div>
+
+            <!-- Metrics: Total + Items -->
+            <div class="card-metrics-row">
+              <span class="card-total">{{ order.total | currency:'USD':'symbol':'1.2-2' }}</span>
+              <span class="card-items-count">{{ order.itemsCount }} {{ order.itemsCount === 1 ? 'item' : 'items' }}</span>
+            </div>
+
+            <!-- Statuses Row: Payment & Fulfillment Pills -->
+            <div class="card-statuses-row">
+              <div class="status-wrap">
+                <span class="status-type-label">Payment:</span>
+                <gp-admin-status-pill [status]="order.paymentStatus" size="sm"></gp-admin-status-pill>
+              </div>
+              <div class="status-wrap">
+                <span class="status-type-label">Fulfillment:</span>
+                <gp-admin-status-pill [status]="order.fulfillmentStatus" size="sm"></gp-admin-status-pill>
+              </div>
+            </div>
+
+            <!-- Card Footer: 44px Touch Targets -->
+            <div class="card-footer-row">
+              <button
+                type="button"
+                class="mobile-touch-btn btn-view-order"
+                (click)="viewOrderDetail(order.id)"
+              >
+                <span>View Order Details</span>
+                <svg viewBox="0 0 20 20" fill="currentColor" class="arrow-icon">
+                  <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+
+              <div class="actions-dropdown-wrapper">
+                <button
+                  type="button"
+                  class="mobile-touch-btn btn-options"
+                  (click)="toggleRowDropdown(order.id, $event)"
+                  aria-label="Order options"
+                >
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <circle cx="10" cy="5" r="1.5"/>
+                    <circle cx="10" cy="10" r="1.5"/>
+                    <circle cx="10" cy="15" r="1.5"/>
+                  </svg>
+                </button>
+
+                @if (activeDropdownId() === order.id) {
+                  <div class="dropdown-menu row-dropdown" (click)="$event.stopPropagation()">
+                    <button
+                      type="button"
+                      class="dropdown-item"
+                      (click)="quickUpdateStatus(order, 'Processing', $event)"
+                    >
+                      <span class="status-dot dot-info"></span>
+                      Mark as Processing
+                    </button>
+                    <button
+                      type="button"
+                      class="dropdown-item"
+                      (click)="quickUpdateStatus(order, 'Shipped', $event)"
+                    >
+                      <span class="status-dot dot-info"></span>
+                      Mark as Shipped
+                    </button>
+                    <button
+                      type="button"
+                      class="dropdown-item"
+                      (click)="quickUpdateStatus(order, 'Delivered', $event)"
+                    >
+                      <span class="status-dot dot-success"></span>
+                      Mark as Delivered
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+
+      <!-- 7. Pagination Controls at Bottom -->
+      <footer class="pagination-footer">
+        <div class="pagination-summary">
+          Showing <strong>{{ startIndex() }}</strong> to <strong>{{ endIndex() }}</strong> of <strong>{{ totalItems() }}</strong> orders
+        </div>
+
+        <div class="pagination-controls">
+          <!-- Rows per page -->
+          <div class="page-size-selector">
+            <span class="page-size-label">Rows per page:</span>
+            <select
+              class="page-size-select"
+              [value]="pageSize()"
+              (change)="setPageSize(+$any($event.target).value)"
+              aria-label="Rows per page selector"
+            >
+              @for (size of pageSizeOptions; track size) {
+                <option [value]="size">{{ size }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Page Navigation Buttons -->
+          <nav class="page-buttons-nav" aria-label="Pagination Navigation">
+            <button
+              type="button"
+              class="page-btn page-btn-prev"
+              [disabled]="currentPage() === 1"
+              (click)="goToPage(currentPage() - 1)"
+              aria-label="Previous page"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+
+            @for (item of getPageNumbers(); track $index) {
+              @if (item === '...') {
+                <span class="page-ellipsis">…</span>
+              } @else {
+                <button
+                  type="button"
+                  class="page-btn page-num"
+                  [class.active]="currentPage() === item"
+                  (click)="goToPage(+item)"
+                >
+                  {{ item }}
+                </button>
+              }
+            }
+
+            <button
+              type="button"
+              class="page-btn page-btn-next"
+              [disabled]="currentPage() === totalPages()"
+              (click)="goToPage(currentPage() + 1)"
+              aria-label="Next page"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </nav>
+        </div>
+      </footer>
+    }
+  </main>
+
+  <!-- 8. Delete Confirmation Modal -->
+  <gp-admin-modal
+    [isOpen]="isDeleteModalOpen()"
+    [title]="orderToDelete() ? 'Delete Order?' : 'Delete Selected Orders?'"
+    size="sm"
+    (closed)="closeDeleteModal()"
+  >
+    <div class="delete-confirm-body">
+      <div class="delete-warning-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+
+      <p class="delete-msg">
+        @if (orderToDelete(); as o) {
+          Are you sure you want to delete order <strong>#{{ o.orderNumber }}</strong>? This will remove all associated item and payment records.
+        } @else {
+          Are you sure you want to delete <strong>{{ selectedCount() }} selected orders</strong>? This action cannot be undone.
+        }
+      </p>
+    </div>
+
+    <div modalFooter class="modal-footer-actions">
+      <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-danger" (click)="executeDelete()">
+        Delete Permanently
+      </button>
+    </div>
+  </gp-admin-modal>
+</div>
