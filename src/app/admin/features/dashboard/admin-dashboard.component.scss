@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   gap: $admin-space-6;
+  font-family: $admin-font-family;
 }
 
 // ── Dashboard Header ─────────────────────────────────────────
@@ -37,7 +38,7 @@
   }
 }
 
-// ── Buttons ──────────────────────────────────────────────────
+// ── Shared Button Styles ─────────────────────────────────────
 .admin-btn {
   height: 36px;
   padding: 0 $admin-space-4;
@@ -62,10 +63,6 @@
     &:hover {
       background: $admin-primary-hover;
     }
-
-    &:active {
-      transform: translateY(1px);
-    }
   }
 
   &--secondary {
@@ -80,132 +77,548 @@
   }
 }
 
-// ── KPI Cards Grid ───────────────────────────────────────────
+// ── Top Row: 4 StatCard KPIs ──────────────────────────────────
+// Responsive: 4 cols desktop -> 2 cols tablet -> 1 col mobile
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: $admin-space-4;
+
+  @media (max-width: 1023px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 639px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
-// ── Orders Section ───────────────────────────────────────────
-.orders-section {
+// ── Generic Dashboard Card Panel ─────────────────────────────
+.dashboard-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  box-shadow: $admin-shadow-xs;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: $admin-space-3;
 
-  .section-toolbar {
+  .card-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
+    padding: $admin-space-4 $admin-space-5;
+    border-bottom: 1px solid $admin-border;
     gap: $admin-space-3;
     flex-wrap: wrap;
 
-    .status-tab-group {
+    .header-titles {
       display: flex;
-      align-items: center;
-      gap: 2px;
-      background: $admin-bg-muted;
-      padding: 3px;
-      border-radius: 8px;
-      border: 1px solid $admin-border;
-      overflow-x: auto;
-      max-width: 100%;
+      flex-direction: column;
+      gap: 3px;
 
-      .status-tab {
-        background: transparent;
-        border: none;
-        padding: 6px $admin-space-3;
-        font-family: $admin-font-family;
-        font-size: 12px;
-        font-weight: 500;
-        color: $admin-text-secondary;
-        border-radius: $admin-inner-radius;
-        cursor: pointer;
-        white-space: nowrap;
-        display: inline-flex;
+      .title-with-badge {
+        display: flex;
         align-items: center;
-        gap: 6px;
-        transition: all $admin-transition-fast;
+        gap: $admin-space-2;
+      }
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: $admin-text-primary;
+      margin: 0;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: $admin-text-secondary;
+    }
+
+    .alert-count-pill {
+      font-size: 11px;
+      font-weight: 600;
+      background: #FEF2F2;
+      color: #DC2626;
+      border: 1px solid #FECACA;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .card-action-link {
+      font-size: 12px;
+      font-weight: 500;
+      color: $admin-primary;
+      text-decoration: none;
+      white-space: nowrap;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// ── Sales Chart Section ──────────────────────────────────────
+.sales-chart-card {
+  .chart-header {
+    align-items: center;
+
+    .chart-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .chart-summary-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: $admin-text-secondary;
+
+        strong {
+          color: $admin-text-primary;
+          font-weight: 600;
+        }
+
+        .meta-divider {
+          color: $admin-text-muted;
+        }
+      }
+    }
+
+    .timeframe-picker {
+      .timeframe-buttons {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        background: $admin-bg-muted;
+        padding: 3px;
+        border-radius: 6px;
+        border: 1px solid $admin-border;
+
+        .timeframe-btn {
+          background: none;
+          border: none;
+          font-family: $admin-font-family;
+          font-size: 12px;
+          font-weight: 500;
+          color: $admin-text-secondary;
+          padding: 4px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all $admin-transition-fast;
+
+          &:hover {
+            color: $admin-text-primary;
+          }
+
+          &--active {
+            background: $admin-bg-surface;
+            color: $admin-text-primary;
+            font-weight: 600;
+            box-shadow: $admin-shadow-xs;
+          }
+        }
+      }
+    }
+  }
+
+  .svg-chart-wrapper {
+    padding: $admin-space-4 $admin-space-5 $admin-space-2;
+    width: 100%;
+    overflow-x: hidden;
+
+    .sales-svg-chart {
+      width: 100%;
+      height: 220px;
+      overflow: visible;
+
+      .axis-label {
+        font-size: 11px;
+        fill: $admin-text-secondary;
+        font-family: $admin-font-family;
+      }
+
+      .chart-point-group {
+        cursor: pointer;
+
+        .hover-hitbox {
+          cursor: pointer;
+        }
+
+        .point-circle {
+          transition: transform $admin-transition-fast, r $admin-transition-fast;
+        }
+
+        &:hover .point-circle {
+          r: 6.5;
+          fill: $admin-primary;
+          stroke: #FFFFFF;
+        }
+      }
+
+      .chart-tooltip-group {
+        pointer-events: none;
+        animation: fadeIn $admin-transition-fast ease-in;
+      }
+    }
+  }
+}
+
+// ── Two-Column Row: Recent Orders & Top Selling Products ─────
+.dashboard-two-col {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: $admin-space-5;
+
+  @media (max-width: 1023px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Recent Orders Table ──────────────────────────────────────
+.orders-card {
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dense-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+
+    thead {
+      background: $admin-bg;
+
+      th {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: $admin-text-secondary;
+        padding: 10px $admin-space-4;
+        border-bottom: 1px solid $admin-border;
+        white-space: nowrap;
+      }
+    }
+
+    tbody {
+      tr {
+        border-bottom: 1px solid $admin-border-subtle;
+        transition: background-color $admin-transition-fast;
+        cursor: pointer;
+
+        &:last-child {
+          border-bottom: none;
+        }
 
         &:hover {
-          color: $admin-text-primary;
+          background-color: $admin-bg-hover;
         }
 
-        &--active {
-          background: $admin-bg-surface;
-          color: $admin-text-primary;
+        td {
+          padding: 10px $admin-space-4;
+          vertical-align: middle;
+          white-space: nowrap;
+        }
+      }
+    }
+
+    .order-id-badge {
+      font-family: monospace, monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: $admin-primary;
+      background: $admin-primary-subtle;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .customer-cell {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+
+      .customer-name {
+        font-weight: 500;
+        color: $admin-text-primary;
+      }
+
+      .customer-email {
+        font-size: 11px;
+        color: $admin-text-muted;
+      }
+    }
+
+    .date-text {
+      font-size: 12px;
+      color: $admin-text-secondary;
+    }
+
+    .row-view-btn {
+      background: none;
+      border: none;
+      font-family: $admin-font-family;
+      font-size: 12px;
+      font-weight: 600;
+      color: $admin-primary;
+      cursor: pointer;
+      padding: 3px 6px;
+      border-radius: 4px;
+
+      &:hover {
+        background: $admin-primary-subtle;
+        text-decoration: underline;
+      }
+    }
+
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+  }
+}
+
+// ── Top Selling Products List ────────────────────────────────
+.top-products-card {
+  .top-products-list {
+    display: flex;
+    flex-direction: column;
+    padding: $admin-space-2 $admin-space-4;
+
+    .top-product-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid $admin-border-subtle;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .rank-badge {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: $admin-bg-muted;
+        color: $admin-text-secondary;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        &--first {
+          background: #FEF3C7;
+          color: #D97706;
+          border: 1px solid #FDE68A;
+        }
+      }
+
+      .product-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 6px;
+        background: $admin-bg;
+        border: 1px solid $admin-border;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+
+      .product-info {
+        flex: 1;
+        min-width: 0;
+
+        .product-name {
+          font-size: 13px;
           font-weight: 600;
-          box-shadow: $admin-shadow-xs;
+          color: $admin-text-primary;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
-        .tab-count {
+        .product-meta {
+          display: flex;
+          align-items: center;
+          gap: 6px;
           font-size: 11px;
-          font-weight: 600;
-          background: rgba(0, 0, 0, 0.06);
-          padding: 1px 6px;
-          border-radius: 10px;
+          color: $admin-text-secondary;
+          margin-top: 1px;
+
+          .meta-dot {
+            color: $admin-text-muted;
+          }
+
+          .sales-count {
+            color: #059669;
+            font-weight: 600;
+          }
+        }
+      }
+
+      .product-revenue {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 3px;
+        flex-shrink: 0;
+
+        .revenue-val {
+          font-size: 13px;
+          color: $admin-text-primary;
         }
       }
     }
   }
 }
 
-// ── Table Custom Cells ───────────────────────────────────────
-.order-id-badge {
-  font-family: monospace, monospace;
-  font-size: 12px;
-  font-weight: 600;
-  color: $admin-primary;
-  background: $admin-primary-subtle;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
+// ── Low Stock Alerts Widget ──────────────────────────────────
+.low-stock-card {
+  .low-stock-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: $admin-space-4;
+    padding: $admin-space-4 $admin-space-5;
 
-.date-cell {
-  font-size: 12px;
-  color: $admin-text-secondary;
-  white-space: nowrap;
-}
+    .low-stock-item {
+      background: $admin-bg;
+      border: 1px solid $admin-border;
+      border-radius: $admin-inner-radius;
+      padding: $admin-space-3 $admin-space-4;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all $admin-transition-fast;
 
-.customer-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
+      &:hover {
+        border-color: $admin-text-muted;
+        background: #FFFFFF;
+        box-shadow: $admin-shadow-sm;
+      }
 
-  .customer-name {
-    font-size: 13px;
-    font-weight: 500;
-    color: $admin-text-primary;
-  }
+      &--critical {
+        border-left: 4px solid #EF4444;
+        background: #FEF2F2;
+      }
 
-  .customer-email {
-    font-size: 11px;
-    color: $admin-text-muted;
-  }
-}
+      .item-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
 
-.total-cell {
-  font-size: 13px;
-  font-weight: 600;
-  color: $admin-text-primary;
-  white-space: nowrap;
-}
+        .item-icon {
+          font-size: 18px;
+          line-height: 1;
+        }
 
-.table-action-link {
-  background: none;
-  border: none;
-  color: $admin-primary;
-  font-family: $admin-font-family;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all $admin-transition-fast;
+        .item-meta {
+          flex: 1;
+          min-width: 0;
 
-  &:hover {
-    background: $admin-primary-subtle;
-    text-decoration: underline;
+          .item-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: $admin-text-primary;
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+
+          .item-sku {
+            font-size: 11px;
+            color: $admin-text-secondary;
+            display: block;
+            margin-top: 2px;
+          }
+        }
+
+        .item-status {
+          flex-shrink: 0;
+        }
+      }
+
+      .stock-progress-section {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .stock-labels {
+          display: flex;
+          justify-content: space-between;
+          font-size: 11px;
+
+          .stock-remaining {
+            color: $admin-text-secondary;
+
+            strong {
+              color: #DC2626;
+            }
+          }
+
+          .stock-price {
+            font-weight: 600;
+            color: $admin-text-primary;
+          }
+        }
+
+        .stock-progress-bar {
+          width: 100%;
+          height: 6px;
+          background: #E5E7EB;
+          border-radius: 3px;
+          overflow: hidden;
+
+          .stock-progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width $admin-transition-base ease-out;
+
+            &.fill-warning {
+              background: #F59E0B;
+            }
+
+            &.fill-danger {
+              background: #EF4444;
+            }
+          }
+        }
+      }
+
+      .item-action-row {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 2px;
+
+        .restock-btn {
+          padding: 4px 10px;
+          font-family: $admin-font-family;
+          font-size: 11px;
+          font-weight: 600;
+          color: $admin-primary;
+          background: $admin-bg-surface;
+          border: 1px solid $admin-border;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all $admin-transition-fast;
+
+          &:hover {
+            background: $admin-primary;
+            color: #FFFFFF;
+            border-color: $admin-primary;
+          }
+        }
+      }
+    }
   }
 }
 
@@ -450,7 +863,12 @@
   }
 }
 
-// Mobile Breakpoints
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+// ── Mobile Responsive Adjustments ────────────────────────────
 @media (max-width: 640px) {
   .dashboard-header {
     flex-direction: column;
@@ -458,6 +876,25 @@
 
     .header-actions {
       justify-content: flex-start;
+    }
+  }
+
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+
+    .timeframe-picker {
+      width: 100%;
+
+      .timeframe-buttons {
+        width: 100%;
+        justify-content: space-between;
+
+        .timeframe-btn {
+          flex: 1;
+          text-align: center;
+        }
+      }
     }
   }
 

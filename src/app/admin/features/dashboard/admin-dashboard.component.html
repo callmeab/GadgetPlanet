@@ -2,11 +2,11 @@
   <!-- ── Page Header ─────────────────────────────────────────── -->
   <header class="dashboard-header">
     <div class="header-content">
-      <h1 class="page-title">Store Overview</h1>
-      <p class="page-subtitle">Monitor performance, track customer purchases, and manage inventory fulfillment.</p>
+      <h1 class="page-title">Dashboard Overview</h1>
+      <p class="page-subtitle">Real-time revenue metrics, recent customer orders, top products, and inventory alerts.</p>
     </div>
     <div class="header-actions">
-      <button type="button" class="admin-btn admin-btn--secondary" (click)="setStatusFilter('all')">
+      <button type="button" class="admin-btn admin-btn--secondary" (click)="setTimeframe('7d')">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" width="15" height="15">
           <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
         </svg>
@@ -21,7 +21,7 @@
     </div>
   </header>
 
-  <!-- ── KPI Stat Cards Grid ─────────────────────────────────── -->
+  <!-- ── Top Row: 4 StatCard KPIs ────────────────────────────── -->
   <section class="kpi-grid" aria-label="Key Performance Indicators">
     @for (metric of metrics(); track metric.id) {
       <gp-admin-stat-card
@@ -34,76 +34,323 @@
     }
   </section>
 
-  <!-- ── Orders Management Section ───────────────────────────── -->
-  <section class="orders-section">
-    <!-- Section Toolbar with Filter Tabs -->
-    <div class="section-toolbar">
-      <div class="status-tab-group" role="tablist">
-        @for (tab of statusTabs; track tab.value) {
+  <!-- ── Sales Chart Section ─────────────────────────────────── -->
+  <section class="dashboard-card sales-chart-card">
+    <div class="card-header chart-header">
+      <div class="chart-header-left">
+        <h2 class="card-title">Sales & Revenue Trends</h2>
+        <div class="chart-summary-meta">
+          <span class="meta-stat">
+            Total Revenue: <strong>{{ chartTotalRevenue() | currency:'USD':'symbol':'1.0-0' }}</strong>
+          </span>
+          <span class="meta-divider">•</span>
+          <span class="meta-stat">
+            Total Volume: <strong>{{ chartTotalOrders() | number }} orders</strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- Date-Range Dropdown Filter -->
+      <div class="timeframe-picker">
+        <label for="chart-timeframe" class="sr-only">Date Range</label>
+        <div class="timeframe-buttons" role="tablist">
           <button
             type="button"
-            role="tab"
-            class="status-tab"
-            [class.status-tab--active]="activeStatus() === tab.value"
-            (click)="setStatusFilter(tab.value)"
+            class="timeframe-btn"
+            [class.timeframe-btn--active]="selectedTimeframe() === '7d'"
+            (click)="setTimeframe('7d')"
           >
-            {{ tab.label }}
-            @if (tab.value === 'all') {
-              <span class="tab-count">{{ orders().length }}</span>
-            }
+            7 Days
           </button>
-        }
+          <button
+            type="button"
+            class="timeframe-btn"
+            [class.timeframe-btn--active]="selectedTimeframe() === '30d'"
+            (click)="setTimeframe('30d')"
+          >
+            30 Days
+          </button>
+          <button
+            type="button"
+            class="timeframe-btn"
+            [class.timeframe-btn--active]="selectedTimeframe() === 'year'"
+            (click)="setTimeframe('year')"
+          >
+            This Year
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- Reusable Data Table Component -->
-    <gp-admin-data-table
-      [data]="filteredOrders()"
-      [columns]="columns"
-      searchPlaceholder="Search order #, customer, or total..."
-      [selectable]="true"
-      (rowClick)="openOrderDetails($event)"
-      (bulkAction)="handleBulkAction($event)"
-    >
-      <!-- Custom Cell Template Injection -->
-      <ng-template #customCell let-row let-column="column" let-val="value">
-        @switch (column.key) {
-          @case ('orderNumber') {
-            <span class="order-id-badge">{{ row.orderNumber }}</span>
-          }
-          @case ('date') {
-            <span class="date-cell">{{ row.date | date:'mediumDate' }}</span>
-          }
-          @case ('customerName') {
-            <div class="customer-cell">
-              <span class="customer-name">{{ row.customerName }}</span>
-              <span class="customer-email">{{ row.customerEmail }}</span>
+    <!-- Responsive SVG Line / Area Chart -->
+    <div class="svg-chart-wrapper">
+      <svg
+        class="sales-svg-chart"
+        viewBox="0 0 720 220"
+        preserveAspectRatio="none"
+        role="img"
+        aria-label="Sales performance graph"
+      >
+        <defs>
+          <linearGradient id="salesGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#0A84FF" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#0A84FF" stop-opacity="0.0" />
+          </linearGradient>
+        </defs>
+
+        <!-- Horizontal Guide Grid Lines -->
+        <line x1="45" y1="35" x2="695" y2="35" stroke="#E5E7EB" stroke-dasharray="4 4" stroke-width="1" />
+        <line x1="45" y1="85" x2="695" y2="85" stroke="#E5E7EB" stroke-dasharray="4 4" stroke-width="1" />
+        <line x1="45" y1="135" x2="695" y2="135" stroke="#E5E7EB" stroke-dasharray="4 4" stroke-width="1" />
+        <line x1="45" y1="185" x2="695" y2="185" stroke="#E5E7EB" stroke-width="1.25" />
+
+        <!-- Area Fill -->
+        <path [attr.d]="chartAreaPath()" fill="url(#salesGradient)" />
+
+        <!-- Trend Line -->
+        <path
+          [attr.d]="chartLinePath()"
+          fill="none"
+          stroke="#0A84FF"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+
+        <!-- Interactive Data Points & Hover Targets -->
+        @for (pt of chartSvgPoints(); track pt.label) {
+          <g
+            class="chart-point-group"
+            (mouseenter)="hoveredPoint.set(pt)"
+            (mouseleave)="hoveredPoint.set(null)"
+          >
+            <!-- Outer transparent hover circle -->
+            <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="16" fill="transparent" class="hover-hitbox" />
+            <!-- Visible point circle -->
+            <circle
+              [attr.cx]="pt.x"
+              [attr.cy]="pt.y"
+              r="4.5"
+              fill="#FFFFFF"
+              stroke="#0A84FF"
+              stroke-width="2.5"
+              class="point-circle"
+            />
+            <!-- X-Axis Label -->
+            <text
+              [attr.x]="pt.x"
+              y="205"
+              text-anchor="middle"
+              class="axis-label"
+            >
+              {{ pt.label }}
+            </text>
+          </g>
+        }
+
+        <!-- Active Hover Tooltip Card -->
+        @if (hoveredPoint(); as hp) {
+          <g class="chart-tooltip-group" [attr.transform]="'translate(' + (hp.x - 55) + ',' + (hp.y - 50) + ')'">
+            <rect
+              x="0"
+              y="0"
+              width="110"
+              height="42"
+              rx="6"
+              fill="#111827"
+              filter="drop-shadow(0 4px 6px rgba(0,0,0,0.15))"
+            />
+            <text x="55" y="17" fill="#F3F4F6" text-anchor="middle" font-size="10" font-weight="500">
+              {{ hp.label }}: {{ hp.revenue | currency:'USD':'symbol':'1.0-0' }}
+            </text>
+            <text x="55" y="32" fill="#9CA3AF" text-anchor="middle" font-size="9.5">
+              {{ hp.orders }} orders placed
+            </text>
+          </g>
+        }
+      </svg>
+    </div>
+  </section>
+
+  <!-- ── Two-Column Row: Recent Orders & Top Selling Products ── -->
+  <section class="dashboard-two-col">
+    <!-- Column 1: Recent Orders Table -->
+    <div class="dashboard-card orders-card">
+      <div class="card-header">
+        <div class="header-titles">
+          <h2 class="card-title">Recent Orders</h2>
+          <span class="card-subtitle">Last 6 orders placed across storefront</span>
+        </div>
+        <a routerLink="/admin/orders" class="card-action-link">
+          View all orders →
+        </a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="dense-table" aria-label="Recent orders">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th class="text-right">Total</th>
+              <th class="text-center">Status</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ord of recentOrders(); track ord.id) {
+              <tr (click)="openOrderDetails(ord)">
+                <td>
+                  <span class="order-id-badge">{{ ord.orderNumber }}</span>
+                </td>
+                <td>
+                  <div class="customer-cell">
+                    <span class="customer-name">{{ ord.customerName }}</span>
+                    <span class="customer-email">{{ ord.customerEmail }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="date-text">{{ ord.date | date:'shortDate' }}</span>
+                </td>
+                <td class="text-right font-mono font-semibold">
+                  {{ ord.total | currency:'USD' }}
+                </td>
+                <td class="text-center">
+                  <gp-admin-status-pill [status]="ord.fulfillmentStatus" size="sm"></gp-admin-status-pill>
+                </td>
+                <td class="text-right" (click)="$event.stopPropagation()">
+                  <button
+                    type="button"
+                    class="row-view-btn"
+                    (click)="openOrderDetails(ord)"
+                    aria-label="View order details"
+                  >
+                    View →
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Column 2: Top Selling Products -->
+    <div class="dashboard-card top-products-card">
+      <div class="card-header">
+        <div class="header-titles">
+          <h2 class="card-title">Top Selling Products</h2>
+          <span class="card-subtitle">Ranked by volume & revenue</span>
+        </div>
+        <a routerLink="/admin/products" class="card-action-link">
+          Catalog →
+        </a>
+      </div>
+
+      <div class="top-products-list">
+        @for (prod of topSellingProducts(); track prod.id; let i = $index) {
+          <div class="top-product-item">
+            <div class="rank-badge" [class.rank-badge--first]="i === 0">
+              #{{ i + 1 }}
             </div>
-          }
-          @case ('paymentStatus') {
-            <gp-admin-status-pill [status]="row.paymentStatus" size="sm"></gp-admin-status-pill>
-          }
-          @case ('fulfillmentStatus') {
-            <gp-admin-status-pill [status]="row.fulfillmentStatus" size="sm"></gp-admin-status-pill>
-          }
-          @case ('total') {
-            <span class="total-cell font-mono">{{ row.total | currency:'USD':'symbol':'1.2-2' }}</span>
-          }
-          @case ('actions') {
+            <div class="product-avatar">
+              @switch (prod.category) {
+                @case ('Audio') { 🎧 }
+                @case ('Accessories') { ⚡ }
+                @case ('Peripherals') { ⌨️ }
+                @case ('Workspace') { 💡 }
+                @default { 📦 }
+              }
+            </div>
+            <div class="product-info">
+              <div class="product-name" [title]="prod.name">{{ prod.name }}</div>
+              <div class="product-meta">
+                <span>{{ prod.category }}</span>
+                <span class="meta-dot">•</span>
+                <span class="sales-count">{{ prod.salesCount }} sold</span>
+              </div>
+            </div>
+            <div class="product-revenue">
+              <div class="revenue-val font-semibold">
+                {{ (prod.salesCount * prod.price) | currency:'USD':'symbol':'1.0-0' }}
+              </div>
+              <gp-admin-status-pill [status]="prod.status" size="sm"></gp-admin-status-pill>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Low Stock Alerts Widget ─────────────────────────────── -->
+  <section class="dashboard-card low-stock-card">
+    <div class="card-header">
+      <div class="header-titles">
+        <div class="title-with-badge">
+          <h2 class="card-title">Low Stock & Out-of-Stock Alerts</h2>
+          <span class="alert-count-pill">{{ lowStockProducts().length }} items need attention</span>
+        </div>
+        <span class="card-subtitle">Products running dangerously low in local warehouse facilities</span>
+      </div>
+      <a routerLink="/admin/inventory" class="card-action-link">
+        Manage Inventory →
+      </a>
+    </div>
+
+    <div class="low-stock-grid">
+      @for (prod of lowStockProducts(); track prod.id) {
+        <div class="low-stock-item" [class.low-stock-item--critical]="prod.stock === 0">
+          <div class="item-header">
+            <div class="item-icon">
+              @if (prod.stock === 0) {
+                <span class="icon-danger">⛔</span>
+              } @else {
+                <span class="icon-warning">⚠️</span>
+              }
+            </div>
+            <div class="item-meta">
+              <h3 class="item-title">{{ prod.name }}</h3>
+              <span class="item-sku">SKU: {{ prod.sku }} • {{ prod.category }}</span>
+            </div>
+            <div class="item-status">
+              <gp-admin-status-pill [status]="prod.status" size="sm"></gp-admin-status-pill>
+            </div>
+          </div>
+
+          <div class="stock-progress-section">
+            <div class="stock-labels">
+              <span class="stock-remaining">
+                @if (prod.stock === 0) {
+                  <strong>0 units</strong> (Out of stock)
+                } @else {
+                  <strong>{{ prod.stock }} units</strong> remaining
+                }
+              </span>
+              <span class="stock-price">{{ prod.price | currency:'USD' }}</span>
+            </div>
+            <div class="stock-progress-bar">
+              <div
+                class="stock-progress-fill"
+                [class.fill-danger]="prod.stock === 0"
+                [class.fill-warning]="prod.stock > 0"
+                [style.width.%]="(prod.stock / 15) * 100"
+              ></div>
+            </div>
+          </div>
+
+          <div class="item-action-row">
             <button
               type="button"
-              class="table-action-link"
-              (click)="$event.stopPropagation(); openOrderDetails(row)"
+              class="restock-btn"
+              (click)="restockProduct(prod, $event)"
             >
-              View →
+              + Restock 10 Units
             </button>
-          }
-          @default {
-            <span>{{ val }}</span>
-          }
-        }
-      </ng-template>
-    </gp-admin-data-table>
+          </div>
+        </div>
+      }
+    </div>
   </section>
 
   <!-- ── Order Details Slide-in Drawer ────────────────────────── -->

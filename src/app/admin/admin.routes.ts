@@ -17,6 +17,14 @@ export const ADMIN_ROUTES: Routes = [
         title: 'Admin Dashboard — GadgetPlanet',
       },
       {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./features/dashboard/admin-dashboard.component').then(
+            m => m.AdminDashboardComponent
+          ),
+        title: 'Admin Dashboard — GadgetPlanet',
+      },
+      {
         path: 'products',
         loadComponent: () =>
           import('./features/dashboard/admin-dashboard.component').then(

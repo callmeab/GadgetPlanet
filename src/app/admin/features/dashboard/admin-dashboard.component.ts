@@ -1,13 +1,23 @@
 import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
-import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminMockDataService, AdminOrder, AdminKpiMetric } from '../../services/admin-mock-data.service';
+import { RouterModule } from '@angular/router';
+import {
+  AdminMockDataService,
+  AdminOrder,
+  AdminProduct,
+  ChartDataPoint
+} from '../../services/admin-mock-data.service';
 import { AdminToastService } from '../../shared/services/admin-toast.service';
 import { StatCardComponent } from '../../shared/components/stat-card/stat-card.component';
-import { DataTableComponent, DataTableColumn } from '../../shared/components/data-table/data-table.component';
 import { StatusPillComponent } from '../../shared/components/status-pill/status-pill.component';
 import { AdminModalComponent } from '../../shared/components/admin-modal/admin-modal.component';
 import { AdminFormFieldComponent } from '../../shared/components/admin-form-field/admin-form-field.component';
+
+export interface ChartSvgPoint extends ChartDataPoint {
+  x: number;
+  y: number;
+}
 
 @Component({
   selector: 'gp-admin-dashboard',
@@ -15,10 +25,11 @@ import { AdminFormFieldComponent } from '../../shared/components/admin-form-fiel
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     CurrencyPipe,
     DatePipe,
+    DecimalPipe,
     StatCardComponent,
-    DataTableComponent,
     StatusPillComponent,
     AdminModalComponent,
     AdminFormFieldComponent
@@ -33,34 +44,85 @@ export class AdminDashboardComponent {
 
   readonly metrics = this.dataService.metrics;
   readonly orders = this.dataService.orders;
+  readonly products = this.dataService.products;
 
-  // Status Filter Signal
-  readonly activeStatus = signal<string>('all');
+  // ── Chart State ───────────────────────────────────────────────
+  readonly selectedTimeframe = signal<'7d' | '30d' | 'year'>('7d');
+  readonly hoveredPoint = signal<ChartSvgPoint | null>(null);
 
-  // Filtered Orders
-  readonly filteredOrders = computed(() => {
-    const status = this.activeStatus();
-    const all = this.orders();
-    if (status === 'all') return all;
-    return all.filter(o => o.fulfillmentStatus === status);
+  readonly activeChartData = computed(() => {
+    return this.dataService.chartDataSets[this.selectedTimeframe()];
   });
 
-  // Table Columns Definition
-  readonly columns: DataTableColumn[] = [
-    { key: 'orderNumber', title: 'Order', width: '120px' },
-    { key: 'date', title: 'Date', width: '110px' },
-    { key: 'customerName', title: 'Customer' },
-    { key: 'paymentStatus', title: 'Payment', width: '120px' },
-    { key: 'fulfillmentStatus', title: 'Fulfillment', width: '140px' },
-    { key: 'total', title: 'Total', align: 'right', width: '110px' },
-    { key: 'actions', title: 'Actions', sortable: false, align: 'right', width: '100px' }
-  ];
+  readonly chartTotalRevenue = computed(() => {
+    return this.activeChartData().reduce((acc, curr) => acc + curr.revenue, 0);
+  });
 
-  // Drawer (Order Details) State
+  readonly chartTotalOrders = computed(() => {
+    return this.activeChartData().reduce((acc, curr) => acc + curr.orders, 0);
+  });
+
+  // SVG Chart Geometry Calculations
+  readonly svgWidth = 720;
+  readonly svgHeight = 220;
+  readonly padLeft = 45;
+  readonly padRight = 25;
+  readonly padTop = 25;
+  readonly padBottom = 35;
+
+  readonly chartSvgPoints = computed<ChartSvgPoint[]>(() => {
+    const data = this.activeChartData();
+    if (!data.length) return [];
+
+    const usableWidth = this.svgWidth - this.padLeft - this.padRight;
+    const usableHeight = this.svgHeight - this.padTop - this.padBottom;
+    const maxRev = Math.max(...data.map(d => d.revenue), 1) * 1.12;
+
+    return data.map((d, index) => {
+      const x = this.padLeft + (index / (data.length - 1 || 1)) * usableWidth;
+      const y = this.padTop + usableHeight - (d.revenue / maxRev) * usableHeight;
+      return { ...d, x, y };
+    });
+  });
+
+  readonly chartLinePath = computed<string>(() => {
+    const points = this.chartSvgPoints();
+    if (!points.length) return '';
+    return points.reduce((path, pt, i) => `${path} ${i === 0 ? 'M' : 'L'} ${pt.x.toFixed(1)},${pt.y.toFixed(1)}`, '');
+  });
+
+  readonly chartAreaPath = computed<string>(() => {
+    const points = this.chartSvgPoints();
+    if (!points.length) return '';
+    const line = this.chartLinePath();
+    const baselineY = (this.svgHeight - this.padBottom).toFixed(1);
+    const lastX = points[points.length - 1].x.toFixed(1);
+    const firstX = points[0].x.toFixed(1);
+    return `${line} L ${lastX},${baselineY} L ${firstX},${baselineY} Z`;
+  });
+
+  // ── Recent Orders (Top 6 latest) ──────────────────────────────
+  readonly recentOrders = computed(() => {
+    return this.orders().slice(0, 6);
+  });
+
+  // ── Top Selling Products (Ranked 1–5) ──────────────────────────
+  readonly topSellingProducts = computed(() => {
+    return [...this.products()]
+      .sort((a, b) => b.salesCount - a.salesCount)
+      .slice(0, 5);
+  });
+
+  // ── Low Stock Alerts (Stock <= 6) ─────────────────────────────
+  readonly lowStockProducts = computed(() => {
+    return this.products().filter(p => p.stock <= 6);
+  });
+
+  // ── Drawer (Order Details) State ──────────────────────────────
   readonly isDrawerOpen = signal<boolean>(false);
   readonly selectedOrder = signal<AdminOrder | null>(null);
 
-  // New Product Modal State
+  // ── New Product Modal State ───────────────────────────────────
   readonly isProductModalOpen = signal<boolean>(false);
   readonly newProductName = signal<string>('');
   readonly newProductSku = signal<string>('');
@@ -69,17 +131,10 @@ export class AdminDashboardComponent {
   readonly newProductStock = signal<number | null>(null);
   readonly productFormError = signal<string>('');
 
-  // Status Filter Tabs
-  readonly statusTabs = [
-    { label: 'All Orders', value: 'all' },
-    { label: 'Processing', value: 'Processing' },
-    { label: 'Shipped', value: 'Shipped' },
-    { label: 'Delivered', value: 'Delivered' },
-    { label: 'Cancelled', value: 'Cancelled' }
-  ];
-
-  setStatusFilter(status: string): void {
-    this.activeStatus.set(status);
+  // Timeframe selector
+  setTimeframe(tf: '7d' | '30d' | 'year'): void {
+    this.selectedTimeframe.set(tf);
+    this.hoveredPoint.set(null);
   }
 
   // Row selection / details
@@ -103,15 +158,11 @@ export class AdminDashboardComponent {
     this.toastService.success(`Order ${order.orderNumber} updated to ${status}`, 'Status Updated');
   }
 
-  // Bulk Actions
-  handleBulkAction(event: { action: string; selectedRows: AdminOrder[] }): void {
-    if (event.action === 'export') {
-      this.toastService.info(`Exported ${event.selectedRows.length} orders to CSV`, 'Export Completed');
-    } else if (event.action === 'delete') {
-      const ids = event.selectedRows.map(r => r.id);
-      this.dataService.deleteMultipleOrders(ids);
-      this.toastService.warning(`Deleted ${ids.length} orders`, 'Orders Removed');
-    }
+  // Restock Product Action
+  restockProduct(product: AdminProduct, event?: Event): void {
+    event?.stopPropagation();
+    this.dataService.restockProduct(product.id, 10);
+    this.toastService.success(`Added +10 units to ${product.name}`, 'Stock Replenished');
   }
 
   // New Product Modal
@@ -150,7 +201,7 @@ export class AdminDashboardComponent {
       category: this.newProductCategory(),
       price,
       stock,
-      status: stock > 5 ? 'In Stock' : stock > 0 ? 'Low Stock' : 'Out of Stock'
+      status: stock > 5 ? 'In Stock' : (stock > 0 ? 'Low Stock' : 'Out of Stock')
     });
 
     this.toastService.success(`Product "${name}" added to catalog`, 'Product Created');

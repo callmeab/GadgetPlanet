@@ -45,45 +45,84 @@ export interface AdminProduct {
   salesCount: number;
 }
 
+export interface ChartDataPoint {
+  label: string;
+  revenue: number;
+  orders: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AdminMockDataService {
-  // KPI Metrics
+  // 4 Top Row KPI Metrics (Total Sales, Total Orders, Total Customers, Total Products)
   readonly metrics = signal<AdminKpiMetric[]>([
     {
-      id: 'rev',
-      title: 'Total Revenue',
+      id: 'sales',
+      title: 'Total Sales',
       value: '$148,290.00',
       change: 14.6,
-      changeLabel: 'vs last 30 days',
+      changeLabel: 'vs last period',
       badgeText: 'Live'
     },
     {
-      id: 'ord',
+      id: 'orders',
       title: 'Total Orders',
       value: '1,842',
       change: 8.3,
-      changeLabel: 'vs last 30 days',
+      changeLabel: 'vs last period',
       badgeText: '30d'
     },
     {
-      id: 'aov',
-      title: 'Average Order Value',
-      value: '$80.50',
-      change: -1.8,
-      changeLabel: 'vs last 30 days',
-      badgeText: '30d'
-    },
-    {
-      id: 'cus',
-      title: 'Active Customers',
+      id: 'customers',
+      title: 'Total Customers',
       value: '4,120',
       change: 24.1,
-      changeLabel: 'vs last 30 days',
+      changeLabel: 'vs last period',
       badgeText: 'Live'
+    },
+    {
+      id: 'products',
+      title: 'Total Products',
+      value: '86',
+      change: 4.2,
+      changeLabel: 'vs last period',
+      badgeText: 'Catalog'
     }
   ]);
+
+  // Sales Chart Datasets for range filter
+  readonly chartDataSets: Record<'7d' | '30d' | 'year', ChartDataPoint[]> = {
+    '7d': [
+      { label: 'Mon', revenue: 3400, orders: 42 },
+      { label: 'Tue', revenue: 4200, orders: 55 },
+      { label: 'Wed', revenue: 3900, orders: 48 },
+      { label: 'Thu', revenue: 5800, orders: 72 },
+      { label: 'Fri', revenue: 7600, orders: 94 },
+      { label: 'Sat', revenue: 9200, orders: 118 },
+      { label: 'Sun', revenue: 6400, orders: 81 }
+    ],
+    '30d': [
+      { label: 'Sep 1', revenue: 12400, orders: 160 },
+      { label: 'Sep 5', revenue: 16800, orders: 210 },
+      { label: 'Sep 10', revenue: 14500, orders: 185 },
+      { label: 'Sep 15', revenue: 22100, orders: 275 },
+      { label: 'Sep 20', revenue: 26400, orders: 320 },
+      { label: 'Sep 25', revenue: 29800, orders: 365 },
+      { label: 'Sep 30', revenue: 34200, orders: 422 }
+    ],
+    'year': [
+      { label: 'Jan', revenue: 78000, orders: 980 },
+      { label: 'Feb', revenue: 86000, orders: 1090 },
+      { label: 'Mar', revenue: 104000, orders: 1320 },
+      { label: 'Apr', revenue: 112000, orders: 1410 },
+      { label: 'May', revenue: 125000, orders: 1560 },
+      { label: 'Jun', revenue: 138000, orders: 1710 },
+      { label: 'Jul', revenue: 131000, orders: 1640 },
+      { label: 'Aug', revenue: 142000, orders: 1780 },
+      { label: 'Sep', revenue: 148290, orders: 1842 }
+    ]
+  };
 
   // Orders Mock Data (20+ realistic orders)
   readonly orders = signal<AdminOrder[]>([
@@ -338,5 +377,19 @@ export class AdminMockDataService {
       salesCount: 0
     };
     this.products.update(list => [newProd, ...list]);
+  }
+
+  restockProduct(productId: string, amount: number = 10): void {
+    this.products.update(list =>
+      list.map(p => {
+        if (p.id !== productId) return p;
+        const newStock = p.stock + amount;
+        return {
+          ...p,
+          stock: newStock,
+          status: newStock > 5 ? 'In Stock' : (newStock > 0 ? 'Low Stock' : 'Out of Stock')
+        };
+      })
+    );
   }
 }
