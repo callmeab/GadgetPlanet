@@ -1,0 +1,192 @@
+@use '../../../styles/variables' as v;
+
+.footer {
+  background: v.$color-bg-elevated;
+  border-top: 1px solid v.$color-surface-border;
+  margin-top: v.$space-20;
+}
+
+.footer-inner {
+  max-width: v.$container-max;
+  margin: 0 auto;
+  padding: v.$space-16 v.$space-6 v.$space-8;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr;
+  gap: v.$space-10;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    gap: v.$space-8;
+  }
+}
+
+// ── Brand ──────────────────────────────────────────────────
+.footer-brand { display: flex; flex-direction: column; gap: v.$space-4; }
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+  text-decoration: none;
+}
+
+.logo-icon { font-size: 22px; }
+
+.logo-text {
+  font-size: v.$font-size-lg;
+  font-weight: v.$font-weight-black;
+  color: v.$color-text-primary;
+  letter-spacing: v.$letter-spacing-tight;
+}
+
+.logo-accent {
+  color: v.$color-primary;
+  background: v.$gradient-primary;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.footer-tagline {
+  color: v.$color-text-secondary;
+  font-size: v.$font-size-sm;
+  line-height: v.$line-height-base;
+  max-width: 260px;
+  margin: 0;
+}
+
+.footer-social {
+  display: flex;
+  gap: v.$space-3;
+}
+
+.social-link {
+  width: 36px;
+  height: 36px;
+  border-radius: v.$radius-sm;
+  background: v.$color-bg-card;
+  border: 1px solid v.$color-surface-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: v.$color-text-secondary;
+  text-decoration: none;
+  transition: all v.$transition-fast;
+
+  &:hover {
+    background: v.$color-primary-glow;
+    border-color: v.$color-primary;
+    color: v.$color-primary;
+    transform: translateY(-2px);
+  }
+}
+
+// ── Link Columns ───────────────────────────────────────────
+.footer-col { display: flex; flex-direction: column; gap: v.$space-4; }
+
+.footer-col-heading {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  text-transform: uppercase;
+  letter-spacing: v.$letter-spacing-wider;
+  margin: 0;
+}
+
+.footer-col-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+.footer-link {
+  color: v.$color-text-secondary;
+  text-decoration: none;
+  font-size: v.$font-size-sm;
+  transition: color v.$transition-fast;
+
+  &:hover { color: v.$color-primary; }
+
+  &--sm { font-size: v.$font-size-xs; }
+}
+
+// ── Newsletter ─────────────────────────────────────────────
+.footer-newsletter-text {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  line-height: v.$line-height-base;
+  margin: 0;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 0;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-sm;
+  overflow: hidden;
+  transition: border-color v.$transition-fast;
+
+  &:focus-within { border-color: v.$color-primary; }
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: v.$space-3 v.$space-4;
+  background: v.$color-bg-card;
+  border: none;
+  color: v.$color-text-primary;
+  font-family: v.$font-family-base;
+  font-size: v.$font-size-sm;
+  outline: none;
+  min-width: 0;
+
+  &::placeholder { color: v.$color-text-muted; }
+}
+
+.newsletter-btn {
+  padding: v.$space-3 v.$space-4;
+  background: v.$gradient-primary;
+  color: #fff;
+  border: none;
+  font-family: v.$font-family-base;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter v.$transition-fast;
+
+  &:hover { filter: brightness(1.15); }
+}
+
+// ── Bottom Bar ─────────────────────────────────────────────
+.footer-bottom {
+  margin-top: v.$space-12;
+  padding-top: v.$space-6;
+  border-top: 1px solid v.$color-surface-border;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: v.$space-4;
+  flex-wrap: wrap;
+}
+
+.footer-copy {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  margin: 0;
+}
+
+.footer-legal {
+  display: flex;
+  gap: v.$space-4;
+}

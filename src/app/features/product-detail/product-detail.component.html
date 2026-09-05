@@ -1,0 +1,146 @@
+<div class="detail-page container" id="product-detail-page">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a routerLink="/" class="breadcrumb-link">Home</a>
+    <span class="breadcrumb-sep">›</span>
+    <a routerLink="/products" class="breadcrumb-link">Products</a>
+    <span class="breadcrumb-sep">›</span>
+    <span class="breadcrumb-current">{{ product()?.name ?? 'Product' }}</span>
+  </nav>
+
+  @if (product(); as p) {
+    <div class="detail-grid">
+
+      <!-- ── Gallery ──────────────────────────────────────── -->
+      <div class="detail-gallery" id="detail-gallery">
+        <div class="gallery-main">
+          <img [src]="p.images[selectedImage()]" [alt]="p.name" class="gallery-main-img" />
+          @if (!p.inStock) {
+            <div class="gallery-oos">Out of Stock</div>
+          }
+          @if (p.discountPercent) {
+            <div class="gallery-discount">-{{ p.discountPercent }}%</div>
+          }
+        </div>
+
+        @if (p.images.length > 1) {
+          <div class="gallery-thumbs">
+            @for (img of p.images; track $index) {
+              <button
+                class="gallery-thumb"
+                [class.gallery-thumb--active]="selectedImage() === $index"
+                (click)="selectedImage.set($index)"
+                [attr.aria-label]="'View image ' + ($index + 1)"
+              >
+                <img [src]="img" [alt]="p.name + ' image ' + ($index + 1)" />
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- ── Info Panel ────────────────────────────────────── -->
+      <div class="detail-info">
+        <p class="detail-brand">{{ p.brand }}</p>
+
+        <div class="detail-badges">
+          @for (badge of p.badges; track badge) {
+            <gp-badge [label]="badge"></gp-badge>
+          }
+        </div>
+
+        <h1 class="detail-name">{{ p.name }}</h1>
+
+        <div class="detail-rating-row">
+          <gp-rating-stars
+            [rating]="p.rating"
+            [reviewCount]="p.reviewCount"
+            [showCount]="true"
+            [showValue]="true"
+          ></gp-rating-stars>
+        </div>
+
+        <!-- Price -->
+        <div class="detail-price-section">
+          @if (p.discountPrice) {
+            <span class="detail-price-current">Rs. {{ p.discountPrice | number:'1.0-0' }}</span>
+            <span class="detail-price-original">Rs. {{ p.price | number:'1.0-0' }}</span>
+            <span class="detail-price-save">Save Rs. {{ (p.price - p.discountPrice) | number:'1.0-0' }}</span>
+          } @else {
+            <span class="detail-price-current">Rs. {{ p.price | number:'1.0-0' }}</span>
+          }
+        </div>
+
+        <!-- Description -->
+        <p class="detail-description">{{ p.description }}</p>
+
+        <!-- Specs -->
+        <div class="detail-specs">
+          <h3 class="detail-specs-title">Key Specifications</h3>
+          <div class="specs-grid">
+            @for (spec of specEntries(p.specs); track spec.key) {
+              <div class="spec-item">
+                <span class="spec-key">{{ spec.key }}</span>
+                <span class="spec-value">{{ spec.value }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Quantity -->
+        <div class="detail-qty">
+          <span class="detail-qty-label">Quantity</span>
+          <div class="qty-controls">
+            <button class="qty-btn" (click)="decreaseQty()" [disabled]="qty() <= 1" id="detail-qty-decrease">−</button>
+            <span class="qty-value" id="detail-qty-value">{{ qty() }}</span>
+            <button class="qty-btn" (click)="increaseQty()" id="detail-qty-increase">+</button>
+          </div>
+        </div>
+
+        <!-- CTAs -->
+        <div class="detail-ctas">
+          <gp-button
+            id="detail-add-cart-btn"
+            variant="primary"
+            size="lg"
+            [fullWidth]="true"
+            [disabled]="!p.inStock"
+            (click)="addToCart(p)"
+          >
+            {{ inCart() ? '✓ Added to Cart' : (p.inStock ? '🛒 Add to Cart' : 'Out of Stock') }}
+          </gp-button>
+
+          <gp-button
+            id="detail-wishlist-btn"
+            [variant]="inWishlist() ? 'accent' : 'ghost'"
+            size="lg"
+            (click)="toggleWishlist(p)"
+          >
+            {{ inWishlist() ? '♥ Wishlisted' : '♡ Wishlist' }}
+          </gp-button>
+        </div>
+
+        <!-- Stock Warning -->
+        @if (p.inStock && p.stockCount < 20) {
+          <p class="detail-stock-warning">⚠ Only {{ p.stockCount }} left in stock!</p>
+        }
+
+        <!-- Delivery Info -->
+        <div class="detail-delivery">
+          <div class="delivery-item">🚀 <span>Free delivery on orders above Rs. 999</span></div>
+          <div class="delivery-item">🔄 <span>30-day hassle-free returns</span></div>
+          <div class="delivery-item">🛡️ <span>1 year manufacturer warranty</span></div>
+        </div>
+      </div>
+
+    </div>
+  } @else {
+    <div class="detail-not-found">
+      <span class="not-found-icon">😕</span>
+      <h2>Product not found</h2>
+      <gp-button variant="primary" size="md" routerLink="/products">Browse Products</gp-button>
+    </div>
+  }
+
+</div>

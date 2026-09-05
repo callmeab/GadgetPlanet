@@ -1,0 +1,239 @@
+@use '../../../../styles/variables' as v;
+
+.product-card {
+  background: v.$color-bg-card;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-lg;
+  overflow: hidden;
+  transition: transform v.$transition-base, box-shadow v.$transition-base, border-color v.$transition-base;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: v.$shadow-lg;
+    border-color: rgba(10, 132, 255, 0.3);
+  }
+
+  &--out-of-stock {
+    opacity: 0.75;
+  }
+}
+
+// ── Image ──────────────────────────────────────────────────
+.card-image-wrap {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: v.$color-bg-elevated;
+  overflow: hidden;
+}
+
+.card-image-link { display: block; width: 100%; height: 100%; }
+
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform v.$transition-slow;
+
+  .product-card:hover & {
+    transform: scale(1.06);
+  }
+}
+
+.card-oos-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: v.$color-text-primary;
+  font-weight: v.$font-weight-bold;
+  font-size: v.$font-size-sm;
+  letter-spacing: v.$letter-spacing-wide;
+  text-transform: uppercase;
+}
+
+// ── Badges overlay ─────────────────────────────────────────
+.card-badges {
+  position: absolute;
+  top: v.$space-3;
+  left: v.$space-3;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-1;
+}
+
+// ── Discount pill ──────────────────────────────────────────
+.card-discount-pill {
+  position: absolute;
+  top: v.$space-3;
+  right: v.$space-3;
+  background: v.$color-error;
+  color: #fff;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-bold;
+  padding: 2px v.$space-2;
+  border-radius: v.$radius-full;
+}
+
+// ── Wishlist button ────────────────────────────────────────
+.card-wishlist-btn {
+  position: absolute;
+  bottom: v.$space-3;
+  right: v.$space-3;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  border: 1px solid v.$color-surface-border;
+  color: v.$color-text-secondary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all v.$transition-fast;
+  backdrop-filter: blur(8px);
+
+  &:hover {
+    background: rgba(255,107,0,0.2);
+    color: v.$color-accent;
+    border-color: v.$color-accent;
+    transform: scale(1.1);
+  }
+
+  &--active {
+    color: v.$color-accent;
+    background: rgba(255,107,0,0.15);
+    border-color: v.$color-accent;
+  }
+}
+
+// ── Card body ──────────────────────────────────────────────
+.card-body {
+  padding: v.$space-4;
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+  flex: 1;
+}
+
+.card-brand {
+  font-size: v.$font-size-xs;
+  color: v.$color-primary;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: v.$letter-spacing-wider;
+  margin: 0;
+}
+
+.card-name {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  text-decoration: none;
+  line-height: v.$line-height-snug;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color v.$transition-fast;
+
+  &:hover { color: v.$color-primary; }
+}
+
+// ── Quick Add Hover Button ─────────────────────────────────
+.card-quick-add-wrap {
+  position: absolute;
+  bottom: v.$space-3;
+  left: v.$space-3;
+  right: calc(#{v.$space-3} + 44px);
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity v.$transition-base, transform v.$transition-base;
+  pointer-events: none;
+
+  .product-card:hover & {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+.card-quick-add-btn {
+  width: 100%;
+  height: 36px;
+  background: rgba(13, 13, 13, 0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid v.$color-primary;
+  border-radius: v.$radius-full;
+  color: #fff;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-bold;
+  letter-spacing: v.$letter-spacing-wide;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-2;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(10, 132, 255, 0.35);
+  transition: all v.$transition-fast;
+
+  &:hover {
+    background: v.$color-primary;
+    color: #fff;
+    transform: scale(1.02);
+    box-shadow: 0 4px 20px rgba(10, 132, 255, 0.55);
+  }
+
+  &--in-cart {
+    background: rgba(48, 209, 88, 0.2);
+    border-color: v.$color-success;
+    color: v.$color-success;
+
+    &:hover {
+      background: v.$color-success;
+      color: #000;
+      border-color: v.$color-success;
+    }
+  }
+}
+
+// ── Pricing ────────────────────────────────────────────────
+.card-price-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: v.$space-2;
+  margin-top: auto;
+}
+
+.card-price-current {
+  font-size: v.$font-size-lg;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+}
+
+.card-price-original {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  text-decoration: line-through;
+}
+
+.card-price-percent {
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-success;
+  background: rgba(48, 209, 88, 0.12);
+  padding: 1px 6px;
+  border-radius: v.$radius-sm;
+  letter-spacing: v.$letter-spacing-wide;
+}
+
+// ── Actions ────────────────────────────────────────────────
+.card-actions {
+  margin-top: v.$space-2;
+}

@@ -1,0 +1,307 @@
+@use '../../../styles/variables' as v;
+
+// ── Sections ───────────────────────────────────────────────
+.section {
+  padding: v.$space-16 0;
+
+  &--dark {
+    background: v.$color-bg-elevated;
+    border-top: 1px solid v.$color-surface-border;
+    border-bottom: 1px solid v.$color-surface-border;
+  }
+}
+
+.container {
+  max-width: v.$container-max;
+  margin: 0 auto;
+  padding: 0 v.$space-6;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: v.$space-8;
+}
+
+.section-title {
+  font-size: v.$font-size-2xl;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  margin: 0;
+  letter-spacing: v.$letter-spacing-tight;
+}
+
+.section-subtitle {
+  color: v.$color-text-secondary;
+  font-size: v.$font-size-sm;
+  margin: v.$space-1 0 0;
+}
+
+.section-link {
+  color: v.$color-primary;
+  text-decoration: none;
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-medium;
+  transition: color v.$transition-fast;
+
+  &:hover { color: v.$color-primary-light; }
+}
+
+// ── Products Grid ──────────────────────────────────────────
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: v.$space-5;
+}
+
+// ── Categories ─────────────────────────────────────────────
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: v.$space-4;
+
+  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 480px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-5 v.$space-4;
+  background: v.$color-bg-card;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-lg;
+  text-decoration: none;
+  transition: all v.$transition-base;
+  cursor: pointer;
+
+  &:hover {
+    border-color: v.$color-primary;
+    background: v.$color-primary-glow;
+    transform: translateY(-2px);
+    box-shadow: v.$shadow-blue;
+  }
+}
+
+.category-emoji { font-size: 32px; }
+
+.category-name {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+}
+
+.category-count {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+}
+
+// ── Sale Is Live Section ───────────────────────────────────
+@keyframes liveBlink {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+}
+
+.section--sale-live {
+  background: linear-gradient(180deg, rgba(255, 107, 0, 0.04) 0%, v.$color-bg 100%);
+  border-top: 1px solid rgba(255, 107, 0, 0.25);
+  border-bottom: 1px solid v.$color-surface-border;
+  position: relative;
+  overflow: hidden;
+}
+
+.sale-live-glow {
+  position: absolute;
+  top: -50px;
+  left: 5%;
+  width: 420px;
+  height: 300px;
+  background: rgba(255, 107, 0, 0.1);
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+}
+
+.sale-live-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: v.$space-8;
+  gap: v.$space-6;
+  flex-wrap: wrap;
+}
+
+.sale-live-title-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: v.$space-2;
+}
+
+.sale-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: rgba(255, 45, 85, 0.14);
+  border: 1px solid rgba(255, 45, 85, 0.38);
+  border-radius: v.$radius-full;
+  width: fit-content;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff2d55;
+  box-shadow: 0 0 8px #ff2d55;
+  animation: liveBlink 1.4s ease-in-out infinite;
+}
+
+.live-text {
+  font-size: 11px;
+  font-weight: v.$font-weight-black;
+  color: #ff2d55;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.sale-live-heading-row {
+  display: flex;
+  align-items: center;
+  gap: v.$space-4;
+  flex-wrap: wrap;
+}
+
+.sale-live-ends-label {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: v.$letter-spacing-wide;
+}
+
+.sale-live-controls {
+  display: flex;
+  align-items: center;
+  gap: v.$space-4;
+}
+
+.carousel-nav-btns {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+}
+
+.carousel-arrow-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: v.$color-bg-card;
+  border: 1px solid v.$color-surface-border;
+  color: v.$color-text-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all v.$transition-fast;
+
+  &:hover {
+    background: rgba(10, 132, 255, 0.25);
+    border-color: v.$color-primary;
+    color: #fff;
+    transform: scale(1.08);
+  }
+}
+
+.sale-view-all {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-primary;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color v.$transition-fast;
+
+  &:hover {
+    color: v.$color-primary-light;
+  }
+}
+
+// ── Horizontal Deals Carousel Track ───────────────────────
+.deals-carousel-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.deals-carousel-track {
+  display: flex;
+  gap: v.$space-5;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  padding: v.$space-2 0 v.$space-6;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.deals-carousel-item {
+  flex: 0 0 280px;
+  min-width: 280px;
+  max-width: 280px;
+  scroll-snap-align: start;
+
+  @media (max-width: 600px) {
+    flex: 0 0 240px;
+    min-width: 240px;
+    max-width: 240px;
+  }
+}
+
+// ── Trust Banner ───────────────────────────────────────────
+.trust-banner {
+  background: v.$color-bg-elevated;
+  border-top: 1px solid v.$color-surface-border;
+  padding: v.$space-12 0;
+}
+
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: v.$space-6;
+
+  @media (max-width: 768px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: v.$space-4;
+}
+
+.trust-icon { font-size: 32px; flex-shrink: 0; }
+
+.trust-title {
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  margin: 0;
+}
+
+.trust-desc {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  margin: 2px 0 0;
+}

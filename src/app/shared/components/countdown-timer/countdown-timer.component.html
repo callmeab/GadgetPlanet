@@ -1,0 +1,34 @@
+<div class="countdown" [class.countdown--expired]="isExpired()">
+  @if (!isExpired()) {
+    <div class="countdown-units">
+
+      @if (showDays) {
+        <div class="countdown-unit">
+          <span class="countdown-value">{{ timeLeft().days | number:'2.0-0' }}</span>
+          <span class="countdown-label">Days</span>
+        </div>
+        <span class="countdown-sep">:</span>
+      }
+
+      <div class="countdown-unit">
+        <span class="countdown-value">{{ timeLeft().hours | number:'2.0-0' }}</span>
+        <span class="countdown-label">Hrs</span>
+      </div>
+      <span class="countdown-sep">:</span>
+
+      <div class="countdown-unit">
+        <span class="countdown-value">{{ timeLeft().minutes | number:'2.0-0' }}</span>
+        <span class="countdown-label">Min</span>
+      </div>
+      <span class="countdown-sep">:</span>
+
+      <div class="countdown-unit countdown-unit--seconds">
+        <span class="countdown-value">{{ timeLeft().seconds | number:'2.0-0' }}</span>
+        <span class="countdown-label">Sec</span>
+      </div>
+
+    </div>
+  } @else {
+    <span class="countdown-expired-text">Offer Ended</span>
+  }
+</div>

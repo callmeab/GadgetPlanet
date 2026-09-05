@@ -1,0 +1,152 @@
+<section
+  class="hero-banner-container"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+  role="region"
+  aria-roledescription="carousel"
+  aria-label="Featured Gadgets Showcase"
+>
+  <!-- Background Ambient Grid -->
+  <div class="hero-ambient-grid"></div>
+
+  <!-- Slides Track/Viewport -->
+  <div class="hero-slides-viewport">
+    @for (slide of slides; track slide.id; let i = $index) {
+      <div
+        class="hero-slide"
+        [class.active]="currentIndex() === i"
+        [attr.aria-hidden]="currentIndex() !== i"
+      >
+        <!-- Background radial glow customized per slide -->
+        <div
+          class="slide-backdrop-glow"
+          [style.background]="slide.bgGlow"
+        ></div>
+
+        <div class="slide-content-wrapper">
+          <!-- Text Content -->
+          <div class="slide-text-col">
+            <div class="slide-meta">
+              <span
+                class="slide-badge"
+                [style.border-color]="slide.accentColor"
+                [style.color]="slide.accentColor"
+              >
+                {{ slide.badge }}
+              </span>
+              <span class="slide-tag-price">{{ slide.tagPrice }}</span>
+            </div>
+
+            <h1 class="slide-title">
+              <span class="slide-title-line">{{ slide.titleLine1 }}</span>
+              <span
+                class="slide-title-accent"
+                [style.--accent-col]="slide.accentColor"
+              >
+                {{ slide.titleAccent }}
+              </span>
+            </h1>
+
+            <p class="slide-subtitle">{{ slide.subtitle }}</p>
+
+            <div class="slide-ctas">
+              <gp-button
+                variant="primary"
+                size="lg"
+                [routerLink]="slide.ctaRoute"
+                [id]="'hero-cta-' + slide.id"
+              >
+                {{ slide.ctaText }}
+              </gp-button>
+              <gp-button
+                variant="ghost"
+                size="lg"
+                routerLink="/products"
+                [id]="'hero-deals-' + slide.id"
+              >
+                Explore Deals
+              </gp-button>
+            </div>
+          </div>
+
+          <!-- Visual / Product Showcase -->
+          <div class="slide-visual-col">
+            <div class="slide-visual-card">
+              <div
+                class="visual-glow-ring"
+                [style.box-shadow]="'0 0 60px ' + slide.bgGlow"
+                [style.border-color]="slide.accentColor"
+              ></div>
+              <img
+                [src]="slide.image"
+                [alt]="slide.titleLine1 + ' ' + slide.titleAccent"
+                class="slide-product-img"
+              />
+              <div class="visual-floating-tag">
+                <span
+                  class="visual-indicator-dot"
+                  [style.background]="slide.accentColor"
+                ></span>
+                <span class="visual-indicator-text">{{ slide.tagPrice }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Navigation Arrows -->
+  <button
+    type="button"
+    class="nav-arrow nav-arrow--prev"
+    (click)="prev()"
+    [attr.aria-label]="'Previous slide'"
+    id="hero-banner-prev"
+  >
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  </button>
+
+  <button
+    type="button"
+    class="nav-arrow nav-arrow--next"
+    (click)="next()"
+    [attr.aria-label]="'Next slide'"
+    id="hero-banner-next"
+  >
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </button>
+
+  <!-- Navigation Dots & Autoplay status -->
+  <div class="hero-indicators-bar">
+    <div class="hero-dots-container" role="tablist">
+      @for (slide of slides; track slide.id; let i = $index) {
+        <button
+          type="button"
+          class="hero-dot"
+          [class.active]="currentIndex() === i"
+          (click)="goTo(i)"
+          role="tab"
+          [attr.aria-selected]="currentIndex() === i"
+          [attr.aria-label]="'Go to slide ' + (i + 1) + ': ' + slide.titleLine1"
+          [id]="'hero-dot-' + i"
+        >
+          <span
+            class="dot-fill"
+            [style.background]="currentIndex() === i ? slide.accentColor : ''"
+          ></span>
+        </button>
+      }
+    </div>
+
+    @if (isHovered()) {
+      <div class="hero-pause-indicator" id="hero-pause-indicator">
+        <span class="pause-icon">⏸</span> Paused
+      </div>
+    }
+  </div>
+</section>

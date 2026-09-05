@@ -1,0 +1,48 @@
+<div class="rating-stars" [attr.aria-label]="'Rating: ' + rating + ' out of 5'" role="img">
+  <div class="stars-row">
+    @for (star of stars; track $index) {
+      <svg
+        class="star"
+        [class.star--filled]="star === 'full'"
+        [class.star--half]="star === 'half'"
+        [class.star--empty]="star === 'empty'"
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+      >
+        @if (star === 'full') {
+          <polygon
+            points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+            fill="currentColor"
+          />
+        } @else if (star === 'half') {
+          <defs>
+            <linearGradient [id]="'half-' + $index">
+              <stop offset="50%" stop-color="currentColor" />
+              <stop offset="50%" stop-color="transparent" />
+            </linearGradient>
+          </defs>
+          <polygon
+            points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+            [attr.fill]="'url(#half-' + $index + ')'"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+        } @else {
+          <polygon
+            points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+        }
+      </svg>
+    }
+  </div>
+  @if (showCount && reviewCount > 0) {
+    <span class="rating-count">({{ reviewCount | number }})</span>
+  }
+  @if (showValue) {
+    <span class="rating-value">{{ rating }}</span>
+  }
+</div>

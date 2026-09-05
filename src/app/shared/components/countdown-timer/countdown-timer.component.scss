@@ -1,0 +1,80 @@
+@use '../../../../styles/variables' as v;
+
+.countdown {
+  display: inline-flex;
+  align-items: center;
+
+  &--expired {
+    opacity: 0.5;
+  }
+}
+
+.countdown-units {
+  display: flex;
+  align-items: center;
+  gap: v.$space-2;
+}
+
+.countdown-unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(26, 26, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: v.$radius-md;
+  padding: v.$space-2 v.$space-3;
+  min-width: 50px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+  &--seconds {
+    border-color: rgba(255, 107, 0, 0.4);
+    background: rgba(255, 107, 0, 0.08);
+
+    .countdown-value {
+      color: v.$color-accent;
+      animation: tick-pulse 1s ease-in-out infinite;
+    }
+  }
+}
+
+.countdown-value {
+  font-size: v.$font-size-xl;
+  font-weight: v.$font-weight-black;
+  color: v.$color-text-primary;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.countdown-label {
+  font-size: 10px;
+  color: v.$color-text-muted;
+  font-weight: v.$font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: v.$letter-spacing-wider;
+  margin-top: 3px;
+}
+
+.countdown-sep {
+  font-size: v.$font-size-lg;
+  font-weight: v.$font-weight-black;
+  color: v.$color-accent;
+  line-height: 1;
+  margin: 0 1px 12px 1px;
+}
+
+.countdown-expired-text {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  font-style: italic;
+}
+
+@keyframes tick-pulse {
+  0%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 8px rgba(255, 107, 0, 0.7);
+  }
+  50% {
+    opacity: 0.75;
+    text-shadow: none;
+  }
+}

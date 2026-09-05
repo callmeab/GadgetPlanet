@@ -1,0 +1,84 @@
+@use '../../../../styles/variables' as v;
+
+.carousel {
+  position: relative;
+  width: 100%;
+}
+
+.carousel-track-container {
+  overflow: hidden;
+  border-radius: v.$radius-md;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform v.$transition-slow;
+  will-change: transform;
+
+  > * {
+    flex: 0 0 calc(100% / var(--visible-slides, 1));
+    min-width: 0;
+  }
+}
+
+// ── Arrow Buttons ──────────────────────────────────────────
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(20,20,20,0.85);
+  border: 1px solid v.$color-surface-border;
+  color: v.$color-text-primary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all v.$transition-fast;
+  backdrop-filter: blur(12px);
+
+  &:hover:not(:disabled) {
+    background: v.$color-primary;
+    border-color: v.$color-primary;
+    box-shadow: v.$shadow-blue;
+    transform: translateY(-50%) scale(1.05);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  &--prev { left: -22px; }
+  &--next { right: -22px; }
+}
+
+// ── Dots ───────────────────────────────────────────────────
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: v.$space-2;
+  margin-top: v.$space-4;
+}
+
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: v.$radius-full;
+  background: v.$color-surface-border;
+  border: none;
+  cursor: pointer;
+  transition: all v.$transition-base;
+
+  &--active {
+    width: 24px;
+    background: v.$color-primary;
+  }
+
+  &:hover:not(.carousel-dot--active) {
+    background: v.$color-text-muted;
+  }
+}

@@ -1,0 +1,54 @@
+<div class="carousel" [id]="id">
+
+  <!-- Track -->
+  <div class="carousel-track-container" #trackContainer>
+    <div
+      class="carousel-track"
+      #track
+      [style.transform]="'translateX(-' + (currentIndex() * slideWidthPercent) + '%)'"
+    >
+      <ng-content></ng-content>
+    </div>
+  </div>
+
+  <!-- Prev / Next Arrows -->
+  @if (showArrows && totalSlides > 1) {
+    <button
+      class="carousel-arrow carousel-arrow--prev"
+      [disabled]="!loop && currentIndex() === 0"
+      (click)="prev()"
+      aria-label="Previous slide"
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+    </button>
+
+    <button
+      class="carousel-arrow carousel-arrow--next"
+      [disabled]="!loop && currentIndex() === totalSlides - visibleSlides"
+      (click)="next()"
+      aria-label="Next slide"
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    </button>
+  }
+
+  <!-- Dots -->
+  @if (showDots && totalDots > 1) {
+    <div class="carousel-dots" role="tablist">
+      @for (dot of dotsArray; track $index) {
+        <button
+          class="carousel-dot"
+          [class.carousel-dot--active]="currentIndex() === $index"
+          (click)="goTo($index)"
+          role="tab"
+          [attr.aria-label]="'Go to slide ' + ($index + 1)"
+        ></button>
+      }
+    </div>
+  }
+
+</div>

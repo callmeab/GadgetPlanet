@@ -1,0 +1,100 @@
+<div class="listing-layout" id="product-listing-page">
+
+  <!-- ── Sidebar Filters ─────────────────────────────────── -->
+  <aside class="listing-sidebar" [class.listing-sidebar--open]="filtersOpen()">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Filters</h3>
+      <button class="sidebar-close" (click)="filtersOpen.set(false)" aria-label="Close filters">✕</button>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="filter-group">
+      <h4 class="filter-label">Category</h4>
+      <div class="filter-options">
+        <button
+          class="filter-chip"
+          [class.filter-chip--active]="!selectedCategory()"
+          (click)="selectedCategory.set(null)"
+          id="filter-all-categories"
+        >All</button>
+
+        @for (cat of categories; track cat) {
+          <button
+            class="filter-chip"
+            [class.filter-chip--active]="selectedCategory() === cat"
+            (click)="selectedCategory.set(cat)"
+            [id]="'filter-cat-' + cat.toLowerCase()"
+          >{{ cat }}</button>
+        }
+      </div>
+    </div>
+
+    <!-- Sort -->
+    <div class="filter-group">
+      <h4 class="filter-label">Sort By</h4>
+      <div class="filter-options filter-options--col">
+        @for (opt of sortOptions; track opt.value) {
+          <button
+            class="filter-chip"
+            [class.filter-chip--active]="sortBy() === opt.value"
+            (click)="sortBy.set(opt.value)"
+            [id]="'sort-' + opt.value"
+          >{{ opt.label }}</button>
+        }
+      </div>
+    </div>
+
+    <!-- In Stock Only -->
+    <div class="filter-group">
+      <label class="toggle-label" for="filter-in-stock">
+        <span>In Stock Only</span>
+        <div class="toggle-wrap">
+          <input
+            id="filter-in-stock"
+            type="checkbox"
+            class="toggle-input"
+            [checked]="inStockOnly()"
+            (change)="toggleInStock()"
+          />
+          <div class="toggle-track">
+            <div class="toggle-thumb"></div>
+          </div>
+        </div>
+      </label>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ─────────────────────────────────────── -->
+  <main class="listing-main">
+    <div class="listing-toolbar">
+      <div class="toolbar-left">
+        <button
+          class="filter-toggle-btn"
+          id="listing-filter-toggle"
+          (click)="toggleFilters()"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+            <line x1="10" y1="18" x2="14" y2="18" />
+          </svg>
+          Filters
+        </button>
+        <p class="listing-count">{{ filteredProducts().length }} products</p>
+      </div>
+    </div>
+
+    <div class="listing-grid">
+      @for (product of filteredProducts(); track product.id) {
+        <gp-product-card [product]="product"></gp-product-card>
+      }
+      @if (filteredProducts().length === 0) {
+        <div class="listing-empty">
+          <span class="listing-empty-icon">🔍</span>
+          <p>No products found. Try adjusting filters.</p>
+        </div>
+      }
+    </div>
+  </main>
+
+</div>

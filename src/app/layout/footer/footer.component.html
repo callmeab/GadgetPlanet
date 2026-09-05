@@ -1,0 +1,68 @@
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-grid">
+
+      <!-- Brand Column -->
+      <div class="footer-brand">
+        <a routerLink="/" class="footer-logo">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">Gadget<span class="logo-accent">Planet</span></span>
+        </a>
+        <p class="footer-tagline">Your universe of premium gadgets. Delivered fast, priced right.</p>
+        <div class="footer-social">
+          @for (social of socials; track social.name) {
+            <a
+              [href]="social.url"
+              class="social-link"
+              [attr.aria-label]="social.name"
+              target="_blank"
+              rel="noopener"
+            >
+              <span [innerHTML]="social.icon"></span>
+            </a>
+          }
+        </div>
+      </div>
+
+      <!-- Links Columns -->
+      @for (col of footerLinks; track col.heading) {
+        <div class="footer-col">
+          <h4 class="footer-col-heading">{{ col.heading }}</h4>
+          <ul class="footer-col-links">
+            @for (link of col.links; track link.label) {
+              <li>
+                <a [routerLink]="link.route" class="footer-link">{{ link.label }}</a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
+      <!-- Newsletter Column -->
+      <div class="footer-col footer-col--newsletter">
+        <h4 class="footer-col-heading">Stay in the Loop</h4>
+        <p class="footer-newsletter-text">Get deals, launches &amp; tech news straight to your inbox.</p>
+        <div class="newsletter-form">
+          <input
+            id="footer-email-input"
+            type="email"
+            class="newsletter-input"
+            placeholder="your@email.com"
+          />
+          <button id="footer-subscribe-btn" class="newsletter-btn">Subscribe</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="footer-bottom">
+      <p class="footer-copy">© {{ currentYear }} GadgetPlanet. All rights reserved.</p>
+      <div class="footer-legal">
+        <a routerLink="/" class="footer-link footer-link--sm">Privacy Policy</a>
+        <a routerLink="/" class="footer-link footer-link--sm">Terms of Service</a>
+        <a routerLink="/" class="footer-link footer-link--sm">Cookie Settings</a>
+      </div>
+    </div>
+  </div>
+</footer>

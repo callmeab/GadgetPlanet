@@ -1,0 +1,325 @@
+<!-- ═══════════════════════════════════════════════════════════
+     GadgetPlanet Header
+     ═══════════════════════════════════════════════════════════ -->
+
+
+
+<!-- ── Mobile Drawer Overlay ─────────────────────────────── -->
+@if (mobileDrawerOpen()) {
+  <div class="drawer-overlay" (click)="closeDrawer()" aria-hidden="true"></div>
+}
+
+<header
+  class="site-header"
+  [class.site-header--scrolled]="isCompact()"
+  [class.site-header--no-ann]="!announcementVisible()"
+>
+
+  <!-- ① Announcement / Promo Bar ─────────────────────────── -->
+  @if (announcementVisible()) {
+    <div class="ann-bar" id="ann-bar">
+      <div class="ann-track">
+        <p class="ann-text">
+          {{ currentAnn.text }}
+          @if (currentAnn.highlight) {
+            <strong class="ann-highlight">{{ currentAnn.highlight }}</strong>
+          }
+          @if (currentAnn.cta) {
+            <a routerLink="/products" class="ann-cta">{{ currentAnn.cta }} →</a>
+          }
+        </p>
+      </div>
+      <button
+        class="ann-dismiss"
+        (click)="dismissAnnouncement()"
+        aria-label="Dismiss announcement"
+        id="ann-dismiss-btn"
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  }
+
+  <!-- ② Main Navbar ──────────────────────────────────────── -->
+  <div class="navbar" id="main-navbar">
+    <div class="navbar-inner">
+
+      <!-- Logo -->
+      <a routerLink="/" class="navbar-logo" id="header-logo" (click)="closeMenu()">
+        <span class="logo-bolt">⚡</span>
+        <span class="logo-wordmark">Gadget<span class="logo-planet">Planet</span></span>
+      </a>
+
+      <!-- ── Desktop Category Nav ─────────────────────────── -->
+      <nav class="desktop-nav" aria-label="Category navigation">
+        @for (cat of categories; track cat.id) {
+          <div
+            class="nav-item"
+            [class.nav-item--active]="activeMenu() === cat.id"
+            (mouseenter)="openMenu(cat.id)"
+            (mouseleave)="closeMenu()"
+          >
+            <a
+              [routerLink]="cat.route"
+              class="nav-link"
+              [id]="'nav-' + cat.id"
+              (click)="closeMenu()"
+            >
+              <span class="nav-icon">{{ cat.icon }}</span>
+              {{ cat.label }}
+              <svg class="nav-chevron" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </a>
+
+            <!-- Mega Menu Dropdown -->
+            <div
+              class="mega-menu"
+              [class.mega-menu--open]="activeMenu() === cat.id"
+              (mouseenter)="openMenu(cat.id)"
+              (mouseleave)="closeMenu()"
+              role="region"
+              [attr.aria-label]="cat.label + ' menu'"
+            >
+              <div class="mega-menu-inner">
+
+                <!-- Link Columns -->
+                <div class="mega-cols">
+                  @for (col of cat.megaMenu.columns; track col.heading) {
+                    <div class="mega-col">
+                      <p class="mega-col-heading">{{ col.heading }}</p>
+                      <ul class="mega-col-links">
+                        @for (link of col.links; track link.label) {
+                          <li>
+                            <a
+                              [routerLink]="link.route"
+                              class="mega-link"
+                              (click)="closeMenu()"
+                            >
+                              <span class="mega-link-arrow">›</span>
+                              {{ link.label }}
+                            </a>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                </div>
+
+                <!-- Promo Tile -->
+                <a
+                  [routerLink]="cat.megaMenu.promoRoute"
+                  class="mega-promo"
+                  (click)="closeMenu()"
+                >
+                  <div class="mega-promo-img-wrap">
+                    <img
+                      [src]="cat.megaMenu.promoImage"
+                      [alt]="cat.megaMenu.promoLabel"
+                      class="mega-promo-img"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div class="mega-promo-overlay">
+                    <span class="mega-promo-badge">Featured</span>
+                    <p class="mega-promo-label">{{ cat.megaMenu.promoLabel }}</p>
+                    <span class="mega-promo-cta">Shop Now →</span>
+                  </div>
+                </a>
+
+              </div>
+            </div>
+          </div>
+        }
+      </nav>
+
+      <!-- ── Right Actions ──────────────────────────────────── -->
+      <div class="navbar-actions">
+
+        <!-- Search -->
+        <div class="search-wrap" [class.search-wrap--open]="searchOpen()">
+          @if (searchOpen()) {
+            <div class="search-field-wrap">
+              <input
+                id="header-search-input"
+                class="search-input"
+                type="search"
+                placeholder="Search gadgets, brands…"
+                [value]="searchQuery()"
+                (input)="onSearch($event)"
+                autocomplete="off"
+              />
+              <button class="search-close-btn" (click)="toggleSearch()" aria-label="Close search">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          } @else {
+            <button
+              class="icon-btn"
+              id="header-search-btn"
+              (click)="toggleSearch()"
+              aria-label="Open search"
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+            </button>
+          }
+        </div>
+
+        <!-- Account -->
+        <button class="icon-btn" id="header-account-btn" aria-label="My account">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </button>
+
+        <!-- Wishlist -->
+        <a routerLink="/wishlist" class="icon-btn icon-btn--badge" id="header-wishlist-btn" aria-label="Wishlist">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          @if (wishlistCount() > 0) {
+            <span class="icon-badge icon-badge--accent" [attr.aria-label]="wishlistCount() + ' items in wishlist'">{{ wishlistCount() }}</span>
+          }
+        </a>
+
+        <!-- Cart -->
+        <a routerLink="/cart" class="icon-btn icon-btn--badge icon-btn--cart" id="header-cart-btn" aria-label="Shopping cart">
+          <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"/>
+            <circle cx="20" cy="21" r="1"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span
+            class="icon-badge icon-badge--primary"
+            [class.icon-badge--pop]="cartCount() > 0"
+            [attr.aria-label]="cartCount() + ' items in cart'"
+          >{{ cartCount() }}</span>
+        </a>
+
+        <!-- Mobile Hamburger -->
+        <button
+          class="hamburger"
+          id="header-hamburger"
+          (click)="openDrawer()"
+          [attr.aria-expanded]="mobileDrawerOpen()"
+          aria-label="Open navigation menu"
+        >
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+</header>
+
+<!-- ③ Mobile Slide-in Drawer ──────────────────────────────── -->
+<nav
+  class="mobile-drawer"
+  [class.mobile-drawer--open]="mobileDrawerOpen()"
+  aria-label="Mobile navigation"
+  [attr.aria-hidden]="!mobileDrawerOpen()"
+  id="mobile-nav-drawer"
+>
+  <!-- Drawer Header -->
+  <div class="drawer-header">
+    <a routerLink="/" class="logo-wordmark" (click)="closeDrawer()">
+      <span class="logo-bolt">⚡</span>Gadget<span class="logo-planet">Planet</span>
+    </a>
+    <button class="drawer-close" (click)="closeDrawer()" aria-label="Close menu" id="drawer-close-btn">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Drawer Search -->
+  <div class="drawer-search">
+    <svg class="drawer-search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input
+      id="drawer-search-input"
+      class="drawer-search-input"
+      type="search"
+      placeholder="Search gadgets…"
+    />
+  </div>
+
+  <!-- Accordion Categories -->
+  <div class="drawer-categories">
+    @for (cat of categories; track cat.id) {
+      <div class="drawer-cat" [class.drawer-cat--open]="activeMobileAccordion() === cat.id">
+
+        <!-- Accordion Trigger -->
+        <button
+          class="drawer-cat-trigger"
+          [id]="'drawer-cat-' + cat.id"
+          (click)="toggleMobileAccordion(cat.id)"
+          [attr.aria-expanded]="activeMobileAccordion() === cat.id"
+        >
+          <span class="drawer-cat-label">
+            <span class="drawer-cat-icon">{{ cat.icon }}</span>
+            {{ cat.label }}
+          </span>
+          <svg
+            class="drawer-cat-chevron"
+            viewBox="0 0 24 24" width="16" height="16"
+            fill="none" stroke="currentColor" stroke-width="2.5"
+          >
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </button>
+
+        <!-- Accordion Panel -->
+        @if (activeMobileAccordion() === cat.id) {
+          <div class="drawer-cat-panel">
+            @for (col of cat.megaMenu.columns; track col.heading) {
+              <p class="drawer-col-heading">{{ col.heading }}</p>
+              @for (link of col.links; track link.label) {
+                <a
+                  [routerLink]="link.route"
+                  class="drawer-link"
+                  (click)="closeDrawer()"
+                >
+                  {{ link.label }}
+                </a>
+              }
+            }
+          </div>
+        }
+
+      </div>
+    }
+  </div>
+
+  <!-- Drawer Footer Links -->
+  <div class="drawer-footer">
+    <a routerLink="/cart" class="drawer-footer-link" (click)="closeDrawer()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+      </svg>
+      Cart
+      @if (cartCount() > 0) {
+        <span class="drawer-cart-badge">{{ cartCount() }}</span>
+      }
+    </a>
+    <a class="drawer-footer-link" (click)="closeDrawer()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+      Account
+    </a>
+  </div>
+</nav>

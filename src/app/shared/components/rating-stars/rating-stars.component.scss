@@ -1,0 +1,32 @@
+@use '../../../../styles/variables' as v;
+
+.rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: v.$space-2;
+}
+
+.stars-row {
+  display: flex;
+  gap: 2px;
+}
+
+.star {
+  flex-shrink: 0;
+
+  &--filled { color: v.$color-star-filled; }
+  &--half   { color: v.$color-star-filled; }
+  &--empty  { color: v.$color-star-empty; }
+}
+
+.rating-count {
+  font-size: v.$font-size-xs;
+  color: v.$color-text-muted;
+  font-weight: v.$font-weight-regular;
+}
+
+.rating-value {
+  font-size: v.$font-size-sm;
+  color: v.$color-star-filled;
+  font-weight: v.$font-weight-semibold;
+}

@@ -1,0 +1,210 @@
+@use '../../../styles/variables' as v;
+
+.listing-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: v.$space-8;
+  max-width: v.$container-max;
+  margin: 0 auto;
+  padding: v.$space-8 v.$space-6;
+  min-height: calc(100vh - v.$header-height);
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Sidebar ────────────────────────────────────────────────
+.listing-sidebar {
+  background: v.$color-bg-card;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-lg;
+  padding: v.$space-6;
+  height: fit-content;
+  position: sticky;
+  top: calc(v.$header-height + v.$space-4);
+
+  @media (max-width: 768px) {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: v.$z-overlay;
+    border-radius: 0;
+    overflow-y: auto;
+
+    &--open { display: block; }
+  }
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: v.$space-6;
+}
+
+.sidebar-title {
+  font-size: v.$font-size-lg;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  margin: 0;
+}
+
+.sidebar-close {
+  display: none;
+  background: none;
+  border: none;
+  color: v.$color-text-secondary;
+  cursor: pointer;
+  font-size: v.$font-size-md;
+
+  @media (max-width: 768px) { display: block; }
+}
+
+.filter-group {
+  margin-bottom: v.$space-6;
+  padding-bottom: v.$space-6;
+  border-bottom: 1px solid v.$color-surface-border;
+
+  &:last-child { border-bottom: none; margin-bottom: 0; }
+}
+
+.filter-label {
+  font-size: v.$font-size-sm;
+  font-weight: v.$font-weight-semibold;
+  color: v.$color-text-primary;
+  text-transform: uppercase;
+  letter-spacing: v.$letter-spacing-wide;
+  margin: 0 0 v.$space-3;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: v.$space-2;
+
+  &--col { flex-direction: column; flex-wrap: nowrap; }
+}
+
+.filter-chip {
+  padding: v.$space-1 v.$space-3;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-full;
+  background: none;
+  color: v.$color-text-secondary;
+  font-family: v.$font-family-base;
+  font-size: v.$font-size-sm;
+  cursor: pointer;
+  transition: all v.$transition-fast;
+
+  &:hover {
+    border-color: v.$color-primary;
+    color: v.$color-primary;
+  }
+
+  &--active {
+    background: v.$color-primary-glow;
+    border-color: v.$color-primary;
+    color: v.$color-primary;
+    font-weight: v.$font-weight-semibold;
+  }
+}
+
+// Toggle
+.toggle-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: v.$font-size-sm;
+  color: v.$color-text-secondary;
+}
+
+.toggle-wrap { position: relative; }
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+
+  &:checked + .toggle-track { background: v.$color-primary; }
+  &:checked + .toggle-track .toggle-thumb { transform: translateX(20px); }
+}
+
+.toggle-track {
+  width: 44px;
+  height: 24px;
+  background: v.$color-bg-muted;
+  border-radius: v.$radius-full;
+  transition: background v.$transition-base;
+  position: relative;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform v.$transition-base;
+}
+
+// ── Main Content ───────────────────────────────────────────
+.listing-main { min-width: 0; }
+
+.listing-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: v.$space-6;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: v.$space-4;
+}
+
+.filter-toggle-btn {
+  display: none;
+  align-items: center;
+  gap: v.$space-2;
+  padding: v.$space-2 v.$space-4;
+  background: v.$color-bg-card;
+  border: 1px solid v.$color-surface-border;
+  border-radius: v.$radius-sm;
+  color: v.$color-text-secondary;
+  font-family: v.$font-family-base;
+  font-size: v.$font-size-sm;
+  cursor: pointer;
+
+  @media (max-width: 768px) { display: flex; }
+}
+
+.listing-count {
+  font-size: v.$font-size-sm;
+  color: v.$color-text-muted;
+  margin: 0;
+}
+
+.listing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: v.$space-5;
+}
+
+.listing-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: v.$space-20;
+  color: v.$color-text-muted;
+}
+
+.listing-empty-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: v.$space-4;
+}

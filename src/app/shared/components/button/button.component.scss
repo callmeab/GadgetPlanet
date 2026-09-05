@@ -1,0 +1,132 @@
+@use '../../../../styles/variables' as v;
+
+.gp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: v.$space-2;
+  border: none;
+  border-radius: v.$radius-sm;
+  font-family: v.$font-family-base;
+  font-weight: v.$font-weight-semibold;
+  letter-spacing: v.$letter-spacing-snug;
+  cursor: pointer;
+  transition: all v.$transition-base;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  text-decoration: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.08);
+    opacity: 0;
+    transition: opacity v.$transition-fast;
+  }
+
+  &:hover::before { opacity: 1; }
+  &:active { transform: scale(0.97); }
+
+  // ── Sizes ──
+  &--sm {
+    padding: v.$space-2 v.$space-3;
+    font-size: v.$font-size-sm;
+    border-radius: v.$radius-xs;
+  }
+  &--md {
+    padding: v.$space-3 v.$space-6;
+    font-size: v.$font-size-base;
+  }
+  &--lg {
+    padding: v.$space-4 v.$space-8;
+    font-size: v.$font-size-md;
+    border-radius: v.$radius-md;
+  }
+
+  // ── Variants ──
+  &--primary {
+    background: v.$gradient-primary;
+    color: #fff;
+    box-shadow: v.$shadow-blue;
+
+    &:hover {
+      box-shadow: v.$shadow-glow-blue;
+      transform: translateY(-1px);
+    }
+  }
+
+  &--accent {
+    background: v.$gradient-accent;
+    color: #fff;
+    box-shadow: v.$shadow-orange;
+
+    &:hover {
+      box-shadow: v.$shadow-glow-orange;
+      transform: translateY(-1px);
+    }
+  }
+
+  &--secondary {
+    background: v.$color-bg-card;
+    color: v.$color-text-primary;
+    border: 1px solid v.$color-surface-border;
+
+    &:hover {
+      border-color: v.$color-primary;
+      color: v.$color-primary;
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: v.$color-primary;
+    border: 1px solid v.$color-primary;
+
+    &:hover {
+      background: v.$color-primary-glow;
+    }
+  }
+
+  &--danger {
+    background: v.$color-error;
+    color: #fff;
+    &:hover { filter: brightness(1.1); }
+  }
+
+  // ── States ──
+  &--full { width: 100%; }
+
+  &--disabled,
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &--loading {
+    cursor: wait;
+    pointer-events: none;
+  }
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btn-spin 0.7s linear infinite;
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-icon-left,
+.btn-icon-right {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+}

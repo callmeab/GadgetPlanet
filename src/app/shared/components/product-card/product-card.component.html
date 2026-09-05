@@ -1,0 +1,122 @@
+<article class="product-card" [class.product-card--out-of-stock]="!product.inStock">
+
+  <!-- ── Image Section ───────────────────────────────── -->
+  <div class="card-image-wrap">
+    <a [routerLink]="['/products', product.id]" class="card-image-link">
+      <img
+        class="card-image"
+        [src]="product.images[0]"
+        [alt]="product.name"
+        loading="lazy"
+      />
+      @if (!product.inStock) {
+        <div class="card-oos-overlay">Out of Stock</div>
+      }
+    </a>
+
+    <!-- Badges -->
+    @if (product.badges.length) {
+      <div class="card-badges">
+        @for (badge of product.badges.slice(0, 2); track badge) {
+          <gp-badge [label]="badge"></gp-badge>
+        }
+      </div>
+    }
+
+    <!-- Discount Pill -->
+    @if (product.discountPercent) {
+      <div class="card-discount-pill">-{{ product.discountPercent }}%</div>
+    }
+
+    <!-- Wishlist Button -->
+    <button
+      class="card-wishlist-btn"
+      [class.card-wishlist-btn--active]="inWishlist()"
+      [attr.aria-label]="inWishlist() ? 'Remove from wishlist' : 'Add to wishlist'"
+      (click)="toggleWishlist($event)"
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        @if (inWishlist()) {
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+            fill="currentColor"
+            stroke="none"
+          />
+        } @else {
+          <path
+            d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+          />
+        }
+      </svg>
+    </button>
+
+    <!-- Quick Add Hover Overlay Button -->
+    @if (product.inStock) {
+      <div class="card-quick-add-wrap">
+        <button
+          type="button"
+          class="card-quick-add-btn"
+          [class.card-quick-add-btn--in-cart]="inCart()"
+          (click)="inCart() ? goToCart() : addToCart($event)"
+          [attr.aria-label]="inCart() ? 'Go to cart' : 'Quick add ' + product.name + ' to cart'"
+        >
+          @if (inCart()) {
+            <span>✓ In Cart (View)</span>
+          } @else {
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span>+ Quick Add</span>
+          }
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- ── Info Section ─────────────────────────────────── -->
+  <div class="card-body">
+    <p class="card-brand">{{ product.brand }}</p>
+    <a [routerLink]="['/products', product.id]" class="card-name">{{ product.name }}</a>
+
+    <gp-rating-stars
+      [rating]="product.rating"
+      [reviewCount]="product.reviewCount"
+      [showCount]="true"
+    ></gp-rating-stars>
+
+    <!-- Pricing -->
+    <div class="card-price-row">
+      @if (product.discountPrice) {
+        <span class="card-price-current">Rs. {{ product.discountPrice | number:'1.0-0' }}</span>
+        <span class="card-price-original">Rs. {{ product.price | number:'1.0-0' }}</span>
+        @if (product.discountPercent) {
+          <span class="card-price-percent">{{ product.discountPercent }}% OFF</span>
+        }
+      } @else {
+        <span class="card-price-current">Rs. {{ product.price | number:'1.0-0' }}</span>
+      }
+    </div>
+
+    <!-- CTA -->
+    <div class="card-actions">
+      @if (inCart()) {
+        <gp-button variant="secondary" size="sm" [fullWidth]="true" (click)="goToCart()">
+          Go to Cart
+        </gp-button>
+      } @else {
+        <gp-button
+          variant="primary"
+          size="sm"
+          [fullWidth]="true"
+          [disabled]="!product.inStock"
+          (click)="addToCart($event)"
+        >
+          {{ product.inStock ? 'Add to Cart' : 'Notify Me' }}
+        </gp-button>
+      }
+    </div>
+  </div>
+
+</article>

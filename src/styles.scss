@@ -1,0 +1,102 @@
+// ============================================================
+// GadgetPlanet — Global Styles
+// ============================================================
+@use 'styles/variables' as v;
+
+// ── Google Fonts ───────────────────────────────────────────
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+
+// ── Box Model Reset ────────────────────────────────────────
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// ── Base ───────────────────────────────────────────────────
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: v.$font-family-base;
+  font-size: v.$font-size-base;
+  font-weight: v.$font-weight-regular;
+  color: v.$color-text-primary;
+  background-color: v.$color-bg;
+  line-height: v.$line-height-base;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+// ── Typography ─────────────────────────────────────────────
+h1, h2, h3, h4, h5, h6 {
+  font-family: v.$font-family-display;
+  font-weight: v.$font-weight-bold;
+  color: v.$color-text-primary;
+  line-height: v.$line-height-tight;
+  letter-spacing: v.$letter-spacing-tight;
+}
+
+p { line-height: v.$line-height-base; }
+
+a {
+  color: v.$color-primary;
+  text-decoration: none;
+  transition: color v.$transition-fast;
+  &:hover { color: v.$color-primary-light; }
+}
+
+img { max-width: 100%; display: block; }
+
+button, input, textarea, select {
+  font-family: v.$font-family-base;
+}
+
+// ── Scrollbar ──────────────────────────────────────────────
+::-webkit-scrollbar        { width: 8px; height: 8px; }
+::-webkit-scrollbar-track  { background: v.$color-bg; }
+::-webkit-scrollbar-thumb  {
+  background: v.$color-bg-muted;
+  border-radius: v.$radius-full;
+  border: 2px solid v.$color-bg;
+}
+::-webkit-scrollbar-thumb:hover { background: v.$color-text-muted; }
+
+// ── Selection ──────────────────────────────────────────────
+::selection {
+  background: v.$color-primary-glow;
+  color: v.$color-primary;
+}
+
+// ── Focus Visible ──────────────────────────────────────────
+:focus-visible {
+  outline: 2px solid v.$color-primary;
+  outline-offset: 3px;
+  border-radius: v.$radius-xs;
+}
+
+// ── View Transitions (Angular withViewTransitions) ─────────
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: 200ms ease-out fade-out;
+  }
+  ::view-transition-new(root) {
+    animation: 200ms ease-in fade-in;
+  }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

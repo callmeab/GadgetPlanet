@@ -1,0 +1,42 @@
+@use '../../../../styles/variables' as v;
+
+.gp-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px v.$space-2;
+  border-radius: v.$radius-xs;
+  font-size: v.$font-size-xs;
+  font-weight: v.$font-weight-bold;
+  letter-spacing: v.$letter-spacing-wider;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &--bestseller {
+    background: v.$color-badge-bestseller;
+    color: #fff;
+  }
+  &--new {
+    background: v.$color-badge-new;
+    color: #fff;
+  }
+  &--hot {
+    background: v.$color-badge-hot;
+    color: #fff;
+  }
+  &--limited {
+    background: v.$color-badge-limited;
+    color: #fff;
+  }
+  &--sale {
+    background: v.$color-badge-sale;
+    color: #fff;
+  }
+  &--top {
+    background: v.$color-warning;
+    color: #000;
+  }
+  &--default {
+    background: v.$color-bg-muted;
+    color: v.$color-text-secondary;
+  }
+}

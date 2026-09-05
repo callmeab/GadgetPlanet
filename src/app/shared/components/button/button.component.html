@@ -1,0 +1,20 @@
+<button
+  [id]="id"
+  [type]="type"
+  [disabled]="disabled || loading"
+  [class]="btnClasses"
+  (click)="onClick($event)"
+>
+  @if (loading) {
+    <span class="btn-spinner" aria-hidden="true"></span>
+  }
+  @if (iconLeft) {
+    <span class="btn-icon-left" [innerHTML]="iconLeft" aria-hidden="true"></span>
+  }
+  <span class="btn-label">
+    <ng-content></ng-content>
+  </span>
+  @if (iconRight) {
+    <span class="btn-icon-right" [innerHTML]="iconRight" aria-hidden="true"></span>
+  }
+</button>
