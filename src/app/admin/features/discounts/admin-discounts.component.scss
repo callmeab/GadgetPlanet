@@ -1,0 +1,1153 @@
+@use '../../styles/admin-variables' as *;
+
+.admin-discounts-page {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// ── 1. Page Header ──────────────────────────────────────────
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $admin-space-4;
+}
+
+.title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: $admin-space-3;
+}
+
+.page-title {
+  font-size: 1.625rem;
+  font-weight: 700;
+  color: $admin-text-primary;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.count-badge {
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: $admin-bg-muted;
+  color: $admin-text-secondary;
+  border: 1px solid $admin-border;
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: $admin-text-secondary;
+  margin: 4px 0 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: $admin-space-3;
+}
+
+// ── Buttons ─────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: $admin-inner-radius;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+  white-space: nowrap;
+
+  .btn-icon { width: 16px; height: 16px; }
+
+  &.btn-primary {
+    background: $admin-primary;
+    color: #fff;
+    &:hover { background: $admin-primary-hover; }
+  }
+
+  &.btn-secondary {
+    background: $admin-bg-surface;
+    color: $admin-text-primary;
+    border-color: $admin-border;
+    &:hover { background: $admin-bg-muted; border-color: #D1D5DB; }
+  }
+
+  &.btn-danger {
+    background: #EF4444;
+    color: #fff;
+    &:hover { background: #DC2626; }
+  }
+}
+
+// ── 2. KPI Metrics Bar ──────────────────────────────────────
+.discounts-kpi-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: 14px 24px;
+  box-shadow: $admin-shadow-xs;
+  flex-wrap: wrap;
+  gap: $admin-space-3;
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $admin-text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.kpi-num {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $admin-text-primary;
+
+  &.text-primary { color: $admin-primary; }
+  &.text-success { color: #10B981; }
+  &.text-indigo { color: #6366F1; }
+  &.text-warning { color: #F59E0B; }
+}
+
+.kpi-divider {
+  width: 1px;
+  height: 32px;
+  background: $admin-border;
+  @media (max-width: 768px) { display: none; }
+}
+
+// ── 3. Status Tabs Navigation ───────────────────────────────
+.discounts-tabs-nav {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: 4px;
+  box-shadow: $admin-shadow-xs;
+  overflow-x: auto;
+}
+
+.tabs-track {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: max-content;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: $admin-text-secondary;
+  background: transparent;
+  border: none;
+  border-radius: $admin-inner-radius;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+
+  &:hover { color: $admin-text-primary; background: $admin-bg-muted; }
+
+  &.tab-active {
+    color: $admin-primary;
+    background: rgba(10, 132, 255, 0.08);
+    font-weight: 600;
+  }
+}
+
+.tab-count-badge {
+  padding: 1px 6px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: $admin-bg-muted;
+  color: $admin-text-muted;
+
+  &.badge-active { background: $admin-primary; color: #fff; }
+  &.badge-danger { background: rgba(239, 68, 68, 0.15); color: #DC2626; }
+  &.badge-muted { background: rgba(107, 114, 128, 0.15); color: #6B7280; }
+}
+
+// ── 4. Search & Filters Card ────────────────────────────────
+.filters-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: $admin-space-3 $admin-space-4;
+  box-shadow: $admin-shadow-xs;
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-3;
+}
+
+.filters-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $admin-space-3;
+}
+
+.search-field {
+  position: relative;
+  flex: 1;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  color: $admin-text-muted;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 36px 0 38px;
+  font-size: 0.875rem;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  background: $admin-bg;
+  color: $admin-text-primary;
+  transition: all $admin-transition-fast;
+
+  &:focus {
+    outline: none;
+    border-color: $admin-primary;
+    background: $admin-bg-surface;
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.12);
+  }
+  &::placeholder { color: $admin-text-muted; }
+}
+
+.clear-search-btn {
+  position: absolute;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: $admin-text-muted;
+  font-size: 1.25rem;
+  cursor: pointer;
+  border-radius: 50%;
+  &:hover { background: $admin-bg-muted; color: $admin-text-primary; }
+}
+
+.filter-select {
+  height: 38px;
+  padding: 0 12px;
+  font-size: 0.8125rem;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  background: $admin-bg;
+  color: $admin-text-primary;
+  cursor: pointer;
+  &:focus { outline: none; border-color: $admin-primary; }
+}
+
+.btn-reset-filters {
+  height: 38px;
+  padding: 0 12px;
+  font-size: 0.8125rem;
+  color: $admin-text-secondary;
+  background: transparent;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  cursor: pointer;
+  &:hover { background: $admin-bg-muted; color: $admin-text-primary; }
+}
+
+.filters-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 6px;
+  border-top: 1px solid $admin-border-subtle;
+  font-size: 0.8125rem;
+  color: $admin-text-secondary;
+}
+
+// ── 5. Bulk Actions Toolbar ─────────────────────────────────
+.bulk-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(10, 132, 255, 0.08);
+  border: 1px solid rgba(10, 132, 255, 0.2);
+  border-radius: $admin-card-radius;
+}
+
+.bulk-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: $admin-text-primary;
+  font-weight: 500;
+}
+
+.selected-badge {
+  background: $admin-primary;
+  color: #fff;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.btn-deselect {
+  border: none;
+  background: transparent;
+  color: $admin-primary;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.bulk-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-bulk {
+  height: 30px;
+  padding: 0 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: $admin-inner-radius;
+  border: 1px solid transparent;
+  cursor: pointer;
+
+  &.btn-bulk-success {
+    background: #10B981;
+    color: #fff;
+    &:hover { background: #059669; }
+  }
+
+  &.btn-bulk-warning {
+    background: #F59E0B;
+    color: #fff;
+    &:hover { background: #D97706; }
+  }
+
+  &.btn-bulk-danger {
+    background: #EF4444;
+    color: #fff;
+    &:hover { background: #DC2626; }
+  }
+}
+
+// ── 6. Main Table & Desktop Table ───────────────────────────
+.table-container-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  box-shadow: $admin-shadow-xs;
+  overflow: hidden;
+}
+
+.table-responsive { width: 100%; overflow-x: auto; }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+
+  thead {
+    background: $admin-bg;
+    border-bottom: 1px solid $admin-border;
+
+    th {
+      padding: 10px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: $admin-text-muted;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+
+      &.th-checkbox { width: 44px; text-align: center; padding-left: 16px; }
+      &.th-sortable {
+        cursor: pointer;
+        &:hover { color: $admin-text-primary; }
+      }
+      &.text-center { text-align: center; }
+      &.text-right { text-align: right; padding-right: 18px; }
+    }
+  }
+
+  .th-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    &.center-content { justify-content: center; }
+  }
+
+  .sort-icon.sort-active { color: $admin-primary; }
+
+  tbody .table-row {
+    border-bottom: 1px solid $admin-border-subtle;
+    transition: background-color $admin-transition-fast;
+    &:hover { background-color: #F8FAFC; }
+    &.row-selected { background-color: rgba(10, 132, 255, 0.04); }
+
+    td {
+      padding: 12px 14px;
+      vertical-align: middle;
+      color: $admin-text-primary;
+      &.td-checkbox { text-align: center; padding-left: 16px; }
+      &.text-center { text-align: center; }
+      &.text-right { text-align: right; padding-right: 18px; }
+    }
+  }
+}
+
+.admin-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: $admin-primary;
+}
+
+// ── Coupon Code Column ──────────────────────────────────────
+.code-col-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.code-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coupon-code-badge {
+  font-family: monospace;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: #EFF6FF;
+  color: $admin-primary;
+  border: 1px dashed rgba(10, 132, 255, 0.4);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.btn-copy-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid $admin-border;
+  background: $admin-bg-surface;
+  border-radius: 4px;
+  color: $admin-text-muted;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+
+  &:hover {
+    color: $admin-primary;
+    border-color: rgba(10, 132, 255, 0.3);
+    background: rgba(10, 132, 255, 0.04);
+  }
+
+  &.copied {
+    background: #ECFDF5;
+    border-color: #A7F3D0;
+    color: #059669;
+  }
+
+  .copy-icon { width: 13px; height: 13px; }
+  .copied-indicator { font-size: 0.6875rem; font-weight: 600; }
+}
+
+.code-description-text {
+  font-size: 0.75rem;
+  color: $admin-text-secondary;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// ── Discount Value Column ───────────────────────────────────
+.discount-value-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.value-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  width: fit-content;
+
+  &.type-percentage {
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+  }
+
+  &.type-fixed {
+    background: rgba(99, 102, 241, 0.12);
+    color: #4F46E5;
+  }
+
+  &.type-free_shipping {
+    background: rgba(168, 85, 247, 0.12);
+    color: #7E22CE;
+  }
+}
+
+.scope-text {
+  font-size: 0.75rem;
+  color: $admin-text-muted;
+}
+
+// ── Usage Column & Progress Bar ─────────────────────────────
+.usage-col-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 110px;
+}
+
+.usage-text-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.usage-percent {
+  font-size: 0.6875rem;
+  color: $admin-text-muted;
+}
+
+.progress-track {
+  width: 100%;
+  height: 5px;
+  background: #E2E8F0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: $admin-primary;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+
+  &.fill-warning { background: #F59E0B; }
+  &.fill-danger { background: #EF4444; }
+}
+
+.sub-badge-limit {
+  font-size: 0.6875rem;
+  color: $admin-text-muted;
+}
+
+// ── Dates & Requirements ────────────────────────────────────
+.dates-col-wrap {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8125rem;
+  color: $admin-text-secondary;
+}
+
+.no-expiry-badge {
+  color: #10B981;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.min-order-val {
+  font-weight: 600;
+  font-size: 0.8125rem;
+}
+
+// ── Actions Row ─────────────────────────────────────────────
+.table-actions-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-row-action {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid $admin-border;
+  background: $admin-bg-surface;
+  border-radius: 4px;
+  color: $admin-text-secondary;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+
+  &:hover {
+    background: $admin-bg-muted;
+    color: $admin-text-primary;
+    border-color: #CBD5E1;
+  }
+
+  &.btn-danger-action:hover {
+    background: #FEF2F2;
+    border-color: #FCA5A5;
+    color: #DC2626;
+  }
+
+  .row-icon { width: 15px; height: 15px; }
+  .text-warning { color: #D97706; }
+  .text-success { color: #059669; }
+}
+
+// ── 7. Mobile Stacked Cards (<768px) ────────────────────────
+.mobile-only-cards { display: none; }
+
+@media (max-width: 768px) {
+  .desktop-only-table { display: none; }
+
+  .mobile-only-cards {
+    display: flex;
+    flex-direction: column;
+    padding: $admin-space-3;
+    gap: $admin-space-3;
+  }
+
+  .discount-card-item {
+    background: #fff;
+    border: 1px solid $admin-border;
+    border-radius: $admin-card-radius;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: $admin-shadow-xs;
+  }
+
+  .card-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .card-code-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-description {
+    font-size: 0.8125rem;
+    color: $admin-text-secondary;
+    margin: 0;
+  }
+
+  .card-value-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    .scope-tag { font-size: 0.75rem; color: $admin-text-muted; }
+  }
+
+  .card-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    background: $admin-bg;
+    padding: 8px 12px;
+    border-radius: $admin-inner-radius;
+
+    .stat-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      .stat-label { font-size: 0.6875rem; color: $admin-text-muted; text-transform: uppercase; }
+      .stat-value { font-size: 0.8125rem; font-weight: 700; color: $admin-text-primary; }
+    }
+  }
+
+  .card-actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 6px;
+    border-top: 1px solid $admin-border-subtle;
+
+    .mobile-action-btn {
+      flex: 1;
+      min-height: 44px; /* Min 44px touch target */
+      border: 1px solid $admin-border;
+      background: $admin-bg;
+      border-radius: $admin-inner-radius;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: $admin-text-primary;
+      cursor: pointer;
+
+      &:hover { background: $admin-bg-muted; }
+      &.btn-danger-text { color: #DC2626; }
+    }
+  }
+}
+
+// ── 8. Pagination Footer ────────────────────────────────────
+.table-pagination-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $admin-space-3;
+  padding: 12px 16px;
+  background: $admin-bg-surface;
+  border-top: 1px solid $admin-border;
+}
+
+.pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.8125rem;
+  color: $admin-text-secondary;
+
+  .page-size-select {
+    height: 32px;
+    padding: 0 8px;
+    font-size: 0.8125rem;
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+    background: $admin-bg-surface;
+    cursor: pointer;
+  }
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .page-nav-btn, .page-numbers .page-num-btn {
+    height: 32px;
+    border-radius: $admin-inner-radius;
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+
+  .page-nav-btn {
+    padding: 0 10px;
+    border: 1px solid $admin-border;
+    background: $admin-bg-surface;
+    color: $admin-text-primary;
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+
+  .page-numbers .page-num-btn {
+    min-width: 32px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: $admin-text-secondary;
+    font-weight: 500;
+    &:hover { background: $admin-bg-muted; color: $admin-text-primary; }
+    &.active-page { background: $admin-primary; color: #fff; font-weight: 600; }
+  }
+}
+
+// ── 9. Empty State ──────────────────────────────────────────
+.empty-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 24px;
+
+  .empty-icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: $admin-bg-muted;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    color: $admin-text-muted;
+  }
+
+  .empty-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: $admin-text-primary;
+    margin: 0 0 8px;
+  }
+
+  .empty-desc {
+    font-size: 0.875rem;
+    color: $admin-text-secondary;
+    max-width: 440px;
+    margin: 0 0 20px;
+  }
+}
+
+// ── 10. '+ Create / Edit Discount' Modal Form ───────────────
+.discount-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #FEF2F2;
+  border: 1px solid #FCA5A5;
+  border-radius: $admin-inner-radius;
+  color: #B91C1C;
+  font-size: 0.8125rem;
+}
+
+.form-section {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-section-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: $admin-text-primary;
+  margin: 0;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $admin-text-primary;
+
+  .required { color: #EF4444; }
+}
+
+.form-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  font-size: 0.875rem;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  background: $admin-bg;
+  color: $admin-text-primary;
+  transition: all $admin-transition-fast;
+
+  &:focus {
+    outline: none;
+    border-color: $admin-primary;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.12);
+  }
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: $admin-text-muted;
+}
+
+// Code Generator Row
+.code-input-with-generator {
+  display: flex;
+  gap: 8px;
+
+  .code-input {
+    font-family: monospace;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .btn-generate-code {
+    height: 38px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid $admin-border;
+    background: $admin-bg-muted;
+    border-radius: $admin-inner-radius;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: $admin-text-primary;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      background: rgba(10, 132, 255, 0.08);
+      color: $admin-primary;
+      border-color: rgba(10, 132, 255, 0.3);
+    }
+
+    .gen-icon { width: 15px; height: 15px; }
+  }
+}
+
+// Segmented Type Selector
+.discount-type-segmented-control {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: $admin-bg;
+  padding: 4px;
+  border-radius: $admin-inner-radius;
+  border: 1px solid $admin-border;
+}
+
+.type-segment-btn {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: $admin-text-secondary;
+  cursor: pointer;
+
+  &.active {
+    background: #fff;
+    color: $admin-text-primary;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .segment-icon { font-weight: 700; }
+}
+
+// Input with Affix
+.input-with-affix {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .input-affix {
+    position: absolute;
+    padding: 0 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $admin-text-muted;
+    pointer-events: none;
+    &:first-child { left: 0; }
+    &:last-child { right: 0; }
+  }
+
+  .form-input {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+}
+
+// Radio Options List
+.radio-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &.horizontal {
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+.radio-label {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+
+  input[type="radio"] {
+    margin-top: 3px;
+    accent-color: $admin-primary;
+  }
+
+  .radio-text {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.8125rem;
+    color: $admin-text-primary;
+    small { color: $admin-text-muted; font-size: 0.75rem; }
+  }
+}
+
+.min-order-input-wrap {
+  max-width: 180px;
+  margin-top: 6px;
+}
+
+// Category Chips Selector
+.categories-picker-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+  background: $admin-bg;
+  border-radius: $admin-inner-radius;
+  border: 1px solid $admin-border;
+}
+
+.category-chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cat-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid $admin-border;
+  background: #fff;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: $admin-text-secondary;
+  cursor: pointer;
+
+  &:hover { border-color: $admin-primary; }
+
+  &.selected {
+    background: rgba(10, 132, 255, 0.08);
+    border-color: $admin-primary;
+    color: $admin-primary;
+    font-weight: 600;
+  }
+
+  .chip-check { font-weight: 700; }
+}
+
+// Checkboxes & Limits
+.checkbox-controls-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: $admin-text-primary;
+  cursor: pointer;
+}
+
+.indent-input {
+  padding-left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .limit-input { width: 100px; }
+}
+
+.dates-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+.modal-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid $admin-border;
+}
+
+.delete-confirm-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 8px 0;
+}
+
+.delete-warning-text {
+  font-size: 0.875rem;
+  color: $admin-text-secondary;
+  line-height: 1.5;
+  margin: 0;
+
+  strong { color: $admin-text-primary; }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

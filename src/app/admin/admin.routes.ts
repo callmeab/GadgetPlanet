@@ -99,8 +99,8 @@ export const ADMIN_ROUTES: Routes = [
       {
         path: 'discounts',
         loadComponent: () =>
-          import('./features/dashboard/admin-dashboard.component').then(
-            m => m.AdminDashboardComponent
+          import('./features/discounts/admin-discounts.component').then(
+            m => m.AdminDiscountsComponent
           ),
         title: 'Discounts & Coupons — GadgetPlanet Admin',
       },

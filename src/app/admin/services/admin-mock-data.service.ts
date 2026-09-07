@@ -110,6 +110,28 @@ export interface InventoryItem {
   lastUpdated?: string;
 }
 
+export type DiscountType = 'percentage' | 'fixed' | 'free_shipping';
+export type DiscountStatus = 'Active' | 'Scheduled' | 'Expired' | 'Disabled';
+export type DiscountAppliesTo = 'all' | 'categories' | 'products';
+
+export interface AdminDiscount {
+  id: string;
+  code: string;
+  description: string;
+  type: DiscountType;
+  value: number; // % (e.g. 25) or $ (e.g. 50), or 0 for free shipping
+  minOrderValue?: number;
+  appliesTo: DiscountAppliesTo;
+  appliesToNames?: string[];
+  usageCount: number;
+  usageLimit?: number | null; // null = unlimited
+  oncePerCustomer: boolean;
+  startDate: string;
+  endDate?: string | null;
+  status: DiscountStatus;
+  createdAt: string;
+}
+
 export interface ProductVariantOption {
   name: string;
   values: string[];
@@ -1652,6 +1674,232 @@ export class AdminMockDataService {
           lastUpdated: new Date().toISOString(),
         };
       })
+    );
+  }
+
+  // ── Discounts & Coupons Mock Data ──────────────────────────
+  readonly discounts = signal<AdminDiscount[]>([
+    {
+      id: 'disc-1',
+      code: 'PLANETVIP500',
+      description: 'VIP loyalty voucher: Rs. 500 flat discount on premium audio & setups',
+      type: 'fixed',
+      value: 500,
+      minOrderValue: 2500,
+      appliesTo: 'all',
+      usageCount: 384,
+      usageLimit: 1000,
+      oncePerCustomer: true,
+      startDate: '2026-06-01',
+      endDate: '2026-12-31',
+      status: 'Active',
+      createdAt: '2026-05-28T10:00:00Z',
+    },
+    {
+      id: 'disc-2',
+      code: 'SUMMER25',
+      description: 'Mid-summer audio blast: 25% off all wireless headphones and earbuds',
+      type: 'percentage',
+      value: 25,
+      minOrderValue: 50,
+      appliesTo: 'categories',
+      appliesToNames: ['Audio'],
+      usageCount: 142,
+      usageLimit: 500,
+      oncePerCustomer: false,
+      startDate: '2026-06-15',
+      endDate: '2026-09-30',
+      status: 'Active',
+      createdAt: '2026-06-10T14:30:00Z',
+    },
+    {
+      id: 'disc-3',
+      code: 'WELCOME10',
+      description: 'First order welcome discount for newly registered newsletter subscribers',
+      type: 'percentage',
+      value: 10,
+      minOrderValue: 30,
+      appliesTo: 'all',
+      usageCount: 890,
+      usageLimit: null, // Unlimited
+      oncePerCustomer: true,
+      startDate: '2026-01-01',
+      endDate: null,
+      status: 'Active',
+      createdAt: '2026-01-01T00:00:00Z',
+    },
+    {
+      id: 'disc-4',
+      code: 'FREESHIP',
+      description: 'Free nationwide express shipping for any order exceeding $75',
+      type: 'free_shipping',
+      value: 0,
+      minOrderValue: 75,
+      appliesTo: 'all',
+      usageCount: 620,
+      usageLimit: null,
+      oncePerCustomer: false,
+      startDate: '2026-03-01',
+      endDate: null,
+      status: 'Active',
+      createdAt: '2026-02-28T11:15:00Z',
+    },
+    {
+      id: 'disc-5',
+      code: 'CYBERSETUP',
+      description: 'Desk upgrade special: $100 off premium workspace & desk setups',
+      type: 'fixed',
+      value: 100,
+      minOrderValue: 350,
+      appliesTo: 'categories',
+      appliesToNames: ['Workspace'],
+      usageCount: 48,
+      usageLimit: 200,
+      oncePerCustomer: true,
+      startDate: '2026-07-01',
+      endDate: '2026-10-15',
+      status: 'Active',
+      createdAt: '2026-06-25T16:20:00Z',
+    },
+    {
+      id: 'disc-6',
+      code: 'FITNESS15',
+      description: 'Smart wearable promo: 15% off smartwatches and health trackers',
+      type: 'percentage',
+      value: 15,
+      minOrderValue: 80,
+      appliesTo: 'categories',
+      appliesToNames: ['Wearables'],
+      usageCount: 67,
+      usageLimit: 300,
+      oncePerCustomer: true,
+      startDate: '2026-08-01',
+      endDate: '2026-11-30',
+      status: 'Active',
+      createdAt: '2026-07-28T09:00:00Z',
+    },
+    {
+      id: 'disc-7',
+      code: 'EARLYBIRD20',
+      description: 'Autumn tech launch preview promo scheduled for next month',
+      type: 'percentage',
+      value: 20,
+      minOrderValue: 120,
+      appliesTo: 'all',
+      usageCount: 0,
+      usageLimit: 250,
+      oncePerCustomer: true,
+      startDate: '2026-10-01',
+      endDate: '2026-10-31',
+      status: 'Scheduled',
+      createdAt: '2026-09-01T12:00:00Z',
+    },
+    {
+      id: 'disc-8',
+      code: 'BLACKFRIDAY',
+      description: 'Annual Black Friday storewide mega discount — 30% off all items',
+      type: 'percentage',
+      value: 30,
+      minOrderValue: 100,
+      appliesTo: 'all',
+      usageCount: 1500,
+      usageLimit: 1500,
+      oncePerCustomer: true,
+      startDate: '2025-11-20',
+      endDate: '2025-11-30',
+      status: 'Expired',
+      createdAt: '2025-11-01T08:00:00Z',
+    },
+    {
+      id: 'disc-9',
+      code: 'INFLUENCER50',
+      description: 'Partner creator promo code — temporarily paused pending campaign review',
+      type: 'fixed',
+      value: 50,
+      minOrderValue: 150,
+      appliesTo: 'all',
+      usageCount: 215,
+      usageLimit: 500,
+      oncePerCustomer: true,
+      startDate: '2026-04-01',
+      endDate: '2026-08-31',
+      status: 'Disabled',
+      createdAt: '2026-03-25T15:40:00Z',
+    },
+    {
+      id: 'disc-10',
+      code: 'SPRINGCLEAN',
+      description: 'Spring peripherals clearance voucher for keyboards and mice',
+      type: 'percentage',
+      value: 20,
+      minOrderValue: 40,
+      appliesTo: 'categories',
+      appliesToNames: ['Peripherals'],
+      usageCount: 400,
+      usageLimit: 400,
+      oncePerCustomer: false,
+      startDate: '2026-03-15',
+      endDate: '2026-05-31',
+      status: 'Expired',
+      createdAt: '2026-03-10T10:30:00Z',
+    },
+  ]);
+
+  // ── Discount Mutation Methods ──────────────────────────────
+  addDiscount(discount: Omit<AdminDiscount, 'id' | 'createdAt' | 'usageCount'>): void {
+    const newDiscount: AdminDiscount = {
+      ...discount,
+      id: 'disc-' + (this.discounts().length + 1) + '-' + Math.random().toString(36).substring(2, 6),
+      usageCount: 0,
+      createdAt: new Date().toISOString(),
+    };
+    this.discounts.update(list => [newDiscount, ...list]);
+  }
+
+  updateDiscount(id: string, updates: Partial<AdminDiscount>): void {
+    this.discounts.update(list =>
+      list.map(d => (d.id === id ? { ...d, ...updates } : d))
+    );
+  }
+
+  deleteDiscount(id: string): void {
+    this.discounts.update(list => list.filter(d => d.id !== id));
+  }
+
+  toggleDiscountStatus(id: string): void {
+    this.discounts.update(list =>
+      list.map(d => {
+        if (d.id !== id) return d;
+        const newStatus: DiscountStatus = d.status === 'Active' ? 'Disabled' : 'Active';
+        return { ...d, status: newStatus };
+      })
+    );
+  }
+
+  duplicateDiscount(id: string): void {
+    const original = this.discounts().find(d => d.id === id);
+    if (!original) return;
+    const duplicated: AdminDiscount = {
+      ...original,
+      id: 'disc-' + (this.discounts().length + 1) + '-' + Math.random().toString(36).substring(2, 6),
+      code: `${original.code}-COPY`,
+      description: `${original.description} (Copy)`,
+      usageCount: 0,
+      status: 'Active',
+      createdAt: new Date().toISOString(),
+    };
+    this.discounts.update(list => [duplicated, ...list]);
+  }
+
+  bulkDeleteDiscounts(ids: string[]): void {
+    const idSet = new Set(ids);
+    this.discounts.update(list => list.filter(d => !idSet.has(d.id)));
+  }
+
+  bulkSetDiscountStatus(ids: string[], status: DiscountStatus): void {
+    const idSet = new Set(ids);
+    this.discounts.update(list =>
+      list.map(d => (idSet.has(d.id) ? { ...d, status } : d))
     );
   }
 }

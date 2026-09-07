@@ -1,0 +1,932 @@
+<div class="admin-discounts-page">
+  <!-- 1. Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="title-with-badge">
+        <h1 class="page-title">Discounts & Coupons</h1>
+        <span class="count-badge">{{ discounts().length }} Offers</span>
+      </div>
+      <p class="page-subtitle">
+        Manage coupon codes, set discount values, configure customer usage limits, and monitor promotional redemptions.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="openCreateModal()"
+        id="btnCreateDiscount"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+          <path d="M10 4v12M4 10h12"/>
+        </svg>
+        <span>+ Create Discount</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. KPI Metrics Bar -->
+  <section class="discounts-kpi-bar" aria-label="Discounts overview statistics">
+    <!-- Total Discounts -->
+    <div class="kpi-card">
+      <span class="kpi-label">Total Discounts</span>
+      <span class="kpi-num">{{ kpiMetrics().totalDiscounts }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- Active Offers -->
+    <div class="kpi-card">
+      <span class="kpi-label">Active Coupons</span>
+      <span class="kpi-num text-success">{{ kpiMetrics().activeCount }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- Total Redemptions -->
+    <div class="kpi-card">
+      <span class="kpi-label">Total Redemptions</span>
+      <span class="kpi-num text-primary">{{ kpiMetrics().totalRedemptions | number }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- Total Savings Granted -->
+    <div class="kpi-card">
+      <span class="kpi-label">Est. Value Granted</span>
+      <span class="kpi-num text-indigo">${{ kpiMetrics().totalSavings | number }}</span>
+    </div>
+  </section>
+
+  <!-- 3. Status Tabs Navigation -->
+  <nav class="discounts-tabs-nav" aria-label="Discount status filter tabs">
+    <div class="tabs-track">
+      @for (tab of statusTabs; track tab) {
+        <button
+          type="button"
+          class="tab-btn"
+          [class.tab-active]="activeStatusTab() === tab"
+          (click)="setStatusTab(tab)"
+        >
+          <span>{{ tab }}</span>
+          <span
+            class="tab-count-badge"
+            [class.badge-active]="activeStatusTab() === tab"
+            [class.badge-danger]="tab === 'Expired' && tabCounts()[tab] > 0"
+            [class.badge-muted]="tab === 'Disabled' && tabCounts()[tab] > 0"
+          >
+            {{ tabCounts()[tab] }}
+          </span>
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- 4. Search & Filters Card -->
+  <section class="filters-card">
+    <div class="filters-row">
+      <!-- Search Field -->
+      <div class="search-field">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+          <circle cx="9" cy="9" r="6"/>
+          <line x1="13.5" y1="13.5" x2="18" y2="18"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search discount code, description, or category..."
+          [value]="searchQuery()"
+          (input)="onSearchInput($any($event.target).value)"
+          id="discountSearchInput"
+        />
+        @if (searchQuery()) {
+          <button
+            type="button"
+            class="clear-search-btn"
+            (click)="onSearchInput('')"
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        }
+      </div>
+
+      <!-- Discount Type Filter -->
+      <div class="filter-group">
+        <label for="discountTypeSelect" class="sr-only">Filter by Discount Type</label>
+        <select
+          id="discountTypeSelect"
+          class="filter-select"
+          [value]="selectedType()"
+          (change)="onTypeChange($any($event.target).value)"
+        >
+          <option value="all">All Discount Types</option>
+          <option value="percentage">Percentage (%)</option>
+          <option value="fixed">Fixed Amount ($)</option>
+          <option value="free_shipping">Free Shipping</option>
+        </select>
+      </div>
+
+      <!-- Clear Filters Button -->
+      @if (searchQuery() || selectedType() !== 'all' || activeStatusTab() !== 'All') {
+        <button
+          type="button"
+          class="btn-reset-filters"
+          (click)="clearFilters()"
+        >
+          Reset Filters
+        </button>
+      }
+    </div>
+
+    <!-- Active summary count -->
+    <div class="filters-summary-row">
+      <span>
+        Showing <strong>{{ filteredDiscounts().length }}</strong> of {{ discounts().length }} discounts
+      </span>
+    </div>
+  </section>
+
+  <!-- 5. Bulk Actions Toolbar -->
+  @if (selectedCount() > 0) {
+    <section class="bulk-action-bar" aria-label="Bulk actions toolbar">
+      <div class="bulk-info">
+        <span class="selected-badge">{{ selectedCount() }}</span>
+        <span>discounts selected</span>
+        <button type="button" class="btn-deselect" (click)="deselectAll()">Deselect all</button>
+      </div>
+      <div class="bulk-controls">
+        <button type="button" class="btn-bulk btn-bulk-success" (click)="bulkActivate()">
+          Activate
+        </button>
+        <button type="button" class="btn-bulk btn-bulk-warning" (click)="bulkDisable()">
+          Disable
+        </button>
+        <button type="button" class="btn-bulk btn-bulk-danger" (click)="bulkDelete()">
+          Delete Selected
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- 6. Main Content Area -->
+  <section class="table-container-card">
+    @if (filteredDiscounts().length > 0) {
+      <!-- ── Desktop DataTable (≥768px) ── -->
+      <div class="desktop-only-table table-responsive">
+        <table class="data-table" aria-label="Discounts catalog table">
+          <thead>
+            <tr>
+              <th class="th-checkbox">
+                <input
+                  type="checkbox"
+                  class="admin-checkbox"
+                  [checked]="isAllSelected()"
+                  [indeterminate]="isIndeterminate()"
+                  (change)="toggleSelectAll()"
+                  aria-label="Select all discounts on this page"
+                />
+              </th>
+              <th class="th-sortable" (click)="toggleSort('code')">
+                <div class="th-content">
+                  <span>Code</span>
+                  <span class="sort-icon" [class.sort-active]="sortField() === 'code'">
+                    {{ sortField() === 'code' ? (sortOrder() === 'asc' ? '↑' : '↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="th-sortable" (click)="toggleSort('value')">
+                <div class="th-content">
+                  <span>Discount</span>
+                  <span class="sort-icon" [class.sort-active]="sortField() === 'value'">
+                    {{ sortField() === 'value' ? (sortOrder() === 'asc' ? '↑' : '↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="th-sortable" (click)="toggleSort('usage')">
+                <div class="th-content">
+                  <span>Redemptions</span>
+                  <span class="sort-icon" [class.sort-active]="sortField() === 'usage'">
+                    {{ sortField() === 'usage' ? (sortOrder() === 'asc' ? '↑' : '↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="th-sortable" (click)="toggleSort('startDate')">
+                <div class="th-content">
+                  <span>Active Dates</span>
+                  <span class="sort-icon" [class.sort-active]="sortField() === 'startDate'">
+                    {{ sortField() === 'startDate' ? (sortOrder() === 'asc' ? '↑' : '↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th>Min. Order</th>
+              <th class="th-sortable text-center" (click)="toggleSort('status')">
+                <div class="th-content center-content">
+                  <span>Status</span>
+                  <span class="sort-icon" [class.sort-active]="sortField() === 'status'">
+                    {{ sortField() === 'status' ? (sortOrder() === 'asc' ? '↑' : '↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (discount of paginatedDiscounts(); track discount.id) {
+              <tr class="table-row" [class.row-selected]="selectedDiscountIds().has(discount.id)">
+                <!-- Checkbox -->
+                <td class="td-checkbox">
+                  <input
+                    type="checkbox"
+                    class="admin-checkbox"
+                    [checked]="selectedDiscountIds().has(discount.id)"
+                    (change)="toggleSelectOne(discount.id)"
+                    aria-label="Select discount"
+                  />
+                </td>
+
+                <!-- Code & Description -->
+                <td>
+                  <div class="code-col-wrapper">
+                    <div class="code-badge-row">
+                      <span class="coupon-code-badge">{{ discount.code }}</span>
+                      <button
+                        type="button"
+                        class="btn-copy-code"
+                        [class.copied]="copiedCodeId() === discount.id"
+                        (click)="copyCode(discount, $event)"
+                        title="Copy coupon code"
+                      >
+                        @if (copiedCodeId() === discount.id) {
+                          <span class="copied-indicator">✓ Copied</span>
+                        } @else {
+                          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="copy-icon">
+                            <rect x="7" y="7" width="10" height="10" rx="2"/>
+                            <path d="M4 13V5a2 2 0 012-2h8"/>
+                          </svg>
+                        }
+                      </button>
+                    </div>
+                    <span class="code-description-text" [title]="discount.description">
+                      {{ discount.description }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Type & Value -->
+                <td>
+                  <div class="discount-value-col">
+                    <div class="value-chip" [class]="'type-' + discount.type">
+                      @if (discount.type === 'percentage') {
+                        <span class="chip-icon">%</span>
+                        <span class="chip-val">{{ discount.value }}% OFF</span>
+                      } @else if (discount.type === 'fixed') {
+                        <span class="chip-icon">$</span>
+                        <span class="chip-val">${{ discount.value | number:'1.2-2' }} OFF</span>
+                      } @else {
+                        <span class="chip-icon">🚚</span>
+                        <span class="chip-val">Free Shipping</span>
+                      }
+                    </div>
+                    <span class="scope-text">
+                      @if (discount.appliesTo === 'all') {
+                        All products
+                      } @else if (discount.appliesTo === 'categories') {
+                        {{ discount.appliesToNames?.join(', ') || 'Selected categories' }}
+                      } @else {
+                        Selected products
+                      }
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Usage Progress -->
+                <td>
+                  <div class="usage-col-wrap">
+                    <div class="usage-text-row">
+                      <span class="usage-count">{{ formatUsageDisplay(discount) }}</span>
+                      @if (discount.usageLimit) {
+                        <span class="usage-percent">{{ calculateUsagePercent(discount) }}%</span>
+                      }
+                    </div>
+                    @if (discount.usageLimit) {
+                      <div class="progress-track" title="{{ calculateUsagePercent(discount) }}% used">
+                        <div
+                          class="progress-fill"
+                          [style.width.%]="calculateUsagePercent(discount)"
+                          [class.fill-danger]="calculateUsagePercent(discount) >= 90"
+                          [class.fill-warning]="calculateUsagePercent(discount) >= 70 && calculateUsagePercent(discount) < 90"
+                        ></div>
+                      </div>
+                    }
+                    @if (discount.oncePerCustomer) {
+                      <span class="sub-badge-limit">1 per customer</span>
+                    }
+                  </div>
+                </td>
+
+                <!-- Active Dates -->
+                <td>
+                  <div class="dates-col-wrap">
+                    <span class="date-range-text">
+                      {{ discount.startDate | date:'mediumDate' }}
+                      @if (discount.endDate) {
+                        — {{ discount.endDate | date:'mediumDate' }}
+                      } @else {
+                        <span class="no-expiry-badge">No Expiry</span>
+                      }
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Min Order -->
+                <td>
+                  @if (discount.minOrderValue && discount.minOrderValue > 0) {
+                    <span class="min-order-val">${{ discount.minOrderValue | number:'1.2-2' }}</span>
+                  } @else {
+                    <span class="text-muted">No minimum</span>
+                  }
+                </td>
+
+                <!-- Status Pill -->
+                <td class="text-center">
+                  <gp-admin-status-pill [status]="discount.status" size="sm"></gp-admin-status-pill>
+                </td>
+
+                <!-- Actions -->
+                <td class="text-right">
+                  <div class="table-actions-row">
+                    <!-- Edit button -->
+                    <button
+                      type="button"
+                      class="btn-row-action"
+                      (click)="openEditModal(discount, $event)"
+                      title="Edit discount"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="row-icon">
+                        <path d="M11 4l5 5L7 18H2v-5L11 4z"/>
+                      </svg>
+                    </button>
+
+                    <!-- Toggle Status Button -->
+                    <button
+                      type="button"
+                      class="btn-row-action"
+                      (click)="toggleStatus(discount.id, $event)"
+                      [title]="discount.status === 'Active' ? 'Disable discount' : 'Activate discount'"
+                    >
+                      @if (discount.status === 'Active') {
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="row-icon text-warning">
+                          <rect x="5" y="4" width="3" height="12" rx="1"/>
+                          <rect x="12" y="4" width="3" height="12" rx="1"/>
+                        </svg>
+                      } @else {
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="row-icon text-success">
+                          <polygon points="6,4 16,10 6,16"/>
+                        </svg>
+                      }
+                    </button>
+
+                    <!-- Duplicate Button -->
+                    <button
+                      type="button"
+                      class="btn-row-action"
+                      (click)="duplicate(discount.id, $event)"
+                      title="Duplicate discount code"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="row-icon">
+                        <rect x="6" y="6" width="10" height="10" rx="2"/>
+                        <path d="M4 12V4a2 2 0 012-2h8"/>
+                      </svg>
+                    </button>
+
+                    <!-- Delete button -->
+                    <button
+                      type="button"
+                      class="btn-row-action btn-danger-action"
+                      (click)="promptDelete(discount, $event)"
+                      title="Delete discount"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="row-icon">
+                        <path d="M4 6h12M8 6V4a1 1 0 011-1h2a1 1 0 011 1v2M6 6v10a2 2 0 002 2h4a2 2 0 002-2V6"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Mobile Stacked Cards (<768px) ── -->
+      <div class="mobile-only-cards">
+        @for (discount of paginatedDiscounts(); track discount.id) {
+          <article class="discount-card-item">
+            <!-- Card Top Header -->
+            <div class="card-header-row">
+              <div class="card-code-group">
+                <input
+                  type="checkbox"
+                  class="admin-checkbox"
+                  [checked]="selectedDiscountIds().has(discount.id)"
+                  (change)="toggleSelectOne(discount.id)"
+                  aria-label="Select discount"
+                />
+                <span class="coupon-code-badge">{{ discount.code }}</span>
+                <button
+                  type="button"
+                  class="btn-copy-code"
+                  [class.copied]="copiedCodeId() === discount.id"
+                  (click)="copyCode(discount, $event)"
+                >
+                  @if (copiedCodeId() === discount.id) {
+                    <span>✓ Copied</span>
+                  } @else {
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="copy-icon">
+                      <rect x="7" y="7" width="10" height="10" rx="2"/>
+                      <path d="M4 13V5a2 2 0 012-2h8"/>
+                    </svg>
+                  }
+                </button>
+              </div>
+              <gp-admin-status-pill [status]="discount.status" size="sm"></gp-admin-status-pill>
+            </div>
+
+            <!-- Description -->
+            <p class="card-description">{{ discount.description }}</p>
+
+            <!-- Value & Scope -->
+            <div class="card-value-row">
+              <div class="value-chip" [class]="'type-' + discount.type">
+                @if (discount.type === 'percentage') {
+                  <span>{{ discount.value }}% OFF</span>
+                } @else if (discount.type === 'fixed') {
+                  <span>${{ discount.value | number:'1.2-2' }} OFF</span>
+                } @else {
+                  <span>Free Shipping</span>
+                }
+              </div>
+              <span class="scope-tag">
+                {{ discount.appliesTo === 'all' ? 'All Products' : (discount.appliesToNames?.join(', ') || 'Specific Category') }}
+              </span>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="card-stats-grid">
+              <div class="stat-col">
+                <span class="stat-label">Redemptions</span>
+                <span class="stat-value">{{ formatUsageDisplay(discount) }}</span>
+              </div>
+              <div class="stat-col">
+                <span class="stat-label">Min. Purchase</span>
+                <span class="stat-value">{{ discount.minOrderValue ? ('$' + discount.minOrderValue) : 'None' }}</span>
+              </div>
+              <div class="stat-col">
+                <span class="stat-label">Valid Through</span>
+                <span class="stat-value">{{ discount.endDate ? (discount.endDate | date:'shortDate') : 'No Expiry' }}</span>
+              </div>
+            </div>
+
+            <!-- Mobile Action Bar (Min 44x44px touch targets) -->
+            <div class="card-actions-bar">
+              <button
+                type="button"
+                class="mobile-action-btn"
+                (click)="openEditModal(discount, $event)"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                class="mobile-action-btn"
+                (click)="toggleStatus(discount.id, $event)"
+              >
+                {{ discount.status === 'Active' ? 'Disable' : 'Activate' }}
+              </button>
+              <button
+                type="button"
+                class="mobile-action-btn btn-danger-text"
+                (click)="promptDelete(discount, $event)"
+              >
+                Delete
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <!-- ── Pagination Footer ── -->
+      <footer class="table-pagination-footer">
+        <div class="pagination-info">
+          <span>
+            Showing {{ paginationStartIndex() }} to {{ paginationEndIndex() }} of {{ filteredDiscounts().length }} discounts
+          </span>
+          <div class="page-size-picker">
+            <label for="pageSizeSelect" class="sr-only">Rows per page</label>
+            <select
+              id="pageSizeSelect"
+              class="page-size-select"
+              [value]="pageSize()"
+              (change)="onPageSizeChange($any($event.target).value)"
+            >
+              @for (opt of pageSizeOptions; track opt) {
+                <option [value]="opt">{{ opt }} per page</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="page-nav-btn"
+            [disabled]="currentPage() === 1"
+            (click)="goToPage(currentPage() - 1)"
+            aria-label="Previous page"
+          >
+            Previous
+          </button>
+
+          <div class="page-numbers">
+            @for (pageNum of pageNumbers(); track pageNum) {
+              <button
+                type="button"
+                class="page-num-btn"
+                [class.active-page]="currentPage() === pageNum"
+                (click)="goToPage(pageNum)"
+              >
+                {{ pageNum }}
+              </button>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="page-nav-btn"
+            [disabled]="currentPage() === totalPages()"
+            (click)="goToPage(currentPage() + 1)"
+            aria-label="Next page"
+          >
+            Next
+          </button>
+        </div>
+      </footer>
+    } @else {
+      <!-- ── Empty State ── -->
+      <div class="empty-state-card">
+        <div class="empty-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+            <path d="M9 14l6-6M9 8h.01M15 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h3 class="empty-title">No discounts found</h3>
+        <p class="empty-desc">
+          No coupon codes match your active search filters. Try adjusting your search query or reset filters.
+        </p>
+        <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+          Clear All Filters
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- ── 7. '+ Create / Edit Discount' Modal ── -->
+  <gp-admin-modal
+    [isOpen]="isModalOpen()"
+    [title]="isEditing() ? 'Edit Discount Code' : 'Create New Discount'"
+    [subtitle]="isEditing() ? 'Update coupon rules, usage limits, and validity dates.' : 'Set up a new discount code or promotional voucher for customers.'"
+    size="lg"
+    (closed)="closeModal()"
+  >
+    <form class="discount-modal-form" (ngSubmit)="saveDiscount()">
+      @if (formError()) {
+        <div class="form-error-banner" role="alert">
+          <svg viewBox="0 0 20 20" fill="currentColor" class="error-icon" width="16" height="16">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+          <span>{{ formError() }}</span>
+        </div>
+      }
+
+      <!-- Section 1: Discount Code & Description -->
+      <div class="form-section">
+        <h4 class="form-section-title">Discount Code & Description</h4>
+
+        <div class="form-group">
+          <label class="form-label" for="discountCodeInput">
+            Discount Code <span class="required">*</span>
+          </label>
+          <div class="code-input-with-generator">
+            <input
+              type="text"
+              id="discountCodeInput"
+              class="form-input code-input"
+              placeholder="e.g. SUMMER25"
+              [value]="formCode()"
+              (input)="onCodeInputChange($any($event.target).value)"
+              required
+            />
+            <button
+              type="button"
+              class="btn-generate-code"
+              (click)="generateRandomCode()"
+              title="Generate a randomized promo code"
+            >
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="gen-icon">
+                <path d="M4 4h12v12H4zM9 9l3 3M12 9l-3 3"/>
+              </svg>
+              <span>Generate Random</span>
+            </button>
+          </div>
+          <span class="form-hint">Customers will enter this code at checkout. Uppercase formatted.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="discountDescInput">Description / Campaign Purpose</label>
+          <input
+            type="text"
+            id="discountDescInput"
+            class="form-input"
+            placeholder="e.g. 20% off all gaming accessories for summer campaign"
+            [value]="formDescription()"
+            (input)="formDescription.set($any($event.target).value)"
+          />
+        </div>
+      </div>
+
+      <!-- Section 2: Discount Type & Value -->
+      <div class="form-section">
+        <h4 class="form-section-title">Discount Type & Value</h4>
+
+        <div class="discount-type-segmented-control" role="group" aria-label="Select discount type">
+          <button
+            type="button"
+            class="type-segment-btn"
+            [class.active]="formType() === 'percentage'"
+            (click)="formType.set('percentage')"
+          >
+            <span class="segment-icon">%</span>
+            <span class="segment-title">Percentage</span>
+          </button>
+          <button
+            type="button"
+            class="type-segment-btn"
+            [class.active]="formType() === 'fixed'"
+            (click)="formType.set('fixed')"
+          >
+            <span class="segment-icon">$</span>
+            <span class="segment-title">Fixed Amount</span>
+          </button>
+          <button
+            type="button"
+            class="type-segment-btn"
+            [class.active]="formType() === 'free_shipping'"
+            (click)="formType.set('free_shipping')"
+          >
+            <span class="segment-icon">🚚</span>
+            <span class="segment-title">Free Shipping</span>
+          </button>
+        </div>
+
+        @if (formType() !== 'free_shipping') {
+          <div class="form-group value-group">
+            <label class="form-label" for="discountValueInput">
+              Discount Value <span class="required">*</span>
+            </label>
+            <div class="input-with-affix">
+              @if (formType() === 'fixed') {
+                <span class="input-affix">$</span>
+              }
+              <input
+                type="number"
+                id="discountValueInput"
+                class="form-input value-number-input"
+                [min]="1"
+                [max]="formType() === 'percentage' ? 100 : 9999"
+                [value]="formValue()"
+                (input)="formValue.set(+$any($event.target).value)"
+              />
+              @if (formType() === 'percentage') {
+                <span class="input-affix">%</span>
+              }
+            </div>
+            <span class="form-hint">
+              {{ formType() === 'percentage' ? 'Percentage off eligible items in the cart.' : 'Exact flat dollar amount subtracted from total.' }}
+            </span>
+          </div>
+        }
+      </div>
+
+      <!-- Section 3: Applies To -->
+      <div class="form-section">
+        <h4 class="form-section-title">Applies To</h4>
+        <div class="radio-options-list">
+          <label class="radio-label">
+            <input
+              type="radio"
+              name="appliesToRadio"
+              value="all"
+              [checked]="formAppliesTo() === 'all'"
+              (change)="formAppliesTo.set('all')"
+            />
+            <span class="radio-text">
+              <strong>All Products</strong>
+              <small>Applies to the entire product catalog</small>
+            </span>
+          </label>
+
+          <label class="radio-label">
+            <input
+              type="radio"
+              name="appliesToRadio"
+              value="categories"
+              [checked]="formAppliesTo() === 'categories'"
+              (change)="formAppliesTo.set('categories')"
+            />
+            <span class="radio-text">
+              <strong>Specific Categories</strong>
+              <small>Choose one or more product categories</small>
+            </span>
+          </label>
+        </div>
+
+        @if (formAppliesTo() === 'categories') {
+          <div class="categories-picker-box">
+            <label class="form-label">Select Applicable Categories:</label>
+            <div class="category-chips-grid">
+              @for (cat of availableCategories; track cat) {
+                <button
+                  type="button"
+                  class="cat-chip-btn"
+                  [class.selected]="formSelectedCategories().includes(cat)"
+                  (click)="toggleCategorySelection(cat)"
+                >
+                  <span class="chip-check">{{ formSelectedCategories().includes(cat) ? '✓' : '+' }}</span>
+                  <span>{{ cat }}</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Section 4: Minimum Requirements & Usage Limits -->
+      <div class="form-section">
+        <h4 class="form-section-title">Minimum Requirements & Usage Limits</h4>
+
+        <!-- Minimum Order Amount -->
+        <div class="form-group">
+          <label class="form-label">Minimum Purchase Requirement</label>
+          <div class="radio-options-list horizontal">
+            <label class="radio-label">
+              <input
+                type="radio"
+                name="minOrderRadio"
+                value="none"
+                [checked]="formMinOrderType() === 'none'"
+                (change)="formMinOrderType.set('none')"
+              />
+              <span class="radio-text">No minimum</span>
+            </label>
+            <label class="radio-label">
+              <input
+                type="radio"
+                name="minOrderRadio"
+                value="amount"
+                [checked]="formMinOrderType() === 'amount'"
+                (change)="formMinOrderType.set('amount')"
+              />
+              <span class="radio-text">Minimum purchase amount ($)</span>
+            </label>
+          </div>
+
+          @if (formMinOrderType() === 'amount') {
+            <div class="input-with-affix min-order-input-wrap">
+              <span class="input-affix">$</span>
+              <input
+                type="number"
+                class="form-input"
+                min="1"
+                [value]="formMinOrderValue()"
+                (input)="formMinOrderValue.set(+$any($event.target).value)"
+                placeholder="50.00"
+              />
+            </div>
+          }
+        </div>
+
+        <!-- Usage limits -->
+        <div class="checkbox-controls-group">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              class="admin-checkbox"
+              [checked]="formHasUsageLimit()"
+              (change)="formHasUsageLimit.set($any($event.target).checked)"
+            />
+            <span>Limit total number of times this discount can be used</span>
+          </label>
+
+          @if (formHasUsageLimit()) {
+            <div class="indent-input">
+              <input
+                type="number"
+                class="form-input limit-input"
+                min="1"
+                [value]="formUsageLimit()"
+                (input)="formUsageLimit.set(+$any($event.target).value)"
+              />
+              <span class="form-hint">Total redemptions permitted across all customers</span>
+            </div>
+          }
+
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              class="admin-checkbox"
+              [checked]="formOncePerCustomer()"
+              (change)="formOncePerCustomer.set($any($event.target).checked)"
+            />
+            <span>Limit to one use per customer</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Section 5: Active Dates -->
+      <div class="form-section">
+        <h4 class="form-section-title">Active Dates</h4>
+        <div class="dates-form-grid">
+          <div class="form-group">
+            <label class="form-label" for="startDateInput">Start Date</label>
+            <input
+              type="date"
+              id="startDateInput"
+              class="form-input"
+              [value]="formStartDate()"
+              (input)="formStartDate.set($any($event.target).value)"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label mb-2">
+              <input
+                type="checkbox"
+                class="admin-checkbox"
+                [checked]="formHasEndDate()"
+                (change)="formHasEndDate.set($any($event.target).checked)"
+              />
+              <span>Set end date</span>
+            </label>
+
+            @if (formHasEndDate()) {
+              <input
+                type="date"
+                id="endDateInput"
+                class="form-input"
+                [value]="formEndDate()"
+                (input)="formEndDate.set($any($event.target).value)"
+              />
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary" id="btnSaveDiscount">
+          {{ isEditing() ? 'Save Changes' : 'Create Discount' }}
+        </button>
+      </div>
+    </form>
+  </gp-admin-modal>
+
+  <!-- ── 8. Delete Confirmation Modal ── -->
+  @if (deleteTarget()) {
+    <gp-admin-modal
+      [isOpen]="true"
+      title="Delete Discount Code"
+      subtitle="This action cannot be undone."
+      size="sm"
+      (closed)="cancelDelete()"
+    >
+      <div class="delete-confirm-box">
+        <p class="delete-warning-text">
+          Are you sure you want to permanently delete the discount code
+          <strong>"{{ deleteTarget()?.code }}"</strong>?
+          Customers will no longer be able to redeem this coupon.
+        </p>
+        <div class="modal-footer-actions">
+          <button type="button" class="btn btn-secondary" (click)="cancelDelete()">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+            Delete Coupon
+          </button>
+        </div>
+      </div>
+    </gp-admin-modal>
+  }
+</div>
