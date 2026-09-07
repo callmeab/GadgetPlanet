@@ -81,6 +81,35 @@ export interface AdminCustomer {
   addresses: CustomerAddress[];
 }
 
+export interface AdminCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  imageUrl?: string;
+  parentId: string | null;
+  displayOrder: number;
+  status: 'Active' | 'Hidden';
+  productCount: number;
+}
+
+export interface InventoryItem {
+  id: string;
+  productId: string;
+  variantId?: string;
+  productName: string;
+  variantName?: string;
+  sku: string;
+  category: string;
+  imageUrl?: string;
+  currentStock: number;
+  reservedStock: number;
+  availableStock: number;
+  lowStockThreshold: number;
+  status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  lastUpdated?: string;
+}
+
 export interface ProductVariantOption {
   name: string;
   values: string[];
@@ -973,4 +1002,658 @@ export class AdminMockDataService {
       })
     );
   }
+
+  // ── Categories Mock Data (Hierarchical: parents and subcategories) ──
+  readonly categories = signal<AdminCategory[]>([
+    // Audio (Parent)
+    {
+      id: 'cat-audio',
+      name: 'Audio',
+      slug: 'audio',
+      description: 'Premium headphones, studio monitors, wireless earbuds, and portable audio equipment.',
+      imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&q=80',
+      parentId: null,
+      displayOrder: 1,
+      status: 'Active',
+      productCount: 28,
+    },
+    {
+      id: 'cat-audio-headphones',
+      name: 'Headphones & Headsets',
+      slug: 'headphones',
+      description: 'Over-ear and on-ear studio monitors and ANC wireless headphones.',
+      imageUrl: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=200&q=80',
+      parentId: 'cat-audio',
+      displayOrder: 1,
+      status: 'Active',
+      productCount: 12,
+    },
+    {
+      id: 'cat-audio-earbuds',
+      name: 'Earbuds & In-Ear',
+      slug: 'earbuds',
+      description: 'True wireless stereo earbuds with charging cases.',
+      imageUrl: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200&q=80',
+      parentId: 'cat-audio',
+      displayOrder: 2,
+      status: 'Active',
+      productCount: 8,
+    },
+    {
+      id: 'cat-audio-speakers',
+      name: 'Bluetooth Speakers',
+      slug: 'bluetooth-speakers',
+      description: 'Rugged portable waterproof outdoor and bookshelf speakers.',
+      imageUrl: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=200&q=80',
+      parentId: 'cat-audio',
+      displayOrder: 3,
+      status: 'Active',
+      productCount: 5,
+    },
+    {
+      id: 'cat-audio-mics',
+      name: 'Microphones & Podcasting',
+      slug: 'microphones',
+      description: 'Wireless lavalier systems and broadcast condenser mics.',
+      imageUrl: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=200&q=80',
+      parentId: 'cat-audio',
+      displayOrder: 4,
+      status: 'Active',
+      productCount: 3,
+    },
+
+    // Peripherals (Parent)
+    {
+      id: 'cat-peripherals',
+      name: 'Peripherals',
+      slug: 'peripherals',
+      description: 'Custom mechanical keyboards, wireless precision mice, and premium desk pads.',
+      imageUrl: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=200&q=80',
+      parentId: null,
+      displayOrder: 2,
+      status: 'Active',
+      productCount: 22,
+    },
+    {
+      id: 'cat-periph-keyboards',
+      name: 'Mechanical Keyboards',
+      slug: 'keyboards',
+      description: 'Custom hot-swappable QMK/VIA wireless mechanical keyboards.',
+      imageUrl: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=200&q=80',
+      parentId: 'cat-peripherals',
+      displayOrder: 1,
+      status: 'Active',
+      productCount: 11,
+    },
+    {
+      id: 'cat-periph-mice',
+      name: 'Precision Mice',
+      slug: 'mice',
+      description: 'Ergonomic productivity and lightweight esports gaming mice.',
+      imageUrl: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=200&q=80',
+      parentId: 'cat-peripherals',
+      displayOrder: 2,
+      status: 'Active',
+      productCount: 7,
+    },
+    {
+      id: 'cat-periph-mats',
+      name: 'Desk Mats & Mousepads',
+      slug: 'desk-mats',
+      description: 'Water-repellent stitched edge micro-woven felt and cloth desk pads.',
+      imageUrl: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=200&q=80',
+      parentId: 'cat-peripherals',
+      displayOrder: 3,
+      status: 'Active',
+      productCount: 4,
+    },
+
+    // Accessories & Power (Parent)
+    {
+      id: 'cat-power',
+      name: 'Accessories & Power',
+      slug: 'accessories-power',
+      description: 'GaN fast wall chargers, high-capacity power banks, cables, and MagSafe gear.',
+      imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=200&q=80',
+      parentId: null,
+      displayOrder: 3,
+      status: 'Active',
+      productCount: 31,
+    },
+    {
+      id: 'cat-power-chargers',
+      name: 'Fast Chargers & Adapters',
+      slug: 'chargers',
+      description: 'Compact 65W–140W multi-port GaN fast charging bricks.',
+      imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=200&q=80',
+      parentId: 'cat-power',
+      displayOrder: 1,
+      status: 'Active',
+      productCount: 12,
+    },
+    {
+      id: 'cat-power-banks',
+      name: 'Power Banks',
+      slug: 'power-banks',
+      description: 'High-density laptop and smartphone portable battery packs.',
+      imageUrl: 'https://images.unsplash.com/photo-1609592424368-e6922d56c4d7?w=200&q=80',
+      parentId: 'cat-power',
+      displayOrder: 2,
+      status: 'Active',
+      productCount: 8,
+    },
+    {
+      id: 'cat-power-magsafe',
+      name: 'MagSafe & Wireless',
+      slug: 'magsafe-wireless',
+      description: 'Qi2 and 15W MagSafe 3-in-1 desktop charging stations.',
+      imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=200&q=80',
+      parentId: 'cat-power',
+      displayOrder: 3,
+      status: 'Active',
+      productCount: 6,
+    },
+    {
+      id: 'cat-power-cables',
+      name: 'Cables & Dongles',
+      slug: 'cables',
+      description: 'Braided 240W USB-C, Thunderbolt 4, and multi-adapter cords.',
+      imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=200&q=80',
+      parentId: 'cat-power',
+      displayOrder: 4,
+      status: 'Active',
+      productCount: 5,
+    },
+
+    // Workspace & Setup (Parent)
+    {
+      id: 'cat-workspace',
+      name: 'Workspace & Setup',
+      slug: 'workspace',
+      description: 'Productivity workstations, monitor light bars, thunderbolt hubs, and streaming decks.',
+      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&q=80',
+      parentId: null,
+      displayOrder: 4,
+      status: 'Active',
+      productCount: 16,
+    },
+    {
+      id: 'cat-work-docks',
+      name: 'Docks & Hubs',
+      slug: 'docks-hubs',
+      description: 'Thunderbolt 4, USB-C dual-display multiport docking stations.',
+      imageUrl: 'https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=200&q=80',
+      parentId: 'cat-workspace',
+      displayOrder: 1,
+      status: 'Active',
+      productCount: 6,
+    },
+    {
+      id: 'cat-work-lighting',
+      name: 'Monitor Lamps & Lighting',
+      slug: 'monitor-lamps',
+      description: 'Asymmetric screen bars and customizable desk ambiance RGB strips.',
+      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&q=80',
+      parentId: 'cat-workspace',
+      displayOrder: 2,
+      status: 'Active',
+      productCount: 5,
+    },
+    {
+      id: 'cat-work-stream',
+      name: 'Stream Decks & Controllers',
+      slug: 'stream-decks',
+      description: 'Custom LCD macro key pads and studio shortcut consoles.',
+      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&q=80',
+      parentId: 'cat-workspace',
+      displayOrder: 3,
+      status: 'Hidden',
+      productCount: 5,
+    },
+
+    // Wearables & Smart (Parent)
+    {
+      id: 'cat-wearables',
+      name: 'Wearables & Smart',
+      slug: 'wearables',
+      description: 'Next-gen smartwatches, AMOLED health trackers, and wearable accessories.',
+      imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80',
+      parentId: null,
+      displayOrder: 5,
+      status: 'Active',
+      productCount: 14,
+    },
+    {
+      id: 'cat-wear-watches',
+      name: 'Smartwatches',
+      slug: 'smartwatches',
+      description: 'GPS smartwatches with heart rate, ECG, and cellular connectivity.',
+      imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80',
+      parentId: 'cat-wearables',
+      displayOrder: 1,
+      status: 'Active',
+      productCount: 9,
+    },
+    {
+      id: 'cat-wear-bands',
+      name: 'Fitness Bands & Straps',
+      slug: 'fitness-bands',
+      description: 'Ultra-light sleep and workout activity trackers with interchangeable straps.',
+      imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80',
+      parentId: 'cat-wearables',
+      displayOrder: 2,
+      status: 'Active',
+      productCount: 5,
+    }
+  ]);
+
+  // ── Category Query & Mutation Methods ──────────────────────
+  getCategoryById(id: string): AdminCategory | undefined {
+    return this.categories().find(c => c.id === id);
+  }
+
+  addCategory(category: Omit<AdminCategory, 'id' | 'productCount'>): AdminCategory {
+    const newCat: AdminCategory = {
+      ...category,
+      id: `cat-${Date.now()}`,
+      productCount: 0
+    };
+    this.categories.update(list => [...list, newCat]);
+    return newCat;
+  }
+
+  updateCategory(id: string, updates: Partial<AdminCategory>): void {
+    this.categories.update(list =>
+      list.map(c => (c.id === id ? { ...c, ...updates } : c))
+    );
+  }
+
+  deleteCategory(id: string): void {
+    this.categories.update(list =>
+      list.filter(c => c.id !== id && c.parentId !== id)
+    );
+  }
+
+  toggleCategoryStatus(id: string): void {
+    this.categories.update(list =>
+      list.map(c =>
+        c.id === id ? { ...c, status: c.status === 'Active' ? 'Hidden' : 'Active' } : c
+      )
+    );
+  }
+
+  reorderCategories(orderedIds: string[]): void {
+    this.categories.update(list => {
+      const orderMap = new Map(orderedIds.map((id, index) => [id, index + 1]));
+      return list.map(c => {
+        if (orderMap.has(c.id)) {
+          return { ...c, displayOrder: orderMap.get(c.id)! };
+        }
+        return c;
+      });
+    });
+  }
+
+  // ── Inventory Mock Data (Detailed variant-level stock tracking) ──
+  readonly inventory = signal<InventoryItem[]>([
+    {
+      id: 'inv-1',
+      productId: 'p1',
+      variantId: 'v1',
+      productName: 'Sony WH-1000XM5 Wireless Headphones',
+      variantName: 'Midnight Black',
+      sku: 'SON-XM5-BLK',
+      category: 'Audio',
+      imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=120&q=80',
+      currentStock: 25,
+      reservedStock: 3,
+      availableStock: 22,
+      lowStockThreshold: 8,
+      status: 'In Stock',
+      lastUpdated: '2026-09-06T14:30:00Z',
+    },
+    {
+      id: 'inv-2',
+      productId: 'p1',
+      variantId: 'v2',
+      productName: 'Sony WH-1000XM5 Wireless Headphones',
+      variantName: 'Platinum Silver',
+      sku: 'SON-XM5-SLV',
+      category: 'Audio',
+      imageUrl: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=120&q=80',
+      currentStock: 15,
+      reservedStock: 2,
+      availableStock: 13,
+      lowStockThreshold: 8,
+      status: 'In Stock',
+      lastUpdated: '2026-09-06T11:20:00Z',
+    },
+    {
+      id: 'inv-3',
+      productId: 'p1',
+      variantId: 'v3',
+      productName: 'Sony WH-1000XM5 Wireless Headphones',
+      variantName: 'Smoky Navy',
+      sku: 'SON-XM5-NVY',
+      category: 'Audio',
+      imageUrl: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=120&q=80',
+      currentStock: 5,
+      reservedStock: 2,
+      availableStock: 3,
+      lowStockThreshold: 6,
+      status: 'Low Stock',
+      lastUpdated: '2026-09-05T16:45:00Z',
+    },
+    {
+      id: 'inv-4',
+      productId: 'p2',
+      productName: 'Anker 65W GaN Fast Charger',
+      variantName: 'Arctic White',
+      sku: 'ANK-65W-WHT',
+      category: 'Accessories',
+      imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=120&q=80',
+      currentStock: 80,
+      reservedStock: 6,
+      availableStock: 74,
+      lowStockThreshold: 15,
+      status: 'In Stock',
+      lastUpdated: '2026-09-07T08:00:00Z',
+    },
+    {
+      id: 'inv-5',
+      productId: 'p2',
+      productName: 'Anker 65W GaN Fast Charger',
+      variantName: 'Matte Black',
+      sku: 'ANK-65W-BLK',
+      category: 'Accessories',
+      imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=120&q=80',
+      currentStock: 40,
+      reservedStock: 4,
+      availableStock: 36,
+      lowStockThreshold: 15,
+      status: 'In Stock',
+      lastUpdated: '2026-09-06T10:15:00Z',
+    },
+    {
+      id: 'inv-6',
+      productId: 'p3',
+      productName: 'Logitech MX Master 3S Wireless Mouse',
+      variantName: 'Space Gray',
+      sku: 'LOG-MX3S-GRY',
+      category: 'Peripherals',
+      imageUrl: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=120&q=80',
+      currentStock: 18,
+      reservedStock: 3,
+      availableStock: 15,
+      lowStockThreshold: 10,
+      status: 'In Stock',
+      lastUpdated: '2026-09-06T18:00:00Z',
+    },
+    {
+      id: 'inv-7',
+      productId: 'p3',
+      productName: 'Logitech MX Master 3S Wireless Mouse',
+      variantName: 'Pale Gray / White',
+      sku: 'LOG-MX3S-WHT',
+      category: 'Peripherals',
+      imageUrl: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=120&q=80',
+      currentStock: 6,
+      reservedStock: 2,
+      availableStock: 4,
+      lowStockThreshold: 8,
+      status: 'Low Stock',
+      lastUpdated: '2026-09-05T09:30:00Z',
+    },
+    {
+      id: 'inv-8',
+      productId: 'p4',
+      productName: 'Keychron Q1 Pro Wireless Keyboard',
+      variantName: 'RGB / Gateron Red',
+      sku: 'KEY-Q1P-RED',
+      category: 'Peripherals',
+      imageUrl: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=120&q=80',
+      currentStock: 4,
+      reservedStock: 1,
+      availableStock: 3,
+      lowStockThreshold: 5,
+      status: 'Low Stock',
+      lastUpdated: '2026-09-06T12:00:00Z',
+    },
+    {
+      id: 'inv-9',
+      productId: 'p4',
+      productName: 'Keychron Q1 Pro Wireless Keyboard',
+      variantName: 'RGB / Gateron Brown',
+      sku: 'KEY-Q1P-BRN',
+      category: 'Peripherals',
+      imageUrl: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=120&q=80',
+      currentStock: 0,
+      reservedStock: 0,
+      availableStock: 0,
+      lowStockThreshold: 5,
+      status: 'Out of Stock',
+      lastUpdated: '2026-09-04T15:00:00Z',
+    },
+    {
+      id: 'inv-10',
+      productId: 'p5',
+      productName: 'BenQ ScreenBar Pro Monitor Light',
+      variantName: 'Metallic Silver',
+      sku: 'BNQ-SCR-PRO',
+      category: 'Workspace',
+      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=120&q=80',
+      currentStock: 2,
+      reservedStock: 1,
+      availableStock: 1,
+      lowStockThreshold: 6,
+      status: 'Low Stock',
+      lastUpdated: '2026-09-06T17:30:00Z',
+    },
+    {
+      id: 'inv-11',
+      productId: 'p6',
+      productName: 'CalDigit TS4 Thunderbolt 4 Dock',
+      variantName: 'Titanium Silver',
+      sku: 'CAL-TS4-SIL',
+      category: 'Workspace',
+      imageUrl: 'https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=120&q=80',
+      currentStock: 0,
+      reservedStock: 0,
+      availableStock: 0,
+      lowStockThreshold: 8,
+      status: 'Out of Stock',
+      lastUpdated: '2026-09-05T14:10:00Z',
+    },
+    {
+      id: 'inv-12',
+      productId: 'p7',
+      productName: 'Apple MagSafe Battery Pack 5000mAh',
+      variantName: 'White',
+      sku: 'APP-MAG-BAT',
+      category: 'Accessories',
+      imageUrl: 'https://images.unsplash.com/photo-1609592424368-e6922d56c4d7?w=120&q=80',
+      currentStock: 34,
+      reservedStock: 5,
+      availableStock: 29,
+      lowStockThreshold: 10,
+      status: 'In Stock',
+      lastUpdated: '2026-09-07T07:45:00Z',
+    },
+    {
+      id: 'inv-13',
+      productId: 'p8',
+      productName: 'DJI Mic 2 Wireless Microphone System',
+      variantName: '2 TX + 1 RX + Case',
+      sku: 'DJI-MIC-2',
+      category: 'Audio',
+      imageUrl: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=120&q=80',
+      currentStock: 12,
+      reservedStock: 2,
+      availableStock: 10,
+      lowStockThreshold: 6,
+      status: 'In Stock',
+      lastUpdated: '2026-09-06T15:20:00Z',
+    },
+    {
+      id: 'inv-14',
+      productId: 'p9',
+      productName: 'Razer DeathAdder V3 Pro Wireless',
+      variantName: 'Pro White Edition',
+      sku: 'RZR-DA-WHT',
+      category: 'Peripherals',
+      imageUrl: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=120&q=80',
+      currentStock: 22,
+      reservedStock: 3,
+      availableStock: 19,
+      lowStockThreshold: 8,
+      status: 'In Stock',
+      lastUpdated: '2026-09-06T16:10:00Z',
+    },
+    {
+      id: 'inv-15',
+      productId: 'p10',
+      productName: 'Bose SoundLink Flex Bluetooth Speaker',
+      variantName: 'Stone Blue',
+      sku: 'BOS-SL-BLU',
+      category: 'Audio',
+      imageUrl: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=120&q=80',
+      currentStock: 15,
+      reservedStock: 2,
+      availableStock: 13,
+      lowStockThreshold: 6,
+      status: 'In Stock',
+      lastUpdated: '2026-09-05T11:00:00Z',
+    },
+    {
+      id: 'inv-16',
+      productId: 'p11',
+      productName: 'Baseus Blade 100W Ultra-Thin Power Bank',
+      variantName: 'Graphite Black',
+      sku: 'BAS-PB-100W',
+      category: 'Accessories',
+      imageUrl: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=120&q=80',
+      currentStock: 0,
+      reservedStock: 0,
+      availableStock: 0,
+      lowStockThreshold: 10,
+      status: 'Out of Stock',
+      lastUpdated: '2026-09-04T12:00:00Z',
+    },
+    {
+      id: 'inv-17',
+      productId: 'p12',
+      productName: 'HyperX Cloud III Wireless Gaming Headset',
+      variantName: 'Black / Red Accent',
+      sku: 'HYP-CLD-3',
+      category: 'Audio',
+      imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=120&q=80',
+      currentStock: 3,
+      reservedStock: 1,
+      availableStock: 2,
+      lowStockThreshold: 6,
+      status: 'Low Stock',
+      lastUpdated: '2026-09-06T13:40:00Z',
+    },
+    {
+      id: 'inv-18',
+      productId: 'p13',
+      productName: 'SanDisk 512GB Extreme PRO SDXC Card',
+      variantName: 'UHS-II 300MB/s',
+      sku: 'SND-SD-512',
+      category: 'Accessories',
+      imageUrl: 'https://images.unsplash.com/photo-1609592424368-e6922d56c4d7?w=120&q=80',
+      currentStock: 50,
+      reservedStock: 4,
+      availableStock: 46,
+      lowStockThreshold: 12,
+      status: 'In Stock',
+      lastUpdated: '2026-09-07T06:00:00Z',
+    },
+    {
+      id: 'inv-19',
+      productId: 'p15',
+      productName: 'Elgato Stream Deck MK.2 15 LCD Keys',
+      variantName: 'Deep Black',
+      sku: 'ELG-STR-MK2',
+      category: 'Workspace',
+      imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=120&q=80',
+      currentStock: 14,
+      reservedStock: 2,
+      availableStock: 12,
+      lowStockThreshold: 6,
+      status: 'In Stock',
+      lastUpdated: '2026-09-06T14:15:00Z',
+    },
+    {
+      id: 'inv-20',
+      productId: 'p9',
+      productName: 'Xiaomi Smart Band 8 Pro',
+      variantName: 'Light Gold Frame',
+      sku: 'MI-BND-8P',
+      category: 'Wearables',
+      imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=120&q=80',
+      currentStock: 5,
+      reservedStock: 2,
+      availableStock: 3,
+      lowStockThreshold: 8,
+      status: 'Low Stock',
+      lastUpdated: '2026-09-06T09:10:00Z',
+    },
+  ]);
+
+  // ── Inventory Mutation Methods ─────────────────────────────
+  updateInventoryStock(id: string, newCurrentStock: number): void {
+    const validStock = Math.max(0, newCurrentStock);
+    this.inventory.update(list =>
+      list.map(item => {
+        if (item.id !== id) return item;
+        const available = Math.max(0, validStock - item.reservedStock);
+        let status: 'In Stock' | 'Low Stock' | 'Out of Stock' = 'In Stock';
+        if (available <= 0) {
+          status = 'Out of Stock';
+        } else if (available <= item.lowStockThreshold) {
+          status = 'Low Stock';
+        }
+        return {
+          ...item,
+          currentStock: validStock,
+          availableStock: available,
+          status,
+          lastUpdated: new Date().toISOString(),
+        };
+      })
+    );
+  }
+
+  quickRestock(id: string, amount: number = 10): void {
+    const item = this.inventory().find(i => i.id === id);
+    if (!item) return;
+    this.updateInventoryStock(id, item.currentStock + amount);
+  }
+
+  bulkUpdateStock(updates: { id: string; stock: number }[]): void {
+    const updateMap = new Map(updates.map(u => [u.id, u.stock]));
+    this.inventory.update(list =>
+      list.map(item => {
+        if (!updateMap.has(item.id)) return item;
+        const newStock = Math.max(0, updateMap.get(item.id)!);
+        const available = Math.max(0, newStock - item.reservedStock);
+        let status: 'In Stock' | 'Low Stock' | 'Out of Stock' = 'In Stock';
+        if (available <= 0) {
+          status = 'Out of Stock';
+        } else if (available <= item.lowStockThreshold) {
+          status = 'Low Stock';
+        }
+        return {
+          ...item,
+          currentStock: newStock,
+          availableStock: available,
+          status,
+          lastUpdated: new Date().toISOString(),
+        };
+      })
+    );
+  }
 }
+
+

@@ -1,0 +1,849 @@
+<div class="admin-categories-page">
+  <!-- 1. Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="title-with-badge">
+        <h1 class="page-title">Categories</h1>
+        <span class="count-badge">{{ categories().length }}</span>
+      </div>
+      <p class="page-subtitle">
+        Organize storefront taxonomy, manage nested subcategories, and drag to reorder display sequence.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <!-- Expand / Collapse All -->
+      <button
+        type="button"
+        class="btn btn-secondary btn-tree-toggle"
+        (click)="expandedCategoryIds().size > 0 ? collapseAll() : expandAll()"
+        title="Expand or collapse all category branches"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+          @if (expandedCategoryIds().size > 0) {
+            <!-- Fold / Collapse Icon -->
+            <polyline points="4 14 10 8 16 14"/>
+          } @else {
+            <!-- Unfold / Expand Icon -->
+            <polyline points="4 6 10 12 16 6"/>
+          }
+        </svg>
+        <span>{{ expandedCategoryIds().size > 0 ? 'Collapse All' : 'Expand All' }}</span>
+      </button>
+
+      <!-- Add Category Button -->
+      <button
+        type="button"
+        class="btn btn-primary btn-add"
+        (click)="openAddModal()"
+        title="Create a new category or subcategory"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+          <line x1="10" y1="4" x2="10" y2="16"/>
+          <line x1="4" y1="10" x2="16" y2="10"/>
+        </svg>
+        <span>Add Category</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. KPI Metrics Bar -->
+  <section class="category-kpi-bar" aria-label="Category statistics">
+    <div class="kpi-item">
+      <span class="kpi-label">Top-Level Categories</span>
+      <span class="kpi-value">{{ totalRootCount() }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-item">
+      <span class="kpi-label">Subcategories</span>
+      <span class="kpi-value">{{ totalSubCount() }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-item">
+      <span class="kpi-label">Active on Storefront</span>
+      <span class="kpi-value text-success">{{ totalActiveCount() }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+    <div class="kpi-item">
+      <span class="kpi-label">Hidden / Draft</span>
+      <span class="kpi-value text-muted">{{ totalHiddenCount() }}</span>
+    </div>
+  </section>
+
+  <!-- 3. Search & Filter Bar -->
+  <section class="filters-card">
+    <div class="filters-row">
+      <!-- Search Field -->
+      <div class="search-field">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+          <circle cx="9" cy="9" r="6"/>
+          <line x1="13.5" y1="13.5" x2="18" y2="18"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search categories by name, slug, or description..."
+          [value]="searchQuery()"
+          (input)="searchQuery.set($any($event.target).value)"
+          id="categorySearchInput"
+        />
+        @if (searchQuery()) {
+          <button
+            type="button"
+            class="clear-search-btn"
+            (click)="searchQuery.set('')"
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        }
+      </div>
+
+      <!-- Status Filter Tabs -->
+      <div class="status-filter-group" role="group" aria-label="Status filter">
+        <button
+          type="button"
+          class="filter-tab-pill"
+          [class.active]="statusFilter() === 'All'"
+          (click)="statusFilter.set('All')"
+        >
+          All ({{ categories().length }})
+        </button>
+        <button
+          type="button"
+          class="filter-tab-pill"
+          [class.active]="statusFilter() === 'Active'"
+          (click)="statusFilter.set('Active')"
+        >
+          Active ({{ totalActiveCount() }})
+        </button>
+        <button
+          type="button"
+          class="filter-tab-pill"
+          [class.active]="statusFilter() === 'Hidden'"
+          (click)="statusFilter.set('Hidden')"
+        >
+          Hidden ({{ totalHiddenCount() }})
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Main Tree View Container (Desktop Tree & Mobile Accordion) -->
+  <section class="categories-tree-container">
+    @if (categoryTree().length > 0) {
+      <!-- DESKTOP TREE VIEW (≥768px) -->
+      <div class="tree-view desktop-tree" role="tree" aria-label="Categories hierarchy tree">
+        <!-- Tree Column Headers -->
+        <div class="tree-header-row">
+          <div class="th-col col-name">Category & Hierarchy</div>
+          <div class="th-col col-slug">URL Slug</div>
+          <div class="th-col col-products">Products</div>
+          <div class="th-col col-status">Status</div>
+          <div class="th-col col-actions text-right">Actions</div>
+        </div>
+
+        <!-- Tree Nodes List -->
+        <div class="tree-body">
+          @for (parent of categoryTree(); track parent.id) {
+            <!-- PARENT ROW -->
+            <div
+              class="tree-node parent-node"
+              [class.is-dragged]="draggedCategoryId() === parent.id"
+              [class.is-dragover]="dragOverCategoryId() === parent.id"
+              [class.is-expanded]="isExpanded(parent.id)"
+              draggable="true"
+              (dragstart)="onDragStart($event, parent)"
+              (dragover)="onDragOver($event, parent)"
+              (dragleave)="onDragLeave($event, parent)"
+              (drop)="onDrop($event, parent)"
+              (dragend)="onDragEnd()"
+              role="treeitem"
+              [attr.aria-expanded]="isExpanded(parent.id)"
+            >
+              <!-- Drag Handle & Chevron & Info -->
+              <div class="node-cell cell-identity">
+                <!-- Drag Grip Handle -->
+                <div class="drag-handle" title="Drag to reorder category" aria-label="Drag handle">
+                  <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+                    <circle cx="7" cy="4" r="1.5"/>
+                    <circle cx="13" cy="4" r="1.5"/>
+                    <circle cx="7" cy="10" r="1.5"/>
+                    <circle cx="13" cy="10" r="1.5"/>
+                    <circle cx="7" cy="16" r="1.5"/>
+                    <circle cx="13" cy="16" r="1.5"/>
+                  </svg>
+                </div>
+
+                <!-- Expand / Collapse Chevron Button -->
+                @if (parent.children.length > 0) {
+                  <button
+                    type="button"
+                    class="btn-chevron"
+                    (click)="toggleExpand(parent.id, $event)"
+                    [attr.aria-label]="isExpanded(parent.id) ? 'Collapse ' + parent.name : 'Expand ' + parent.name"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" class="chevron-svg" [class.rotated]="isExpanded(parent.id)">
+                      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                  </button>
+                } @else {
+                  <div class="chevron-placeholder"></div>
+                }
+
+                <!-- Category Image Thumbnail -->
+                <div class="category-thumb-wrapper">
+                  @if (parent.imageUrl) {
+                    <img [src]="parent.imageUrl" [alt]="parent.name" class="category-thumb-img" loading="lazy" />
+                  } @else {
+                    <div class="category-thumb-fallback">📁</div>
+                  }
+                </div>
+
+                <!-- Category Name & Description -->
+                <div class="category-title-group">
+                  <div class="name-badge-row">
+                    <span class="category-name-text">{{ parent.name }}</span>
+                    @if (parent.children.length > 0) {
+                      <span class="subcat-counter-pill">{{ parent.children.length }} subcategories</span>
+                    }
+                  </div>
+                  @if (parent.description) {
+                    <span class="category-desc-snippet">{{ parent.description }}</span>
+                  }
+                </div>
+              </div>
+
+              <!-- Slug Column -->
+              <div class="node-cell cell-slug">
+                <code class="slug-code">/category/{{ parent.slug }}</code>
+              </div>
+
+              <!-- Products Count Column -->
+              <div class="node-cell cell-products">
+                <span class="product-count-badge">{{ parent.productCount }} products</span>
+              </div>
+
+              <!-- Active / Hidden Status Toggle -->
+              <div class="node-cell cell-status">
+                <label class="status-toggle-switch" [title]="'Click to toggle ' + parent.name + ' status'">
+                  <input
+                    type="checkbox"
+                    [checked]="parent.status === 'Active'"
+                    (change)="toggleStatus(parent, $event)"
+                    [attr.aria-label]="'Toggle ' + parent.name + ' active state'"
+                  />
+                  <span class="toggle-slider"></span>
+                </label>
+                <span class="status-label-text" [class.text-active]="parent.status === 'Active'">
+                  {{ parent.status }}
+                </span>
+              </div>
+
+              <!-- Actions Column -->
+              <div class="node-cell cell-actions text-right">
+                <!-- Move Up / Down Buttons -->
+                <button
+                  type="button"
+                  class="btn-row-action"
+                  (click)="moveUp(parent, $event)"
+                  title="Move category up"
+                  aria-label="Move category up"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <polyline points="5 12 10 7 15 12"/>
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="btn-row-action"
+                  (click)="moveDown(parent, $event)"
+                  title="Move category down"
+                  aria-label="Move category down"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <polyline points="5 8 10 13 15 8"/>
+                  </svg>
+                </button>
+
+                <!-- Add Subcategory Button -->
+                <button
+                  type="button"
+                  class="btn-row-action btn-add-sub"
+                  (click)="openAddModal(parent.id)"
+                  title="Add subcategory under {{ parent.name }}"
+                  aria-label="Add subcategory"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                    <line x1="10" y1="4" x2="10" y2="16"/>
+                    <line x1="4" y1="10" x2="16" y2="10"/>
+                  </svg>
+                </button>
+
+                <!-- Edit Button -->
+                <button
+                  type="button"
+                  class="btn-row-action"
+                  (click)="openEditModal(parent, $event)"
+                  title="Edit category details"
+                  aria-label="Edit category"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14">
+                    <path d="M11 4H4a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-7M16 2.5a2.12 2.12 0 013 3L10 14l-4 1 1-4 9-8.5z"/>
+                  </svg>
+                </button>
+
+                <!-- Delete Button -->
+                <button
+                  type="button"
+                  class="btn-row-action text-danger"
+                  (click)="confirmDelete(parent, $event)"
+                  title="Delete category"
+                  aria-label="Delete category"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14">
+                    <path d="M4 6h12M8 6V4a1 1 0 011-1h2a1 1 0 011 1v2m2 0v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6h10z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- NESTED SUBCATEGORIES LIST -->
+            @if (isExpanded(parent.id) && parent.children.length > 0) {
+              <div class="subcategories-branch" role="group" aria-label="Subcategories list">
+                @for (child of parent.children; track child.id) {
+                  <div
+                    class="tree-node child-node"
+                    [class.is-dragged]="draggedCategoryId() === child.id"
+                    [class.is-dragover]="dragOverCategoryId() === child.id"
+                    draggable="true"
+                    (dragstart)="onDragStart($event, child)"
+                    (dragover)="onDragOver($event, child)"
+                    (dragleave)="onDragLeave($event, child)"
+                    (drop)="onDrop($event, child)"
+                    (dragend)="onDragEnd()"
+                    role="treeitem"
+                  >
+                    <!-- Visual Tree Branch Connector Line -->
+                    <div class="node-cell cell-identity child-identity">
+                      <!-- Tree connector guide -->
+                      <div class="branch-connector">
+                        <span class="connector-line"></span>
+                        <span class="connector-hook">└─</span>
+                      </div>
+
+                      <!-- Subcategory Drag Handle -->
+                      <div class="drag-handle sm-grip" title="Drag to reorder subcategory" aria-label="Drag handle">
+                        <svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12">
+                          <circle cx="7" cy="4" r="1.5"/>
+                          <circle cx="13" cy="4" r="1.5"/>
+                          <circle cx="7" cy="10" r="1.5"/>
+                          <circle cx="13" cy="10" r="1.5"/>
+                          <circle cx="7" cy="16" r="1.5"/>
+                          <circle cx="13" cy="16" r="1.5"/>
+                        </svg>
+                      </div>
+
+                      <!-- Thumbnail -->
+                      <div class="category-thumb-wrapper sm-thumb">
+                        @if (child.imageUrl) {
+                          <img [src]="child.imageUrl" [alt]="child.name" class="category-thumb-img" loading="lazy" />
+                        } @else {
+                          <div class="category-thumb-fallback">📄</div>
+                        }
+                      </div>
+
+                      <!-- Name & Sub-description -->
+                      <div class="category-title-group">
+                        <span class="category-name-text child-name">{{ child.name }}</span>
+                        @if (child.description) {
+                          <span class="category-desc-snippet">{{ child.description }}</span>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Slug Column -->
+                    <div class="node-cell cell-slug">
+                      <code class="slug-code sub-slug">/category/{{ parent.slug }}/{{ child.slug }}</code>
+                    </div>
+
+                    <!-- Products Count -->
+                    <div class="node-cell cell-products">
+                      <span class="product-count-badge sub-count">{{ child.productCount }} products</span>
+                    </div>
+
+                    <!-- Status Toggle -->
+                    <div class="node-cell cell-status">
+                      <label class="status-toggle-switch" [title]="'Click to toggle ' + child.name + ' status'">
+                        <input
+                          type="checkbox"
+                          [checked]="child.status === 'Active'"
+                          (change)="toggleStatus(child, $event)"
+                          [attr.aria-label]="'Toggle ' + child.name + ' active state'"
+                        />
+                        <span class="toggle-slider"></span>
+                      </label>
+                      <span class="status-label-text" [class.text-active]="child.status === 'Active'">
+                        {{ child.status }}
+                      </span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="node-cell cell-actions text-right">
+                      <button
+                        type="button"
+                        class="btn-row-action"
+                        (click)="moveUp(child, $event)"
+                        title="Move subcategory up"
+                        aria-label="Move subcategory up"
+                      >
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                          <polyline points="5 12 10 7 15 12"/>
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-row-action"
+                        (click)="moveDown(child, $event)"
+                        title="Move subcategory down"
+                        aria-label="Move subcategory down"
+                      >
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                          <polyline points="5 8 10 13 15 8"/>
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-row-action"
+                        (click)="openEditModal(child, $event)"
+                        title="Edit subcategory"
+                        aria-label="Edit subcategory"
+                      >
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14">
+                          <path d="M11 4H4a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-7M16 2.5a2.12 2.12 0 013 3L10 14l-4 1 1-4 9-8.5z"/>
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-row-action text-danger"
+                        (click)="confirmDelete(child, $event)"
+                        title="Delete subcategory"
+                        aria-label="Delete subcategory"
+                      >
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="14" height="14">
+                          <path d="M4 6h12M8 6V4a1 1 0 011-1h2a1 1 0 011 1v2m2 0v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6h10z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- MOBILE RESPONSIVE ACCORDION (<768px) -->
+      <div class="accordion-view mobile-accordion" aria-label="Mobile categories accordion">
+        @for (parent of categoryTree(); track parent.id) {
+          <article class="accordion-card-item">
+            <!-- Accordion Header Card -->
+            <div class="accordion-header" (click)="toggleExpand(parent.id, $event)">
+              <div class="acc-header-left">
+                <button
+                  type="button"
+                  class="acc-chevron-btn"
+                  [class.is-open]="isExpanded(parent.id)"
+                  [attr.aria-label]="isExpanded(parent.id) ? 'Collapse ' + parent.name : 'Expand ' + parent.name"
+                >
+                  <svg viewBox="0 0 20 20" fill="currentColor" class="acc-chevron-svg">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                  </svg>
+                </button>
+
+                <div class="category-thumb-wrapper">
+                  @if (parent.imageUrl) {
+                    <img [src]="parent.imageUrl" [alt]="parent.name" class="category-thumb-img" loading="lazy" />
+                  } @else {
+                    <div class="category-thumb-fallback">📁</div>
+                  }
+                </div>
+
+                <div class="acc-title-group">
+                  <h3 class="acc-cat-title">{{ parent.name }}</h3>
+                  <div class="acc-meta-tags">
+                    <span class="acc-sub-count">{{ parent.children.length }} subcategories</span>
+                    <span class="acc-dot">&bull;</span>
+                    <span class="acc-prod-count">{{ parent.productCount }} items</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick Status Toggle -->
+              <div class="acc-header-right" (click)="$event.stopPropagation()">
+                <label class="status-toggle-switch">
+                  <input
+                    type="checkbox"
+                    [checked]="parent.status === 'Active'"
+                    (change)="toggleStatus(parent, $event)"
+                    [attr.aria-label]="'Toggle ' + parent.name + ' status'"
+                  />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Parent Mobile Action Bar (Min 44px Touch Targets) -->
+            <div class="mobile-action-bar">
+              <button
+                type="button"
+                class="mobile-touch-btn"
+                (click)="openAddModal(parent.id)"
+              >
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <line x1="10" y1="4" x2="10" y2="16"/>
+                  <line x1="4" y1="10" x2="16" y2="10"/>
+                </svg>
+                <span>Add Sub</span>
+              </button>
+
+              <button
+                type="button"
+                class="mobile-touch-btn"
+                (click)="openEditModal(parent, $event)"
+              >
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16">
+                  <path d="M11 4H4a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-7M16 2.5a2.12 2.12 0 013 3L10 14l-4 1 1-4 9-8.5z"/>
+                </svg>
+                <span>Edit</span>
+              </button>
+
+              <button
+                type="button"
+                class="mobile-touch-btn"
+                (click)="moveUp(parent, $event)"
+                title="Move up"
+              >
+                ↑ Up
+              </button>
+
+              <button
+                type="button"
+                class="mobile-touch-btn"
+                (click)="moveDown(parent, $event)"
+                title="Move down"
+              >
+                ↓ Down
+              </button>
+
+              <button
+                type="button"
+                class="mobile-touch-btn text-danger"
+                (click)="confirmDelete(parent, $event)"
+              >
+                Delete
+              </button>
+            </div>
+
+            <!-- Accordion Subcategory Body -->
+            @if (isExpanded(parent.id)) {
+              <div class="accordion-body">
+                @if (parent.children.length > 0) {
+                  <div class="sub-accordion-list">
+                    @for (child of parent.children; track child.id) {
+                      <div class="sub-accordion-row">
+                        <div class="sub-acc-left">
+                          <span class="sub-arrow">↳</span>
+                          <div class="category-thumb-wrapper sm-thumb">
+                            @if (child.imageUrl) {
+                              <img [src]="child.imageUrl" [alt]="child.name" class="category-thumb-img" loading="lazy" />
+                            } @else {
+                              <div class="category-thumb-fallback">📄</div>
+                            }
+                          </div>
+                          <div class="sub-acc-name-group">
+                            <span class="sub-acc-name">{{ child.name }}</span>
+                            <span class="sub-acc-meta">{{ child.productCount }} items &bull; {{ child.slug }}</span>
+                          </div>
+                        </div>
+
+                        <div class="sub-acc-right">
+                          <label class="status-toggle-switch">
+                            <input
+                              type="checkbox"
+                              [checked]="child.status === 'Active'"
+                              (change)="toggleStatus(child, $event)"
+                              [attr.aria-label]="'Toggle ' + child.name + ' status'"
+                            />
+                            <span class="toggle-slider"></span>
+                          </label>
+
+                          <div class="sub-actions-mini">
+                            <button
+                              type="button"
+                              class="mini-touch-btn"
+                              (click)="moveUp(child, $event)"
+                              title="Move up"
+                            >
+                              ↑
+                            </button>
+                            <button
+                              type="button"
+                              class="mini-touch-btn"
+                              (click)="moveDown(child, $event)"
+                              title="Move down"
+                            >
+                              ↓
+                            </button>
+                            <button
+                              type="button"
+                              class="mini-touch-btn"
+                              (click)="openEditModal(child, $event)"
+                              title="Edit"
+                            >
+                              ✎
+                            </button>
+                            <button
+                              type="button"
+                              class="mini-touch-btn text-danger"
+                              (click)="confirmDelete(child, $event)"
+                              title="Delete"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="empty-sub-notice">
+                    <span>No subcategories yet under {{ parent.name }}.</span>
+                    <button type="button" class="btn btn-sm btn-secondary" (click)="openAddModal(parent.id)">
+                      + Add First Subcategory
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </article>
+        }
+      </div>
+    } @else {
+      <!-- Empty State -->
+      <div class="empty-state-card">
+        <div class="empty-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="empty-svg">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </div>
+        <h2 class="empty-title">No categories found</h2>
+        <p class="empty-desc">
+          @if (searchQuery() || statusFilter() !== 'All') {
+            No categories matched your current search filters. Try clearing your search query.
+          } @else {
+            You have not configured any product categories yet. Add your first top-level category to structure your store catalog.
+          }
+        </p>
+        <div class="empty-actions">
+          @if (searchQuery() || statusFilter() !== 'All') {
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="searchQuery.set(''); statusFilter.set('All')"
+            >
+              Reset Filters
+            </button>
+          } @else {
+            <button type="button" class="btn btn-primary" (click)="openAddModal()">
+              Add First Category
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <!-- 5. Add / Edit Category Modal -->
+  <gp-admin-modal
+    [isOpen]="isCategoryModalOpen()"
+    [title]="isEditMode() ? 'Edit Category' : 'Add New Category'"
+    [subtitle]="isEditMode() ? 'Modify taxonomy details, parent relationships, and media' : 'Create a category or nested subcategory for your store taxonomy'"
+    size="lg"
+    (closed)="closeCategoryModal()"
+  >
+    <div class="category-modal-form">
+      <div class="form-grid-2col">
+        <!-- Name -->
+        <div class="form-group">
+          <label class="form-label" for="catNameInput">Category Name *</label>
+          <input
+            id="catNameInput"
+            type="text"
+            class="form-input"
+            [class.input-error]="formErrors()['name']"
+            placeholder="e.g. Wireless Audio, Mechanical Keyboards"
+            [value]="formName()"
+            (input)="onNameChange($any($event.target).value)"
+          />
+          @if (formErrors()['name']) {
+            <span class="field-error">{{ formErrors()['name'] }}</span>
+          }
+        </div>
+
+        <!-- URL Slug -->
+        <div class="form-group">
+          <label class="form-label" for="catSlugInput">URL Slug</label>
+          <div class="slug-input-wrapper">
+            <span class="slug-prefix">/category/</span>
+            <input
+              id="catSlugInput"
+              type="text"
+              class="form-input slug-input"
+              placeholder="wireless-audio"
+              [value]="formSlug()"
+              (input)="formSlug.set($any($event.target).value)"
+            />
+          </div>
+          <span class="form-help">Unique handle used in storefront URLs for SEO.</span>
+        </div>
+
+        <!-- Parent Category Dropdown -->
+        <div class="form-group">
+          <label class="form-label" for="catParentSelect">Parent Category</label>
+          <select
+            id="catParentSelect"
+            class="form-select"
+            [value]="formParentId()"
+            (change)="formParentId.set($any($event.target).value)"
+          >
+            <option value="">None (Top-Level Category)</option>
+            @for (topCat of topLevelCategories(); track topCat.id) {
+              <!-- Prevent setting self as parent when editing -->
+              @if (!isEditMode() || topCat.id !== editingCategoryId()) {
+                <option [value]="topCat.id">{{ topCat.name }}</option>
+              }
+            }
+          </select>
+          <span class="form-help">Select a parent category to make this a nested subcategory.</span>
+        </div>
+
+        <!-- Status Selection -->
+        <div class="form-group">
+          <label class="form-label" for="catStatusSelect">Visibility Status</label>
+          <select
+            id="catStatusSelect"
+            class="form-select"
+            [value]="formStatus()"
+            (change)="formStatus.set($any($event.target).value)"
+          >
+            <option value="Active">Active (Visible in Storefront & Nav)</option>
+            <option value="Hidden">Hidden (Draft / Archive)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label" for="catDescInput">Description (Optional)</label>
+        <textarea
+          id="catDescInput"
+          class="form-textarea"
+          rows="2"
+          placeholder="Brief description displayed on the collection page banner and SEO meta tags..."
+          [value]="formDescription()"
+          (input)="formDescription.set($any($event.target).value)"
+        ></textarea>
+      </div>
+
+      <!-- Category Image & Presets Section -->
+      <div class="image-upload-section">
+        <label class="form-label" for="catImageInput">Category Image / Banner URL</label>
+        <div class="image-input-row">
+          <input
+            id="catImageInput"
+            type="url"
+            class="form-input"
+            placeholder="https://images.unsplash.com/..."
+            [value]="formImageUrl()"
+            (input)="formImageUrl.set($any($event.target).value)"
+          />
+          @if (formImageUrl()) {
+            <div class="image-preview-box">
+              <img [src]="formImageUrl()" alt="Category preview" class="preview-img" />
+            </div>
+          }
+        </div>
+
+        <!-- Quick Image Presets -->
+        <div class="preset-chips-block">
+          <span class="preset-title">Or pick from catalog presets:</span>
+          <div class="preset-chips-row">
+            @for (preset of presetImages; track preset.label) {
+              <button
+                type="button"
+                class="preset-chip"
+                [class.preset-active]="formImageUrl() === preset.url"
+                (click)="selectPresetImage(preset.url)"
+              >
+                {{ preset.label }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div modalFooter class="modal-footer-actions">
+      <button type="button" class="btn btn-secondary" (click)="closeCategoryModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-primary" (click)="saveCategory()">
+        {{ isEditMode() ? 'Save Changes' : 'Create Category' }}
+      </button>
+    </div>
+  </gp-admin-modal>
+
+  <!-- 6. Delete Category Confirmation Modal -->
+  <gp-admin-modal
+    [isOpen]="isDeleteModalOpen()"
+    title="Confirm Category Deletion"
+    size="sm"
+    (closed)="closeDeleteModal()"
+  >
+    <div class="delete-dialog-content">
+      <div class="warning-icon-wrapper">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="warning-svg">
+          <path d="M10 3L2 17h16L10 3zM10 9v4m0 2h.01"/>
+        </svg>
+      </div>
+
+      @if (categoryToDelete(); as cat) {
+        <p class="delete-msg">
+          Are you sure you want to delete category <strong>{{ cat.name }}</strong>?
+        </p>
+        @if (getSubcategoryCount(cat) > 0) {
+          <div class="delete-warning-box">
+            <strong>Warning:</strong> This category contains <strong>{{ getSubcategoryCount(cat) }} nested subcategories</strong>. Deleting it will also remove all its subcategories from the storefront taxonomy.
+          </div>
+        }
+        <p class="delete-submsg">
+          This action cannot be undone. Products assigned to this category will not be deleted.
+        </p>
+      }
+    </div>
+
+    <div modalFooter class="modal-footer-actions">
+      <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-danger" (click)="executeDelete()">
+        Confirm Delete
+      </button>
+    </div>
+  </gp-admin-modal>
+</div>

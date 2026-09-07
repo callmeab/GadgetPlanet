@@ -83,16 +83,16 @@ export const ADMIN_ROUTES: Routes = [
       {
         path: 'categories',
         loadComponent: () =>
-          import('./features/dashboard/admin-dashboard.component').then(
-            m => m.AdminDashboardComponent
+          import('./features/categories/admin-categories.component').then(
+            m => m.AdminCategoriesComponent
           ),
         title: 'Categories — GadgetPlanet Admin',
       },
       {
         path: 'inventory',
         loadComponent: () =>
-          import('./features/dashboard/admin-dashboard.component').then(
-            m => m.AdminDashboardComponent
+          import('./features/inventory/admin-inventory.component').then(
+            m => m.AdminInventoryComponent
           ),
         title: 'Inventory — GadgetPlanet Admin',
       },

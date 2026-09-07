@@ -1,0 +1,845 @@
+<div class="admin-inventory-page">
+  <!-- 1. Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="title-with-badge">
+        <h1 class="page-title">Inventory</h1>
+        <span class="count-badge">{{ inventory().length }} SKUs</span>
+      </div>
+      <p class="page-subtitle">
+        Monitor real-time on-hand stock, track reserved order commitments, and update variant quantities.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <!-- Export CSV Button -->
+      <button
+        type="button"
+        class="btn btn-secondary btn-export"
+        (click)="exportInventoryToCsv()"
+        title="Export inventory catalog to CSV file"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+          <path d="M4 14v2a2 2 0 002 2h8a2 2 0 002-2v-2M7 10l3 3 3-3M10 3v10"/>
+        </svg>
+        <span>Export CSV</span>
+      </button>
+
+      <!-- Bulk Stock Adjustment Modal Button -->
+      <button
+        type="button"
+        class="btn btn-primary btn-bulk"
+        (click)="openBulkModal()"
+        title="Open bulk stock adjustment modal"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+          <path d="M3 4h14M3 10h14M3 16h14"/>
+        </svg>
+        <span>Bulk Stock Adjustment</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. KPI Metrics Bar -->
+  <section class="inventory-kpi-bar" aria-label="Inventory summary statistics">
+    <!-- Total SKUs -->
+    <div class="kpi-card">
+      <span class="kpi-label">Total SKUs</span>
+      <span class="kpi-num">{{ kpiMetrics().totalVariants }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- On Hand -->
+    <div class="kpi-card">
+      <span class="kpi-label">Units On Hand</span>
+      <span class="kpi-num text-primary">{{ kpiMetrics().totalOnHand }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- Reserved -->
+    <div class="kpi-card">
+      <span class="kpi-label">Reserved (Orders)</span>
+      <span class="kpi-num text-muted">{{ kpiMetrics().totalReserved }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- Available -->
+    <div class="kpi-card">
+      <span class="kpi-label">Available for Sale</span>
+      <span class="kpi-num text-success">{{ kpiMetrics().totalAvailable }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- Low Stock Alert -->
+    <div class="kpi-card">
+      <span class="kpi-label">Low Stock Alert</span>
+      <span class="kpi-num text-warning">{{ kpiMetrics().lowStockCount }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- Out of Stock Alert -->
+    <div class="kpi-card">
+      <span class="kpi-label">Out of Stock</span>
+      <span class="kpi-num text-danger">{{ kpiMetrics().outOfStockCount }}</span>
+    </div>
+  </section>
+
+  <!-- 3. Status Tabs Navigation -->
+  <nav class="inventory-tabs-nav" aria-label="Inventory status filter tabs">
+    <div class="tabs-track">
+      @for (tab of statusTabs; track tab) {
+        <button
+          type="button"
+          class="tab-btn"
+          [class.tab-active]="activeStatusTab() === tab"
+          (click)="setStatusTab(tab)"
+        >
+          <span>{{ tab }}</span>
+          <span
+            class="tab-count-badge"
+            [class.badge-active]="activeStatusTab() === tab"
+            [class.badge-warning]="tab === 'Low Stock' && tabCounts()[tab] > 0"
+            [class.badge-danger]="tab === 'Out of Stock' && tabCounts()[tab] > 0"
+          >
+            {{ tabCounts()[tab] }}
+          </span>
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- 4. Search & Quick Filters Toolbar -->
+  <section class="filters-card">
+    <div class="filters-row">
+      <!-- Search Field -->
+      <div class="search-field">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+          <circle cx="9" cy="9" r="6"/>
+          <line x1="13.5" y1="13.5" x2="18" y2="18"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search product name, variant, SKU, or category..."
+          [value]="searchQuery()"
+          (input)="onSearchChange($any($event.target).value)"
+          id="inventorySearchInput"
+        />
+        @if (searchQuery()) {
+          <button
+            type="button"
+            class="clear-search-btn"
+            (click)="onSearchChange('')"
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        }
+      </div>
+
+      <!-- Category Filter Dropdown -->
+      <div class="filter-group">
+        <label for="invCategorySelect" class="sr-only">Filter by Category</label>
+        <select
+          id="invCategorySelect"
+          class="filter-select"
+          [value]="categoryFilter()"
+          (change)="onCategoryChange($any($event.target).value)"
+        >
+          <option value="all">All Categories</option>
+          @for (cat of categoriesList(); track cat) {
+            <option [value]="cat">{{ cat }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Low Stock Toggle Switch -->
+      <div class="low-stock-toggle-box">
+        <label class="toggle-switch-label" title="Show only items needing restock">
+          <input
+            type="checkbox"
+            [checked]="onlyLowStockToggle()"
+            (change)="toggleLowStockFilter()"
+          />
+          <span class="toggle-switch-slider"></span>
+          <span class="toggle-text">Needs Restock</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Active Filters Summary -->
+    <div class="filters-summary-row">
+      <div class="results-count">
+        Showing <strong>{{ totalItems() }}</strong> of {{ inventory().length }} SKUs
+      </div>
+
+      @if (searchQuery() || categoryFilter() !== 'all' || onlyLowStockToggle() || activeStatusTab() !== 'All') {
+        <div class="active-chips">
+          @if (searchQuery()) {
+            <span class="filter-chip">
+              Search: "{{ searchQuery() }}"
+              <button type="button" (click)="onSearchChange('')">&times;</button>
+            </span>
+          }
+          @if (categoryFilter() !== 'all') {
+            <span class="filter-chip">
+              Category: {{ categoryFilter() }}
+              <button type="button" (click)="onCategoryChange('all')">&times;</button>
+            </span>
+          }
+          @if (onlyLowStockToggle()) {
+            <span class="filter-chip">
+              Needs Restock Only
+              <button type="button" (click)="toggleLowStockFilter()">&times;</button>
+            </span>
+          }
+          @if (activeStatusTab() !== 'All') {
+            <span class="filter-chip">
+              Status: {{ activeStatusTab() }}
+              <button type="button" (click)="setStatusTab('All')">&times;</button>
+            </span>
+          }
+          <button type="button" class="btn-clear-all" (click)="resetFilters()">
+            Clear all
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 5. Main Table Card (Desktop Table & Mobile Stacked Cards) -->
+  <div class="table-container-card">
+    @if (paginatedInventory().length > 0) {
+      <!-- DESKTOP DATA TABLE (≥768px) -->
+      <div class="table-responsive desktop-only-table">
+        <table class="data-table" aria-label="Inventory stock table">
+          <thead>
+            <tr>
+              <!-- Checkbox -->
+              <th class="th-checkbox">
+                <input
+                  type="checkbox"
+                  class="admin-checkbox"
+                  [checked]="isAllSelected()"
+                  [indeterminate]="isPartiallySelected()"
+                  (change)="toggleSelectAll()"
+                  aria-label="Select all inventory items on page"
+                />
+              </th>
+
+              <!-- Product & Variant -->
+              <th class="th-sortable th-product" (click)="setSort('productName')">
+                <div class="th-content">
+                  <span>Product & Variant</span>
+                  <span class="sort-icon" [class.sort-active]="sortColumn() === 'productName'">
+                    @if (sortColumn() === 'productName') {
+                      {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                    } @else {
+                      ↕
+                    }
+                  </span>
+                </div>
+              </th>
+
+              <!-- SKU -->
+              <th class="th-sortable th-sku" (click)="setSort('sku')">
+                <div class="th-content">
+                  <span>SKU</span>
+                  <span class="sort-icon" [class.sort-active]="sortColumn() === 'sku'">
+                    @if (sortColumn() === 'sku') {
+                      {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                    } @else {
+                      ↕
+                    }
+                  </span>
+                </div>
+              </th>
+
+              <!-- Category -->
+              <th class="th-sortable th-cat" (click)="setSort('category')">
+                <div class="th-content">
+                  <span>Category</span>
+                  <span class="sort-icon" [class.sort-active]="sortColumn() === 'category'">
+                    @if (sortColumn() === 'category') {
+                      {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                    } @else {
+                      ↕
+                    }
+                  </span>
+                </div>
+              </th>
+
+              <!-- On Hand (Current Stock) with Inline Editor -->
+              <th class="th-sortable th-on-hand" (click)="setSort('currentStock')">
+                <div class="th-content">
+                  <span>On Hand (Qty)</span>
+                  <span class="sort-icon" [class.sort-active]="sortColumn() === 'currentStock'">
+                    @if (sortColumn() === 'currentStock') {
+                      {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                    } @else {
+                      ↕
+                    }
+                  </span>
+                </div>
+              </th>
+
+              <!-- Reserved -->
+              <th class="th-reserved text-center">Reserved</th>
+
+              <!-- Available -->
+              <th class="th-sortable th-available" (click)="setSort('availableStock')">
+                <div class="th-content">
+                  <span>Available</span>
+                  <span class="sort-icon" [class.sort-active]="sortColumn() === 'availableStock'">
+                    @if (sortColumn() === 'availableStock') {
+                      {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                    } @else {
+                      ↕
+                    }
+                  </span>
+                </div>
+              </th>
+
+              <!-- Status Pill -->
+              <th class="th-status">Status</th>
+
+              <!-- Quick Restock Actions -->
+              <th class="th-actions text-right">Quick Restock</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (item of paginatedInventory(); track item.id) {
+              <tr class="table-row" [class.row-selected]="selectedIds().has(item.id)">
+                <!-- Checkbox -->
+                <td class="td-checkbox">
+                  <input
+                    type="checkbox"
+                    class="admin-checkbox"
+                    [checked]="selectedIds().has(item.id)"
+                    (change)="toggleSelect(item.id, $event)"
+                    [attr.aria-label]="'Select ' + item.productName"
+                  />
+                </td>
+
+                <!-- Product Info & Variant -->
+                <td class="td-product">
+                  <div class="product-variant-info">
+                    <div class="thumb-wrapper">
+                      @if (item.imageUrl) {
+                        <img [src]="item.imageUrl" [alt]="item.productName" class="thumb-img" loading="lazy" />
+                      } @else {
+                        <div class="thumb-fallback">📦</div>
+                      }
+                    </div>
+                    <div class="text-group">
+                      <span class="product-title">{{ item.productName }}</span>
+                      @if (item.variantName) {
+                        <span class="variant-pill">{{ item.variantName }}</span>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <!-- SKU -->
+                <td class="td-sku">
+                  <code class="sku-badge">{{ item.sku }}</code>
+                </td>
+
+                <!-- Category -->
+                <td class="td-cat">
+                  <span class="cat-label">{{ item.category }}</span>
+                </td>
+
+                <!-- On Hand Stock (Inline Editable Field) -->
+                <td class="td-on-hand">
+                  <div class="inline-stock-editor">
+                    <!-- Stepper down -->
+                    <button
+                      type="button"
+                      class="btn-stepper"
+                      (click)="stepInlineStock(item.id, -1, item.currentStock)"
+                      title="Decrease by 1"
+                      aria-label="Decrease stock"
+                    >
+                      -
+                    </button>
+
+                    <!-- Editable number input -->
+                    <input
+                      type="number"
+                      min="0"
+                      class="stock-number-input"
+                      [class.has-unsaved]="hasUnsavedStock(item.id, item.currentStock)"
+                      [value]="getDraftStock(item.id, item.currentStock)"
+                      (input)="onStockInputChange(item.id, $any($event.target).value)"
+                      (keydown.enter)="saveInlineStock(item, $event)"
+                      [attr.aria-label]="'Current stock for ' + item.sku"
+                    />
+
+                    <!-- Stepper up -->
+                    <button
+                      type="button"
+                      class="btn-stepper"
+                      (click)="stepInlineStock(item.id, 1, item.currentStock)"
+                      title="Increase by 1"
+                      aria-label="Increase stock"
+                    >
+                      +
+                    </button>
+
+                    <!-- Save checkmark if changed -->
+                    @if (hasUnsavedStock(item.id, item.currentStock)) {
+                      <button
+                        type="button"
+                        class="btn-inline-save"
+                        (click)="saveInlineStock(item, $event)"
+                        title="Save quantity"
+                        aria-label="Save quantity"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-inline-cancel"
+                        (click)="cancelInlineStock(item.id, $event)"
+                        title="Cancel changes"
+                        aria-label="Cancel changes"
+                      >
+                        ✕
+                      </button>
+                    }
+                  </div>
+                </td>
+
+                <!-- Reserved Stock -->
+                <td class="td-reserved text-center">
+                  <span class="reserved-pill" [class.has-reserved]="item.reservedStock > 0">
+                    {{ item.reservedStock }}
+                  </span>
+                </td>
+
+                <!-- Available Stock -->
+                <td class="td-available">
+                  <span
+                    class="available-badge"
+                    [class.badge-in-stock]="item.status === 'In Stock'"
+                    [class.badge-low-stock]="item.status === 'Low Stock'"
+                    [class.badge-out-stock]="item.status === 'Out of Stock'"
+                  >
+                    {{ item.availableStock }}
+                  </span>
+                </td>
+
+                <!-- Status Pill -->
+                <td class="td-status">
+                  <gp-admin-status-pill [status]="item.status" size="sm"></gp-admin-status-pill>
+                </td>
+
+                <!-- Quick Restock Actions -->
+                <td class="td-actions text-right">
+                  <div class="quick-restock-buttons">
+                    <button
+                      type="button"
+                      class="btn-restock"
+                      (click)="quickRestock(item, 10, $event)"
+                      title="Add +10 units to stock"
+                    >
+                      +10
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-restock"
+                      (click)="quickRestock(item, 25, $event)"
+                      title="Add +25 units to stock"
+                    >
+                      +25
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- MOBILE STACKED CARDS (<768px) -->
+      <div class="inventory-cards-list mobile-only-cards" aria-label="Mobile inventory cards">
+        @for (item of paginatedInventory(); track item.id) {
+          <article class="inventory-card-item" [class.card-selected]="selectedIds().has(item.id)">
+            <!-- Top Row: Checkbox + Thumbnail + Name + Status -->
+            <div class="card-top-row">
+              <div class="card-identity">
+                <input
+                  type="checkbox"
+                  class="admin-checkbox"
+                  [checked]="selectedIds().has(item.id)"
+                  (change)="toggleSelect(item.id, $event)"
+                  [attr.aria-label]="'Select ' + item.productName"
+                />
+                <div class="thumb-wrapper sm-thumb">
+                  @if (item.imageUrl) {
+                    <img [src]="item.imageUrl" [alt]="item.productName" class="thumb-img" loading="lazy" />
+                  } @else {
+                    <div class="thumb-fallback">📦</div>
+                  }
+                </div>
+                <div class="card-title-group">
+                  <h3 class="card-prod-title">{{ item.productName }}</h3>
+                  <div class="card-sub-badges">
+                    @if (item.variantName) {
+                      <span class="variant-pill">{{ item.variantName }}</span>
+                    }
+                    <code class="sku-badge">{{ item.sku }}</code>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-status-box">
+                <gp-admin-status-pill [status]="item.status" size="sm"></gp-admin-status-pill>
+              </div>
+            </div>
+
+            <!-- Stock Breakdown Metrics Grid -->
+            <div class="card-stock-grid">
+              <div class="stock-col">
+                <span class="stock-col-label">On Hand</span>
+                <span class="stock-col-val">{{ item.currentStock }}</span>
+              </div>
+              <div class="stock-col">
+                <span class="stock-col-label">Reserved</span>
+                <span class="stock-col-val text-muted">{{ item.reservedStock }}</span>
+              </div>
+              <div class="stock-col">
+                <span class="stock-col-label">Available</span>
+                <span
+                  class="stock-col-val"
+                  [class.text-success]="item.status === 'In Stock'"
+                  [class.text-warning]="item.status === 'Low Stock'"
+                  [class.text-danger]="item.status === 'Out of Stock'"
+                >
+                  {{ item.availableStock }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Touch-Friendly Inline Stock Stepper Bar (Min 44px targets) -->
+            <div class="card-stepper-bar">
+              <span class="stepper-label">Adjust On-Hand:</span>
+              <div class="mobile-stepper-controls">
+                <button
+                  type="button"
+                  class="mobile-stepper-btn"
+                  (click)="stepInlineStock(item.id, -1, item.currentStock)"
+                  aria-label="Decrease stock"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min="0"
+                  class="mobile-stock-input"
+                  [class.has-unsaved]="hasUnsavedStock(item.id, item.currentStock)"
+                  [value]="getDraftStock(item.id, item.currentStock)"
+                  (input)="onStockInputChange(item.id, $any($event.target).value)"
+                  aria-label="Quantity"
+                />
+                <button
+                  type="button"
+                  class="mobile-stepper-btn"
+                  (click)="stepInlineStock(item.id, 1, item.currentStock)"
+                  aria-label="Increase stock"
+                >
+                  +
+                </button>
+
+                @if (hasUnsavedStock(item.id, item.currentStock)) {
+                  <button
+                    type="button"
+                    class="mobile-save-btn"
+                    (click)="saveInlineStock(item, $event)"
+                  >
+                    Save
+                  </button>
+                }
+              </div>
+
+              <!-- Quick +10 Restock Button -->
+              <button
+                type="button"
+                class="mobile-quick-restock-btn"
+                (click)="quickRestock(item, 10, $event)"
+              >
+                +10 Restock
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <!-- 6. Pagination Footer -->
+      <footer class="table-pagination-footer">
+        <div class="pagination-info">
+          <span>Showing <strong>{{ startIndex() }}</strong>–<strong>{{ endIndex() }}</strong> of <strong>{{ totalItems() }}</strong> SKUs</span>
+
+          <div class="page-size-selector">
+            <label for="invPageSizeSelect" class="sr-only">Items per page</label>
+            <select
+              id="invPageSizeSelect"
+              class="page-size-select"
+              [value]="pageSize()"
+              (change)="onPageSizeChange($any($event.target).value)"
+            >
+              @for (opt of pageSizeOptions; track opt) {
+                <option [value]="opt">{{ opt }} per page</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="page-nav-btn"
+            [disabled]="currentPage() <= 1"
+            (click)="setPage(currentPage() - 1)"
+            aria-label="Previous page"
+          >
+            &larr; Prev
+          </button>
+
+          <div class="page-numbers">
+            @for (p of [].constructor(totalPages()); track $index) {
+              <button
+                type="button"
+                class="page-num-btn"
+                [class.active-page]="currentPage() === ($index + 1)"
+                (click)="setPage($index + 1)"
+              >
+                {{ $index + 1 }}
+              </button>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="page-nav-btn"
+            [disabled]="currentPage() >= totalPages()"
+            (click)="setPage(currentPage() + 1)"
+            aria-label="Next page"
+          >
+            Next &rarr;
+          </button>
+        </div>
+      </footer>
+    } @else {
+      <!-- 7. Empty State -->
+      <div class="empty-state-card">
+        <div class="empty-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="empty-svg">
+            <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <h2 class="empty-title">No inventory records found</h2>
+        <p class="empty-desc">
+          @if (searchQuery() || categoryFilter() !== 'all' || onlyLowStockToggle() || activeStatusTab() !== 'All') {
+            No variants matched your current filters. Try relaxing or resetting your filter criteria.
+          } @else {
+            There are no inventory items available in your catalog.
+          }
+        </p>
+        <div class="empty-actions">
+          <button type="button" class="btn btn-secondary" (click)="resetFilters()">
+            Reset Filters
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- 8. Bulk Stock Adjustment Modal (CSV Import & Manual Adjustment) -->
+  <gp-admin-modal
+    [isOpen]="isBulkModalOpen()"
+    title="Bulk Stock Adjustment"
+    subtitle="Update inventory quantities in bulk via CSV spreadsheet import or batch delta adjustment."
+    size="lg"
+    (closed)="closeBulkModal()"
+  >
+    <div class="bulk-modal-container">
+      <!-- Mode Tabs (CSV Import vs Manual Delta) -->
+      <div class="modal-mode-tabs">
+        <button
+          type="button"
+          class="mode-tab-btn"
+          [class.active]="bulkModalMode() === 'csv'"
+          (click)="bulkModalMode.set('csv')"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16">
+            <path d="M4 14v2a2 2 0 002 2h8a2 2 0 002-2v-2M7 10l3 3 3-3M10 3v10"/>
+          </svg>
+          <span>CSV Spreadsheet Import</span>
+        </button>
+
+        <button
+          type="button"
+          class="mode-tab-btn"
+          [class.active]="bulkModalMode() === 'manual'"
+          (click)="bulkModalMode.set('manual')"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16">
+            <path d="M3 4h14M3 10h14M3 16h14"/>
+          </svg>
+          <span>Batch Delta Adjustment</span>
+        </button>
+      </div>
+
+      <!-- CSV IMPORT MODE -->
+      @if (bulkModalMode() === 'csv') {
+        <div class="csv-import-pane">
+          <!-- Dropzone -->
+          <div
+            class="csv-dropzone"
+            [class.dragover]="csvDragOver()"
+            (dragover)="onCsvDragOver($event)"
+            (dragleave)="onCsvDragLeave($event)"
+            (drop)="onCsvDrop($event)"
+            (click)="simulateCsvUpload()"
+          >
+            <div class="dropzone-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" width="36" height="36">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="12" y1="18" x2="12" y2="12"/>
+                <line x1="9" y1="15" x2="12" y2="12"/>
+                <line x1="15" y1="15" x2="12" y2="12"/>
+              </svg>
+            </div>
+            <p class="dropzone-title">
+              @if (isCsvUploaded()) {
+                Loaded: <strong>{{ csvFileName() }}</strong>
+              } @else {
+                Drag & drop your inventory CSV file here, or <span class="browse-link">browse</span>
+              }
+            </p>
+            <p class="dropzone-sub">
+              Supported columns: <code>SKU</code>, <code>ProductName</code>, <code>Variant</code>, <code>CurrentStock</code>, <code>NewStock</code>
+            </p>
+          </div>
+
+          <!-- Template Download Link -->
+          <div class="csv-template-row">
+            <span class="template-note">Need the standard spreadsheet format?</span>
+            <button type="button" class="btn-link" (click)="downloadSampleCsv()">
+              Download sample CSV template &darr;
+            </button>
+          </div>
+
+          <!-- CSV Adjustment Preview Table -->
+          <div class="csv-preview-section">
+            <h4 class="preview-heading">Parsed Adjustment Preview ({{ csvPreviewData().length }} items)</h4>
+            <div class="preview-table-wrap">
+              <table class="preview-table" aria-label="CSV preview table">
+                <thead>
+                  <tr>
+                    <th>SKU</th>
+                    <th>Product & Variant</th>
+                    <th>Current</th>
+                    <th>New Stock</th>
+                    <th>Adjustment Delta</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of csvPreviewData(); track row.sku) {
+                    <tr>
+                      <td><code>{{ row.sku }}</code></td>
+                      <td>{{ row.name }} <span class="variant-sub">({{ row.variant }})</span></td>
+                      <td>{{ row.currentStock }}</td>
+                      <td><strong>{{ row.newStock }}</strong></td>
+                      <td>
+                        <span class="delta-tag text-success">+{{ row.delta }} units</span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- MANUAL BATCH DELTA MODE -->
+        <div class="manual-delta-pane">
+          <p class="manual-desc">
+            Quickly adjust on-hand inventory levels for
+            <strong>{{ selectedCount() > 0 ? selectedCount() + ' selected item(s)' : 'all ' + totalItems() + ' filtered items' }}</strong>.
+          </p>
+
+          <div class="delta-form-row">
+            <label class="form-label" for="bulkDeltaNumber">Add / Subtract Quantity:</label>
+            <div class="delta-input-stepper">
+              <button
+                type="button"
+                class="stepper-btn"
+                (click)="bulkDeltaInput.set(bulkDeltaInput() - 5)"
+              >
+                -5
+              </button>
+              <input
+                id="bulkDeltaNumber"
+                type="number"
+                class="delta-input"
+                [value]="bulkDeltaInput()"
+                (input)="bulkDeltaInput.set($any($event.target).valueAsNumber || 0)"
+              />
+              <button
+                type="button"
+                class="stepper-btn"
+                (click)="bulkDeltaInput.set(bulkDeltaInput() + 5)"
+              >
+                +5
+              </button>
+            </div>
+            <span class="delta-hint">
+              Enter a positive number to add stock, or a negative number to reduce stock.
+            </span>
+          </div>
+
+          <!-- Quick Delta Presets -->
+          <div class="quick-preset-buttons">
+            <button type="button" class="preset-btn" (click)="bulkDeltaInput.set(10)">+10</button>
+            <button type="button" class="preset-btn" (click)="bulkDeltaInput.set(25)">+25</button>
+            <button type="button" class="preset-btn" (click)="bulkDeltaInput.set(50)">+50</button>
+            <button type="button" class="preset-btn" (click)="bulkDeltaInput.set(100)">+100</button>
+            <button type="button" class="preset-btn text-danger" (click)="bulkDeltaInput.set(-10)">-10</button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div modalFooter class="modal-footer-actions">
+      <button type="button" class="btn btn-secondary" (click)="closeBulkModal()">
+        Cancel
+      </button>
+
+      @if (bulkModalMode() === 'csv') {
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="applyCsvAdjustments()"
+        >
+          Apply CSV Stock Adjustments
+        </button>
+      } @else {
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="applyManualDeltaAdjustment()"
+        >
+          Apply {{ bulkDeltaInput() >= 0 ? '+' : '' }}{{ bulkDeltaInput() }} Adjustment
+        </button>
+      }
+    </div>
+  </gp-admin-modal>
+</div>
