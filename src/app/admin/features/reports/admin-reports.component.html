@@ -1,0 +1,432 @@
+<div class="admin-reports-page">
+  <!-- 1. Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">Analytics & Reports</h1>
+      <p class="page-subtitle">
+        Comprehensive performance analytics across store revenue, catalog volume, and customer acquisition.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <!-- Timeframe selector -->
+      <div class="timeframe-picker" role="group" aria-label="Select report timeframe">
+        @for (tf of timeframeOptions; track tf.id) {
+          <button
+            type="button"
+            class="timeframe-btn"
+            [class.active]="activeTimeframe() === tf.id"
+            (click)="setTimeframe(tf.id)"
+          >
+            {{ tf.label }}
+          </button>
+        }
+      </div>
+
+      <!-- Export CSV Button -->
+      <button
+        type="button"
+        class="btn btn-primary btn-export"
+        (click)="exportCsv()"
+        title="Download active report as CSV"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+          <path d="M4 14v2a2 2 0 002 2h8a2 2 0 002-2v-2M7 10l3 3 3-3M10 3v10"/>
+        </svg>
+        <span>Export CSV</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. Horizontal Scrollable Report Tabs Bar -->
+  <nav class="report-tabs-nav" aria-label="Report category tabs">
+    <div class="tabs-track">
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          class="report-tab-btn"
+          [class.tab-active]="activeTab() === tab.id"
+          (click)="setTab(tab.id)"
+        >
+          <span>{{ tab.label }}</span>
+          @if (tab.badge) {
+            <span class="tab-badge-live">{{ tab.badge }}</span>
+          }
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- 3. TAB 1: Sales Report -->
+  @if (activeTab() === 'sales') {
+    <div class="report-tab-pane">
+      <!-- 4-Card Summary Row -->
+      <section class="kpi-cards-grid" aria-label="Sales summary KPIs">
+        <div class="stat-card">
+          <span class="stat-label">Gross Sales</span>
+          <span class="stat-value text-primary">${{ salesReport().summary.totalGross | number:'1.0-0' }}</span>
+          <span class="stat-sub">Before discounts & refunds</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Net Sales</span>
+          <span class="stat-value text-success">${{ salesReport().summary.netSales | number:'1.0-0' }}</span>
+          <span class="stat-sub">Discounts: -${{ salesReport().summary.totalDiscounts | number:'1.0-0' }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total Orders</span>
+          <span class="stat-value text-indigo">{{ salesReport().summary.totalOrders | number }}</span>
+          <span class="stat-sub">Across all sales channels</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Average Order Value</span>
+          <span class="stat-value">${{ salesReport().summary.aov | number:'1.2-2' }}</span>
+          <span class="stat-sub">Per completed order</span>
+        </div>
+      </section>
+
+      <!-- Sales Trend SVG Chart -->
+      <section class="chart-container-card">
+        <div class="chart-header">
+          <div class="chart-title-group">
+            <h2 class="chart-title">Revenue Trajectory</h2>
+            <span class="chart-subtitle">Net sales performance progression over selected timeframe</span>
+          </div>
+          <span class="chart-legend-indicator">
+            <span class="legend-dot dot-blue"></span> Net Revenue ($)
+          </span>
+        </div>
+
+        <div class="svg-chart-wrapper">
+          <svg
+            class="responsive-svg-chart"
+            [attr.viewBox]="'0 0 ' + svgWidth + ' ' + svgHeight"
+            preserveAspectRatio="none"
+            role="img"
+            aria-label="Sales revenue area chart"
+          >
+            <defs>
+              <linearGradient id="reportSalesGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#0A84FF" stop-opacity="0.32"/>
+                <stop offset="100%" stop-color="#0A84FF" stop-opacity="0.0"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Background Horizontal Gridlines -->
+            <line x1="50" y1="20" x2="690" y2="20" stroke="#F1F5F9" stroke-width="1"/>
+            <line x1="50" y1="75" x2="690" y2="75" stroke="#F1F5F9" stroke-width="1"/>
+            <line x1="50" y1="130" x2="690" y2="130" stroke="#F1F5F9" stroke-width="1"/>
+            <line x1="50" y1="185" x2="690" y2="185" stroke="#E2E8F0" stroke-width="1"/>
+
+            <!-- Area Fill -->
+            @if (salesAreaPath()) {
+              <path [attr.d]="salesAreaPath()" fill="url(#reportSalesGrad)" />
+            }
+
+            <!-- Line Curve -->
+            @if (salesLinePath()) {
+              <path [attr.d]="salesLinePath()" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round"/>
+            }
+
+            <!-- Data Nodes & Tooltip hover zones -->
+            @for (pt of salesChartPoints(); track pt.label) {
+              <circle
+                [attr.cx]="pt.x"
+                [attr.cy]="pt.y"
+                r="4.5"
+                fill="#fff"
+                stroke="#0A84FF"
+                stroke-width="2.5"
+                class="chart-node"
+                (mouseenter)="setHoveredPoint({ label: pt.label, value: pt.revenue, x: pt.x, y: pt.y })"
+                (mouseleave)="setHoveredPoint(null)"
+              />
+              <text
+                [attr.x]="pt.x"
+                [attr.y]="svgHeight - 12"
+                text-anchor="middle"
+                class="svg-axis-label"
+              >
+                {{ pt.label }}
+              </text>
+            }
+          </svg>
+
+          <!-- Interactive Tooltip Overlay -->
+          @if (hoveredPoint(); as h) {
+            <div
+              class="chart-hover-tooltip"
+              [style.left.%]="(h.x / svgWidth) * 100"
+              [style.top.px]="h.y - 12"
+            >
+              <span class="tooltip-label">{{ h.label }}</span>
+              <strong class="tooltip-val">${{ h.value | number:'1.2-2' }}</strong>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Detailed Breakdown Table -->
+      <section class="table-container-card">
+        <div class="table-card-header">
+          <h3 class="table-card-title">Sales Breakdown by Interval</h3>
+          <span class="table-meta-text">{{ salesReport().rows.length }} intervals recorded</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" aria-label="Sales breakdown table">
+            <thead>
+              <tr>
+                <th>Date / Interval</th>
+                <th class="text-center">Orders</th>
+                <th class="text-right">Gross Sales</th>
+                <th class="text-right">Discounts</th>
+                <th class="text-right">Shipping</th>
+                <th class="text-right">Net Sales</th>
+                <th class="text-right">Avg Order Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of salesReport().rows; track row.date) {
+                <tr class="table-row">
+                  <td class="font-medium">{{ row.date }}</td>
+                  <td class="text-center">{{ row.orders }}</td>
+                  <td class="text-right">${{ row.grossSales | number:'1.2-2' }}</td>
+                  <td class="text-right text-discount">-${{ row.discounts | number:'1.2-2' }}</td>
+                  <td class="text-right">${{ row.shipping | number:'1.2-2' }}</td>
+                  <td class="text-right font-bold text-success">${{ row.netSales | number:'1.2-2' }}</td>
+                  <td class="text-right">${{ row.aov | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  }
+
+  <!-- 4. TAB 2: Product Performance -->
+  @if (activeTab() === 'products') {
+    <div class="report-tab-pane">
+      <!-- 4-Card Summary Row -->
+      <section class="kpi-cards-grid" aria-label="Product performance KPIs">
+        <div class="stat-card">
+          <span class="stat-label">Top Grossing Product</span>
+          <span class="stat-value text-primary font-truncate">{{ productPerformance().summary.topProduct }}</span>
+          <span class="stat-sub">Rank #1 by revenue volume</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total Units Sold</span>
+          <span class="stat-value text-success">{{ productPerformance().summary.totalUnitsSold | number }}</span>
+          <span class="stat-sub">Across all product lines</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Avg Units / Order</span>
+          <span class="stat-value text-indigo">{{ productPerformance().summary.avgUnitsPerOrder }}</span>
+          <span class="stat-sub">Basket basket density</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Refund / Return Rate</span>
+          <span class="stat-value">{{ productPerformance().summary.refundRate }}</span>
+          <span class="stat-sub text-success">Well below 2% benchmark</span>
+        </div>
+      </section>
+
+      <!-- Top Products Bar Chart -->
+      <section class="chart-container-card">
+        <div class="chart-header">
+          <div class="chart-title-group">
+            <h2 class="chart-title">Top Products by Revenue & Volume</h2>
+            <span class="chart-subtitle">Direct comparison of top-performing catalog items</span>
+          </div>
+        </div>
+
+        <div class="product-bar-chart-container">
+          @for (bar of productPerformance().chartBars; track bar.name) {
+            <div class="product-bar-row">
+              <div class="bar-info">
+                <span class="bar-name">{{ bar.name }}</span>
+                <span class="bar-meta">{{ bar.units }} units • ${{ bar.revenue | number:'1.0-0' }}</span>
+              </div>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  [style.width.%]="(bar.revenue / maxProductRevenue()) * 100"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Products Performance Table -->
+      <section class="table-container-card">
+        <div class="table-card-header">
+          <h3 class="table-card-title">Catalog Sales Breakdown</h3>
+          <span class="table-meta-text">{{ productPerformance().rows.length }} products tracked</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" aria-label="Product performance table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th class="text-center">Units Sold</th>
+                <th class="text-right">Gross Revenue</th>
+                <th class="text-center">Stock Status</th>
+                <th class="text-center">Stock Count</th>
+                <th class="text-right">Conversion Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of productPerformance().rows; track item.id) {
+                <tr class="table-row">
+                  <td>
+                    <div class="product-summary-cell">
+                      <img [src]="item.thumbnail" [alt]="item.name" class="table-prod-thumb" loading="lazy"/>
+                      <span class="table-prod-title">{{ item.name }}</span>
+                    </div>
+                  </td>
+                  <td><span class="cat-pill">{{ item.category }}</span></td>
+                  <td class="text-center font-bold">{{ item.unitsSold }}</td>
+                  <td class="text-right font-bold">${{ item.grossRevenue | number:'1.2-2' }}</td>
+                  <td class="text-center">
+                    <span
+                      class="stock-badge"
+                      [class.in-stock]="item.stockStatus === 'In Stock'"
+                      [class.low-stock]="item.stockStatus === 'Low Stock'"
+                      [class.out-stock]="item.stockStatus === 'Out of Stock'"
+                    >
+                      {{ item.stockStatus }}
+                    </span>
+                  </td>
+                  <td class="text-center">{{ item.stockCount }}</td>
+                  <td class="text-right font-medium text-primary">{{ item.conversionRate }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  }
+
+  <!-- 5. TAB 3: Customer Report -->
+  @if (activeTab() === 'customers') {
+    <div class="report-tab-pane">
+      <!-- 4-Card Summary Row -->
+      <section class="kpi-cards-grid" aria-label="Customer report KPIs">
+        <div class="stat-card">
+          <span class="stat-label">Active Customers</span>
+          <span class="stat-value text-primary">{{ customerReport().summary.totalActive | number }}</span>
+          <span class="stat-sub">Made at least 1 purchase</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">New Customers Acquired</span>
+          <span class="stat-value text-success">{{ customerReport().summary.newCustomers | number }}</span>
+          <span class="stat-sub">First-time purchasers</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Repeat Purchase Rate</span>
+          <span class="stat-value text-indigo">{{ customerReport().summary.repeatRate }}</span>
+          <span class="stat-sub">Customers with >1 order</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Average Customer LTV</span>
+          <span class="stat-value">${{ customerReport().summary.avgLtv }}</span>
+          <span class="stat-sub">Estimated lifetime revenue</span>
+        </div>
+      </section>
+
+      <!-- Customer Acquisition SVG Chart -->
+      <section class="chart-container-card">
+        <div class="chart-header">
+          <div class="chart-title-group">
+            <h2 class="chart-title">Customer Acquisition Trends</h2>
+            <span class="chart-subtitle">New buyers vs returning repeat customers</span>
+          </div>
+          <div class="chart-dual-legend">
+            <span class="legend-item"><span class="legend-dot dot-blue"></span> New Buyers</span>
+            <span class="legend-item"><span class="legend-dot dot-emerald"></span> Returning</span>
+          </div>
+        </div>
+
+        <div class="svg-chart-wrapper">
+          <svg
+            class="responsive-svg-chart"
+            [attr.viewBox]="'0 0 ' + svgWidth + ' ' + svgHeight"
+            preserveAspectRatio="none"
+            role="img"
+            aria-label="Customer acquisition trend chart"
+          >
+            <!-- Gridlines -->
+            <line x1="50" y1="20" x2="690" y2="20" stroke="#F1F5F9" stroke-width="1"/>
+            <line x1="50" y1="75" x2="690" y2="75" stroke="#F1F5F9" stroke-width="1"/>
+            <line x1="50" y1="130" x2="690" y2="130" stroke="#F1F5F9" stroke-width="1"/>
+            <line x1="50" y1="185" x2="690" y2="185" stroke="#E2E8F0" stroke-width="1"/>
+
+            <!-- Returning Line -->
+            @if (customerRetLinePath()) {
+              <path [attr.d]="customerRetLinePath()" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round"/>
+            }
+
+            <!-- New Line -->
+            @if (customerNewLinePath()) {
+              <path [attr.d]="customerNewLinePath()" fill="none" stroke="#0A84FF" stroke-width="2.5" stroke-linecap="round"/>
+            }
+
+            <!-- Nodes & Labels -->
+            @for (pt of customerAcquisitionPoints().newPts; track pt.label) {
+              <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="4" fill="#fff" stroke="#0A84FF" stroke-width="2"/>
+              <text [attr.x]="pt.x" [attr.y]="svgHeight - 12" text-anchor="middle" class="svg-axis-label">
+                {{ pt.label }}
+              </text>
+            }
+            @for (pt of customerAcquisitionPoints().retPts; track pt.label) {
+              <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="4" fill="#fff" stroke="#10B981" stroke-width="2"/>
+            }
+          </svg>
+        </div>
+      </section>
+
+      <!-- Customer Loyalty Table -->
+      <section class="table-container-card">
+        <div class="table-card-header">
+          <h3 class="table-card-title">Top Value Customers</h3>
+          <span class="table-meta-text">{{ customerReport().rows.length }} customers displayed</span>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" aria-label="Customer loyalty table">
+            <thead>
+              <tr>
+                <th>Customer Name</th>
+                <th>Email</th>
+                <th class="text-center">Total Orders</th>
+                <th class="text-right">Total Spent</th>
+                <th class="text-right">AOV</th>
+                <th>Last Order Date</th>
+                <th class="text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cust of customerReport().rows; track cust.id) {
+                <tr class="table-row">
+                  <td class="font-medium">{{ cust.name }}</td>
+                  <td class="text-muted">{{ cust.email }}</td>
+                  <td class="text-center font-bold">{{ cust.totalOrders }}</td>
+                  <td class="text-right font-bold text-success">${{ cust.totalSpent | number:'1.2-2' }}</td>
+                  <td class="text-right">${{ cust.aov | number:'1.2-2' }}</td>
+                  <td>{{ cust.lastOrderDate | date:'mediumDate' }}</td>
+                  <td class="text-center">
+                    <gp-admin-status-pill [status]="cust.status" size="sm"></gp-admin-status-pill>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  }
+</div>

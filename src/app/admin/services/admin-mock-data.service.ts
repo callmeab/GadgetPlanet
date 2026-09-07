@@ -160,6 +160,40 @@ export interface AdminReview {
   adminReply?: AdminReviewReply | null;
 }
 
+export interface SalesReportRow {
+  date: string;
+  orders: number;
+  grossSales: number;
+  discounts: number;
+  shipping: number;
+  netSales: number;
+  aov: number;
+}
+
+export interface ProductPerformanceRow {
+  id: string;
+  name: string;
+  thumbnail: string;
+  category: string;
+  unitsSold: number;
+  grossRevenue: number;
+  conversionRate: string;
+  stockStatus: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  stockCount: number;
+}
+
+export interface CustomerReportRow {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  totalOrders: number;
+  totalSpent: number;
+  aov: number;
+  lastOrderDate: string;
+  status: 'Active' | 'VIP' | 'New' | 'Inactive';
+}
+
 export interface ProductVariantOption {
   name: string;
   values: string[];
@@ -2234,6 +2268,288 @@ export class AdminMockDataService {
   bulkDeleteReviews(ids: string[]): void {
     const idSet = new Set(ids);
     this.reviews.update(list => list.filter(r => !idSet.has(r.id)));
+  }
+
+  // ── Reports & Analytics Data Queries ───────────────────────
+  getSalesReportData(timeframe: '7d' | '30d' | 'quarter' | 'year'): {
+    summary: { totalGross: number; netSales: number; totalOrders: number; aov: number; totalDiscounts: number };
+    chartPoints: { label: string; revenue: number; orders: number }[];
+    rows: SalesReportRow[];
+  } {
+    if (timeframe === '7d') {
+      const rows: SalesReportRow[] = [
+        { date: 'Sep 07, 2026', orders: 81, grossSales: 6840, discounts: 420, shipping: 240, netSales: 6660, aov: 82.22 },
+        { date: 'Sep 06, 2026', orders: 118, grossSales: 9650, discounts: 650, shipping: 380, netSales: 9380, aov: 79.49 },
+        { date: 'Sep 05, 2026', orders: 94, grossSales: 7920, discounts: 510, shipping: 310, netSales: 7720, aov: 82.13 },
+        { date: 'Sep 04, 2026', orders: 72, grossSales: 6100, discounts: 390, shipping: 220, netSales: 5930, aov: 82.36 },
+        { date: 'Sep 03, 2026', orders: 48, grossSales: 4120, discounts: 280, shipping: 160, netSales: 4000, aov: 83.33 },
+        { date: 'Sep 02, 2026', orders: 55, grossSales: 4480, discounts: 310, shipping: 190, netSales: 4360, aov: 79.27 },
+        { date: 'Sep 01, 2026', orders: 42, grossSales: 3590, discounts: 220, shipping: 140, netSales: 3510, aov: 83.57 },
+      ];
+      const totalGross = rows.reduce((s, r) => s + r.grossSales, 0);
+      const netSales = rows.reduce((s, r) => s + r.netSales, 0);
+      const totalOrders = rows.reduce((s, r) => s + r.orders, 0);
+      const totalDiscounts = rows.reduce((s, r) => s + r.discounts, 0);
+      const aov = Math.round((netSales / totalOrders) * 100) / 100;
+      const chartPoints = rows.slice().reverse().map(r => ({ label: r.date.split(',')[0], revenue: r.netSales, orders: r.orders }));
+      return { summary: { totalGross, netSales, totalOrders, aov, totalDiscounts }, chartPoints, rows };
+    }
+
+    if (timeframe === '30d') {
+      const rows: SalesReportRow[] = [
+        { date: 'Sep 01 – Sep 07', orders: 510, grossSales: 42700, discounts: 2780, shipping: 1640, netSales: 41560, aov: 81.49 },
+        { date: 'Aug 25 – Aug 31', orders: 465, grossSales: 38900, discounts: 2450, shipping: 1520, netSales: 37970, aov: 81.66 },
+        { date: 'Aug 18 – Aug 24', orders: 410, grossSales: 34200, discounts: 2180, shipping: 1380, netSales: 33400, aov: 81.46 },
+        { date: 'Aug 11 – Aug 17', orders: 385, grossSales: 31800, discounts: 1950, shipping: 1290, netSales: 31140, aov: 80.88 },
+        { date: 'Aug 04 – Aug 10', orders: 340, grossSales: 28400, discounts: 1720, shipping: 1140, netSales: 27820, aov: 81.82 },
+      ];
+      const totalGross = rows.reduce((s, r) => s + r.grossSales, 0);
+      const netSales = rows.reduce((s, r) => s + r.netSales, 0);
+      const totalOrders = rows.reduce((s, r) => s + r.orders, 0);
+      const totalDiscounts = rows.reduce((s, r) => s + r.discounts, 0);
+      const aov = Math.round((netSales / totalOrders) * 100) / 100;
+      const chartPoints = rows.slice().reverse().map(r => ({ label: r.date, revenue: r.netSales, orders: r.orders }));
+      return { summary: { totalGross, netSales, totalOrders, aov, totalDiscounts }, chartPoints, rows };
+    }
+
+    if (timeframe === 'quarter') {
+      const rows: SalesReportRow[] = [
+        { date: 'Week 12 (Aug 28 – Sep 04)', orders: 495, grossSales: 41200, discounts: 2600, shipping: 1600, netSales: 40200, aov: 81.21 },
+        { date: 'Week 10 (Aug 14 – Aug 21)', orders: 430, grossSales: 35800, discounts: 2250, shipping: 1420, netSales: 34970, aov: 81.33 },
+        { date: 'Week 08 (Jul 31 – Aug 07)', orders: 405, grossSales: 33900, discounts: 2100, shipping: 1350, netSales: 33150, aov: 81.85 },
+        { date: 'Week 06 (Jul 17 – Jul 24)', orders: 380, grossSales: 31400, discounts: 1980, shipping: 1260, netSales: 30680, aov: 80.74 },
+        { date: 'Week 04 (Jul 03 – Jul 10)', orders: 350, grossSales: 29100, discounts: 1820, shipping: 1180, netSales: 28460, aov: 81.31 },
+        { date: 'Week 02 (Jun 19 – Jun 26)', orders: 320, grossSales: 26500, discounts: 1650, shipping: 1080, netSales: 25930, aov: 81.03 },
+      ];
+      const totalGross = rows.reduce((s, r) => s + r.grossSales, 0);
+      const netSales = rows.reduce((s, r) => s + r.netSales, 0);
+      const totalOrders = rows.reduce((s, r) => s + r.orders, 0);
+      const totalDiscounts = rows.reduce((s, r) => s + r.discounts, 0);
+      const aov = Math.round((netSales / totalOrders) * 100) / 100;
+      const chartPoints = rows.slice().reverse().map(r => ({ label: r.date.split('(')[0].trim(), revenue: r.netSales, orders: r.orders }));
+      return { summary: { totalGross, netSales, totalOrders, aov, totalDiscounts }, chartPoints, rows };
+    }
+
+    // Default 'year'
+    const rows: SalesReportRow[] = [
+      { date: 'August 2026', orders: 1842, grossSales: 154200, discounts: 9800, shipping: 6100, netSales: 150500, aov: 81.71 },
+      { date: 'July 2026', orders: 1690, grossSales: 141800, discounts: 8900, shipping: 5600, netSales: 138500, aov: 81.95 },
+      { date: 'June 2026', orders: 1540, grossSales: 129400, discounts: 8100, shipping: 5100, netSales: 126400, aov: 82.08 },
+      { date: 'May 2026', orders: 1410, grossSales: 118200, discounts: 7400, shipping: 4700, netSales: 115500, aov: 81.91 },
+      { date: 'April 2026', orders: 1320, grossSales: 110500, discounts: 6900, shipping: 4400, netSales: 108000, aov: 81.82 },
+      { date: 'March 2026', orders: 1210, grossSales: 101400, discounts: 6300, shipping: 4000, netSales: 99100, aov: 81.90 },
+      { date: 'February 2026', orders: 1090, grossSales: 91200, discounts: 5700, shipping: 3600, netSales: 89100, aov: 81.74 },
+      { date: 'January 2026', orders: 980, grossSales: 82100, discounts: 5100, shipping: 3200, netSales: 80200, aov: 81.84 },
+    ];
+    const totalGross = rows.reduce((s, r) => s + r.grossSales, 0);
+    const netSales = rows.reduce((s, r) => s + r.netSales, 0);
+    const totalOrders = rows.reduce((s, r) => s + r.orders, 0);
+    const totalDiscounts = rows.reduce((s, r) => s + r.discounts, 0);
+    const aov = Math.round((netSales / totalOrders) * 100) / 100;
+    const chartPoints = rows.slice().reverse().map(r => ({ label: r.date.split(' ')[0].substring(0, 3), revenue: r.netSales, orders: r.orders }));
+    return { summary: { totalGross, netSales, totalOrders, aov, totalDiscounts }, chartPoints, rows };
+  }
+
+  getProductPerformanceData(timeframe: '7d' | '30d' | 'quarter' | 'year'): {
+    summary: { topProduct: string; totalUnitsSold: number; avgUnitsPerOrder: number; refundRate: string };
+    chartBars: { name: string; revenue: number; units: number }[];
+    rows: ProductPerformanceRow[];
+  } {
+    const rows: ProductPerformanceRow[] = [
+      {
+        id: 'p1',
+        name: 'Sony WH-1000XM5 Wireless Headphones',
+        thumbnail: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=120&q=80',
+        category: 'Audio',
+        unitsSold: timeframe === '7d' ? 42 : timeframe === '30d' ? 190 : 640,
+        grossRevenue: timeframe === '7d' ? 16758 : timeframe === '30d' ? 75810 : 255360,
+        conversionRate: '4.8%',
+        stockStatus: 'In Stock',
+        stockCount: 45,
+      },
+      {
+        id: 'p2',
+        name: 'Apple Watch Ultra 2 GPS + Cellular',
+        thumbnail: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=120&q=80',
+        category: 'Wearables',
+        unitsSold: timeframe === '7d' ? 18 : timeframe === '30d' ? 84 : 290,
+        grossRevenue: timeframe === '7d' ? 14382 : timeframe === '30d' ? 67116 : 231710,
+        conversionRate: '3.9%',
+        stockStatus: 'In Stock',
+        stockCount: 16,
+      },
+      {
+        id: 'p3',
+        name: 'Keychron Q1 Pro Wireless Custom Keyboard',
+        thumbnail: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=120&q=80',
+        category: 'Peripherals',
+        unitsSold: timeframe === '7d' ? 35 : timeframe === '30d' ? 148 : 510,
+        grossRevenue: timeframe === '7d' ? 7315 : timeframe === '30d' ? 30932 : 106590,
+        conversionRate: '5.2%',
+        stockStatus: 'In Stock',
+        stockCount: 38,
+      },
+      {
+        id: 'p4',
+        name: 'Logitech MX Master 3S Performance Mouse',
+        thumbnail: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=120&q=80',
+        category: 'Peripherals',
+        unitsSold: timeframe === '7d' ? 56 : timeframe === '30d' ? 245 : 820,
+        grossRevenue: timeframe === '7d' ? 5594 : timeframe === '30d' ? 24475 : 81918,
+        conversionRate: '6.4%',
+        stockStatus: 'In Stock',
+        stockCount: 52,
+      },
+      {
+        id: 'p5',
+        name: 'Anker 737 Power Bank (PowerCore 24K)',
+        thumbnail: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=120&q=80',
+        category: 'Accessories',
+        unitsSold: timeframe === '7d' ? 38 : timeframe === '30d' ? 162 : 540,
+        grossRevenue: timeframe === '7d' ? 5696 : timeframe === '30d' ? 24283 : 80946,
+        conversionRate: '5.5%',
+        stockStatus: 'Low Stock',
+        stockCount: 6,
+      },
+      {
+        id: 'p7',
+        name: 'BenQ ScreenBar Halo Monitor Light',
+        thumbnail: 'https://images.unsplash.com/photo-1593062096033-9a26b09da705?w=120&q=80',
+        category: 'Workspace',
+        unitsSold: timeframe === '7d' ? 24 : timeframe === '30d' ? 108 : 360,
+        grossRevenue: timeframe === '7d' ? 4317 : timeframe === '30d' ? 19429 : 64764,
+        conversionRate: '4.1%',
+        stockStatus: 'In Stock',
+        stockCount: 22,
+      },
+      {
+        id: 'p11',
+        name: 'Baseus Blade 100W Ultra-Thin Power Bank',
+        thumbnail: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=120&q=80',
+        category: 'Accessories',
+        unitsSold: timeframe === '7d' ? 0 : timeframe === '30d' ? 12 : 180,
+        grossRevenue: timeframe === '7d' ? 0 : timeframe === '30d' ? 1199 : 17982,
+        conversionRate: '1.2%',
+        stockStatus: 'Out of Stock',
+        stockCount: 0,
+      },
+    ];
+
+    const totalUnitsSold = rows.reduce((s, r) => s + r.unitsSold, 0);
+    const topProduct = rows[0]?.name || 'Sony WH-1000XM5';
+    const chartBars = rows.slice(0, 5).map(r => ({
+      name: r.name.split(' ')[0] + ' ' + (r.name.split(' ')[1] || ''),
+      revenue: r.grossRevenue,
+      units: r.unitsSold,
+    }));
+
+    return {
+      summary: {
+        topProduct,
+        totalUnitsSold,
+        avgUnitsPerOrder: 1.8,
+        refundRate: '1.4%',
+      },
+      chartBars,
+      rows,
+    };
+  }
+
+  getCustomerReportData(timeframe: '7d' | '30d' | 'quarter' | 'year'): {
+    summary: { totalActive: number; newCustomers: number; repeatRate: string; avgLtv: number };
+    acquisitionChart: { label: string; newCust: number; returningCust: number }[];
+    rows: CustomerReportRow[];
+  } {
+    const rows: CustomerReportRow[] = [
+      {
+        id: 'c1',
+        name: 'Zubair Ahmed',
+        email: 'zubair.ahmed@techpk.com',
+        totalOrders: 8,
+        totalSpent: 3450,
+        aov: 431.25,
+        lastOrderDate: '2026-09-06T14:30:00Z',
+        status: 'VIP',
+      },
+      {
+        id: 'c2',
+        name: 'Fatima Noor',
+        email: 'f.noor@designlab.org',
+        totalOrders: 6,
+        totalSpent: 2890,
+        aov: 481.67,
+        lastOrderDate: '2026-09-05T18:10:00Z',
+        status: 'VIP',
+      },
+      {
+        id: 'c3',
+        name: 'Bilal Farooq',
+        email: 'bilal.farooq92@gmail.com',
+        totalOrders: 4,
+        totalSpent: 1640,
+        aov: 410.00,
+        lastOrderDate: '2026-09-04T11:00:00Z',
+        status: 'Active',
+      },
+      {
+        id: 'c4',
+        name: 'Ayesha Khan',
+        email: 'ayesha.k@outlook.com',
+        totalOrders: 3,
+        totalSpent: 1250,
+        aov: 416.67,
+        lastOrderDate: '2026-09-03T16:20:00Z',
+        status: 'Active',
+      },
+      {
+        id: 'c5',
+        name: 'Hamza Tariq',
+        email: 'hamza.tariq@gmail.com',
+        totalOrders: 1,
+        totalSpent: 399,
+        aov: 399.00,
+        lastOrderDate: '2026-09-06T09:15:00Z',
+        status: 'New',
+      },
+      {
+        id: 'c6',
+        name: 'Sana Malik',
+        email: 'sana.malik@outlook.com',
+        totalOrders: 2,
+        totalSpent: 598,
+        aov: 299.00,
+        lastOrderDate: '2026-08-20T10:00:00Z',
+        status: 'Active',
+      },
+    ];
+
+    const acquisitionChart = timeframe === '7d'
+      ? [
+          { label: 'Sep 01', newCust: 14, returningCust: 28 },
+          { label: 'Sep 02', newCust: 18, returningCust: 37 },
+          { label: 'Sep 03', newCust: 15, returningCust: 33 },
+          { label: 'Sep 04', newCust: 24, returningCust: 48 },
+          { label: 'Sep 05', newCust: 31, returningCust: 63 },
+          { label: 'Sep 06', newCust: 39, returningCust: 79 },
+          { label: 'Sep 07', newCust: 27, returningCust: 54 },
+        ]
+      : [
+          { label: 'Week 1', newCust: 110, returningCust: 230 },
+          { label: 'Week 2', newCust: 125, returningCust: 260 },
+          { label: 'Week 3', newCust: 140, returningCust: 280 },
+          { label: 'Week 4', newCust: 165, returningCust: 345 },
+        ];
+
+    return {
+      summary: {
+        totalActive: 4120,
+        newCustomers: timeframe === '7d' ? 168 : timeframe === '30d' ? 540 : 1850,
+        repeatRate: '42.8%',
+        avgLtv: 680,
+      },
+      acquisitionChart,
+      rows,
+    };
   }
 }
 

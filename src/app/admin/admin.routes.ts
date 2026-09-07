@@ -115,16 +115,16 @@ export const ADMIN_ROUTES: Routes = [
       {
         path: 'reports',
         loadComponent: () =>
-          import('./features/dashboard/admin-dashboard.component').then(
-            m => m.AdminDashboardComponent
+          import('./features/reports/admin-reports.component').then(
+            m => m.AdminReportsComponent
           ),
         title: 'Analytics & Reports — GadgetPlanet Admin',
       },
       {
         path: 'analytics',
         loadComponent: () =>
-          import('./features/dashboard/admin-dashboard.component').then(
-            m => m.AdminDashboardComponent
+          import('./features/reports/admin-reports.component').then(
+            m => m.AdminReportsComponent
           ),
         title: 'Analytics & Reports — GadgetPlanet Admin',
       },
