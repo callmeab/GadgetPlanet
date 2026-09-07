@@ -1,0 +1,632 @@
+@if (customer(); as cust) {
+  <div class="admin-customer-detail-page">
+    <!-- 1. Breadcrumb & Back Navigation -->
+    <nav class="detail-nav-bar" aria-label="Customer breadcrumb navigation">
+      <a routerLink="/admin/customers" class="back-link">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="back-icon">
+          <line x1="15" y1="10" x2="5" y2="10"/>
+          <polyline points="10 15 5 10 10 5"/>
+        </svg>
+        <span>Back to Customers</span>
+      </a>
+      <span class="breadcrumb-separator">/</span>
+      <span class="breadcrumb-current">{{ cust.name }}</span>
+    </nav>
+
+    <!-- 2. Header Section -->
+    <header class="detail-header-card">
+      <div class="header-main-info">
+        <div
+          class="customer-avatar-lg"
+          [style.backgroundColor]="getAvatarColor(cust.name).bg"
+          [style.color]="getAvatarColor(cust.name).text"
+        >
+          {{ getInitials(cust.name) }}
+        </div>
+
+        <div class="header-text-block">
+          <div class="name-status-row">
+            <h1 class="customer-title">{{ cust.name }}</h1>
+            <gp-admin-status-pill [status]="cust.status"></gp-admin-status-pill>
+          </div>
+          <div class="meta-row">
+            <span class="customer-id-tag">ID: {{ cust.id }}</span>
+            <span class="meta-dot">&bull;</span>
+            <span class="join-date">Customer since {{ cust.joinedDate | date:'mediumDate' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a
+          href="mailto:{{ cust.email }}"
+          class="btn btn-secondary btn-email"
+          title="Send email to {{ cust.email }}"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+            <path d="M2 5l8 6 8-6M2 5v10h16V5H2z"/>
+          </svg>
+          <span>Email</span>
+        </a>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="openEditModal()"
+          title="Edit customer account details"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+            <path d="M11 4H4a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-7M16 2.5a2.12 2.12 0 013 3L10 14l-4 1 1-4 9-8.5z"/>
+          </svg>
+          <span>Edit</span>
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-danger-outline"
+          (click)="openDeleteModal()"
+          title="Delete customer"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+            <path d="M4 6h12M8 6V4a1 1 0 011-1h2a1 1 0 011 1v2m2 0v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6h10z"/>
+          </svg>
+          <span>Delete</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 3. 3-KPI Stats Row -->
+    <section class="stats-cards-grid" aria-label="Customer key statistics">
+      <!-- Total Orders -->
+      <div class="stat-card">
+        <div class="stat-icon-wrapper icon-orders">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat-svg">
+            <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">Total Orders</span>
+          <div class="stat-value-group">
+            <span class="stat-num">{{ totalOrdersCount() }}</span>
+            <span class="stat-sub">{{ totalOrdersCount() === 1 ? 'order placed' : 'orders placed' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lifetime Value -->
+      <div class="stat-card">
+        <div class="stat-icon-wrapper icon-ltv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat-svg">
+            <line x1="12" y1="1" x2="12" y2="23"/>
+            <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">Lifetime Value (LTV)</span>
+          <div class="stat-value-group">
+            <span class="stat-num text-success">{{ lifetimeValue() | currency }}</span>
+            <span class="stat-sub">total spend across catalog</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Average Order Value -->
+      <div class="stat-card">
+        <div class="stat-icon-wrapper icon-aov">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="stat-svg">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+            <polyline points="17 6 23 6 23 12"/>
+          </svg>
+        </div>
+        <div class="stat-body">
+          <span class="stat-label">Average Order Value</span>
+          <div class="stat-value-group">
+            <span class="stat-num">{{ averageOrderValue() | currency }}</span>
+            <span class="stat-sub">per completed order</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Two-Column Layout (Order History + Notes on left, Contact + Tags + Addresses on right) -->
+    <div class="customer-layout-grid">
+      <!-- Main Column (Left) -->
+      <main class="main-column">
+        <!-- Order History Card -->
+        <section class="card-panel order-history-panel">
+          <div class="card-panel-header">
+            <div class="panel-header-title">
+              <h2 class="panel-title">Order History</h2>
+              <span class="panel-count-badge">{{ customerOrders().length }}</span>
+            </div>
+            <p class="panel-subtitle">Past purchases and fulfillment status for this customer</p>
+          </div>
+
+          @if (customerOrders().length > 0) {
+            <div class="table-responsive">
+              <table class="data-table" aria-label="Customer order history table">
+                <thead>
+                  <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Fulfillment</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (order of customerOrders(); track order.id) {
+                    <tr class="table-row">
+                      <td class="td-order-num">
+                        <a [routerLink]="['/admin/orders', order.id]" class="order-link">
+                          {{ order.orderNumber }}
+                        </a>
+                      </td>
+                      <td class="td-date">{{ order.date | date:'mediumDate' }}</td>
+                      <td class="td-items">{{ order.itemsCount }} item{{ order.itemsCount > 1 ? 's' : '' }}</td>
+                      <td class="td-total"><strong>{{ order.total | currency }}</strong></td>
+                      <td class="td-status">
+                        <gp-admin-status-pill [status]="order.paymentStatus" size="sm"></gp-admin-status-pill>
+                      </td>
+                      <td class="td-status">
+                        <gp-admin-status-pill [status]="order.fulfillmentStatus" size="sm"></gp-admin-status-pill>
+                      </td>
+                      <td class="td-action text-right">
+                        <a [routerLink]="['/admin/orders', order.id]" class="btn btn-sm btn-secondary">
+                          View Order
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="empty-orders-block">
+              <div class="empty-mini-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="28" height="28">
+                  <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                </svg>
+              </div>
+              <p class="empty-orders-text">No orders placed under email <strong>{{ cust.email }}</strong> yet.</p>
+              <p class="empty-orders-sub">When this customer places an order, it will appear here automatically.</p>
+            </div>
+          }
+        </section>
+
+        <!-- Internal / Staff Notes Card -->
+        <section class="card-panel staff-notes-panel">
+          <div class="card-panel-header">
+            <h2 class="panel-title">Staff & Support Notes</h2>
+            <p class="panel-subtitle">Private internal notes for store operators and customer service reps.</p>
+          </div>
+
+          <div class="notes-body">
+            <textarea
+              class="notes-textarea"
+              rows="4"
+              placeholder="Add private customer notes (e.g. VIP shipping preferences, call log, wholesale pricing agreements)..."
+              [value]="notesText()"
+              (input)="notesText.set($any($event.target).value)"
+              id="customerNotesTextarea"
+              aria-label="Staff notes for customer"
+            ></textarea>
+
+            <div class="notes-footer">
+              <span class="notes-help">Only visible to administrators. Not shown to the customer.</span>
+              <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                [disabled]="isSavingNote()"
+                (click)="saveNotes()"
+              >
+                @if (isSavingNote()) {
+                  <span>Saving...</span>
+                } @else {
+                  <span>Save Notes</span>
+                }
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Sidebar Column (Right) -->
+      <aside class="sidebar-column">
+        <!-- Profile & Contact Card -->
+        <section class="card-panel contact-panel">
+          <div class="card-panel-header">
+            <h2 class="panel-title">Contact Information</h2>
+          </div>
+
+          <div class="contact-card-content">
+            <div class="contact-entry">
+              <span class="contact-label">Email</span>
+              <div class="contact-value-group">
+                <a href="mailto:{{ cust.email }}" class="contact-link">
+                  {{ cust.email }}
+                </a>
+              </div>
+            </div>
+
+            <div class="contact-entry">
+              <span class="contact-label">Phone</span>
+              <div class="contact-value-group">
+                <a href="tel:{{ cust.phone }}" class="contact-link">
+                  {{ cust.phone }}
+                </a>
+              </div>
+            </div>
+
+            <div class="contact-entry">
+              <span class="contact-label">Account Status</span>
+              <div class="status-select-wrapper">
+                <select
+                  class="status-quick-select"
+                  [value]="cust.status"
+                  (change)="onStatusChange($any($event.target).value)"
+                  aria-label="Quick update customer status"
+                >
+                  <option value="Active">Active</option>
+                  <option value="VIP">VIP</option>
+                  <option value="New">New</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Customer Tags Card -->
+        <section class="card-panel tags-panel">
+          <div class="card-panel-header">
+            <h2 class="panel-title">Customer Tags</h2>
+          </div>
+
+          <div class="tags-body">
+            <div class="tags-cloud">
+              @for (tag of cust.tags; track tag) {
+                <span class="tag-chip">
+                  <span>{{ tag }}</span>
+                  <button
+                    type="button"
+                    class="btn-remove-tag"
+                    (click)="removeTag(tag)"
+                    [attr.aria-label]="'Remove tag ' + tag"
+                  >
+                    &times;
+                  </button>
+                </span>
+              }
+              @if (cust.tags.length === 0) {
+                <span class="no-tags-msg">No tags assigned yet</span>
+              }
+            </div>
+
+            <div class="add-tag-field">
+              <input
+                type="text"
+                class="tag-input"
+                placeholder="Add tag (e.g. VIP, Wholesaler)..."
+                [value]="newTagInput()"
+                (input)="newTagInput.set($any($event.target).value)"
+                (keydown.enter)="addTag()"
+                aria-label="New tag name"
+              />
+              <button
+                type="button"
+                class="btn btn-secondary btn-sm"
+                [disabled]="!newTagInput().trim()"
+                (click)="addTag()"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Saved Addresses Card -->
+        <section class="card-panel addresses-panel">
+          <div class="card-panel-header address-header">
+            <h2 class="panel-title">Saved Addresses</h2>
+            <button
+              type="button"
+              class="btn btn-sm btn-secondary"
+              (click)="openAddressModal()"
+            >
+              + Add
+            </button>
+          </div>
+
+          <div class="addresses-list">
+            @for (addr of cust.addresses; track addr.id) {
+              <div class="address-item-card" [class.is-default-address]="addr.isDefault">
+                <div class="address-card-header">
+                  <div class="address-label-wrap">
+                    <span class="address-label-badge">{{ addr.label }}</span>
+                    @if (addr.isDefault) {
+                      <span class="default-badge">Default Shipping</span>
+                    }
+                  </div>
+                </div>
+
+                <div class="address-card-body">
+                  <p class="recipient-name">{{ addr.recipientName }}</p>
+                  <p class="address-line">{{ addr.street }}</p>
+                  <p class="address-line">{{ addr.city }}, {{ addr.country }} {{ addr.postalCode }}</p>
+                  <p class="address-phone">{{ addr.phone }}</p>
+                </div>
+              </div>
+            }
+
+            @if (cust.addresses.length === 0) {
+              <div class="no-addresses-block">
+                <p class="no-addresses-text">No saved shipping addresses</p>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-secondary"
+                  (click)="openAddressModal()"
+                >
+                  Add First Address
+                </button>
+              </div>
+            }
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <!-- 5. Edit Customer Modal -->
+    <gp-admin-modal
+      [isOpen]="isEditModalOpen()"
+      title="Edit Customer Profile"
+      subtitle="Update name, email address, phone, and account status."
+      size="md"
+      (closed)="closeEditModal()"
+    >
+      <div class="edit-customer-form">
+        <!-- Name -->
+        <div class="form-group">
+          <label class="form-label" for="editCustName">Full Name *</label>
+          <input
+            id="editCustName"
+            type="text"
+            class="form-input"
+            [class.input-error]="editErrors()['name']"
+            [value]="editName()"
+            (input)="editName.set($any($event.target).value)"
+          />
+          @if (editErrors()['name']) {
+            <span class="field-error">{{ editErrors()['name'] }}</span>
+          }
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="editCustEmail">Email Address *</label>
+          <input
+            id="editCustEmail"
+            type="email"
+            class="form-input"
+            [class.input-error]="editErrors()['email']"
+            [value]="editEmail()"
+            (input)="editEmail.set($any($event.target).value)"
+          />
+          @if (editErrors()['email']) {
+            <span class="field-error">{{ editErrors()['email'] }}</span>
+          }
+        </div>
+
+        <!-- Phone -->
+        <div class="form-group">
+          <label class="form-label" for="editCustPhone">Phone Number</label>
+          <input
+            id="editCustPhone"
+            type="tel"
+            class="form-input"
+            [value]="editPhone()"
+            (input)="editPhone.set($any($event.target).value)"
+          />
+        </div>
+
+        <!-- Status -->
+        <div class="form-group">
+          <label class="form-label" for="editCustStatus">Account Status</label>
+          <select
+            id="editCustStatus"
+            class="form-select"
+            [value]="editStatus()"
+            (change)="editStatus.set($any($event.target).value)"
+          >
+            <option value="Active">Active</option>
+            <option value="VIP">VIP</option>
+            <option value="New">New</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <div modalFooter class="modal-footer-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeEditModal()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveEditCustomer()">
+          Save Changes
+        </button>
+      </div>
+    </gp-admin-modal>
+
+    <!-- 6. Add Address Modal -->
+    <gp-admin-modal
+      [isOpen]="isAddressModalOpen()"
+      title="Add Shipping Address"
+      subtitle="Add a new delivery address for {{ cust.name }}"
+      size="md"
+      (closed)="closeAddressModal()"
+    >
+      <div class="address-form">
+        <div class="form-grid-2col">
+          <!-- Label -->
+          <div class="form-group">
+            <label class="form-label" for="addrLabelSelect">Address Label</label>
+            <select
+              id="addrLabelSelect"
+              class="form-select"
+              [value]="addrLabel()"
+              (change)="addrLabel.set($any($event.target).value)"
+            >
+              <option value="Home">Home</option>
+              <option value="Office">Office</option>
+              <option value="Warehouse">Warehouse</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Recipient Name -->
+          <div class="form-group">
+            <label class="form-label" for="addrRecipientInput">Recipient Name</label>
+            <input
+              id="addrRecipientInput"
+              type="text"
+              class="form-input"
+              placeholder="e.g. Ahmad Khan"
+              [value]="addrRecipient()"
+              (input)="addrRecipient.set($any($event.target).value)"
+            />
+          </div>
+        </div>
+
+        <!-- Street Address -->
+        <div class="form-group">
+          <label class="form-label" for="addrStreetInput">Street Address *</label>
+          <input
+            id="addrStreetInput"
+            type="text"
+            class="form-input"
+            [class.input-error]="addrErrors()['street']"
+            placeholder="e.g. House 45, Street 12, F-8/2"
+            [value]="addrStreet()"
+            (input)="addrStreet.set($any($event.target).value)"
+          />
+          @if (addrErrors()['street']) {
+            <span class="field-error">{{ addrErrors()['street'] }}</span>
+          }
+        </div>
+
+        <div class="form-grid-2col">
+          <!-- City -->
+          <div class="form-group">
+            <label class="form-label" for="addrCityInput">City *</label>
+            <input
+              id="addrCityInput"
+              type="text"
+              class="form-input"
+              [class.input-error]="addrErrors()['city']"
+              placeholder="e.g. Islamabad"
+              [value]="addrCity()"
+              (input)="addrCity.set($any($event.target).value)"
+            />
+            @if (addrErrors()['city']) {
+              <span class="field-error">{{ addrErrors()['city'] }}</span>
+            }
+          </div>
+
+          <!-- Postal Code -->
+          <div class="form-group">
+            <label class="form-label" for="addrPostalInput">Postal Code</label>
+            <input
+              id="addrPostalInput"
+              type="text"
+              class="form-input"
+              placeholder="e.g. 44000"
+              [value]="addrPostalCode()"
+              (input)="addrPostalCode.set($any($event.target).value)"
+            />
+          </div>
+        </div>
+
+        <div class="form-grid-2col">
+          <!-- Country -->
+          <div class="form-group">
+            <label class="form-label" for="addrCountryInput">Country</label>
+            <input
+              id="addrCountryInput"
+              type="text"
+              class="form-input"
+              [value]="addrCountry()"
+              (input)="addrCountry.set($any($event.target).value)"
+            />
+          </div>
+
+          <!-- Phone -->
+          <div class="form-group">
+            <label class="form-label" for="addrPhoneInput">Contact Phone</label>
+            <input
+              id="addrPhoneInput"
+              type="tel"
+              class="form-input"
+              placeholder="e.g. +92 300 1234567"
+              [value]="addrPhone()"
+              (input)="addrPhone.set($any($event.target).value)"
+            />
+          </div>
+        </div>
+
+        <!-- Set as Default checkbox -->
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              class="admin-checkbox"
+              [checked]="addrIsDefault()"
+              (change)="addrIsDefault.set($any($event.target).checked)"
+            />
+            <span>Set as default shipping address</span>
+          </label>
+        </div>
+      </div>
+
+      <div modalFooter class="modal-footer-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeAddressModal()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveAddress()">
+          Save Address
+        </button>
+      </div>
+    </gp-admin-modal>
+
+    <!-- 7. Delete Customer Confirmation Modal -->
+    <gp-admin-modal
+      [isOpen]="isDeleteModalOpen()"
+      title="Delete Customer Account"
+      size="sm"
+      (closed)="closeDeleteModal()"
+    >
+      <div class="delete-dialog-content">
+        <div class="warning-icon-wrapper">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="warning-svg">
+            <path d="M10 3L2 17h16L10 3zM10 9v4m0 2h.01"/>
+          </svg>
+        </div>
+        <p class="delete-msg">
+          Are you sure you want to delete customer <strong>{{ cust.name }}</strong>?
+        </p>
+        <p class="delete-submsg">
+          This will permanently delete this customer profile from your catalog. This action cannot be undone.
+        </p>
+      </div>
+
+      <div modalFooter class="modal-footer-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-danger" (click)="executeDelete()">
+          Confirm Delete
+        </button>
+      </div>
+    </gp-admin-modal>
+  </div>
+}

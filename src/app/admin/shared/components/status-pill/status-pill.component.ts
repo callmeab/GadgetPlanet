@@ -33,13 +33,13 @@ export class StatusPillComponent {
     if (['delivered', 'paid', 'completed', 'active', 'in_stock', 'in stock', 'published', 'success'].includes(s)) {
       return 'success';
     }
-    if (['pending', 'unfulfilled', 'low_stock', 'low stock', 'attention', 'warning'].includes(s)) {
+    if (['pending', 'unfulfilled', 'low_stock', 'low stock', 'attention', 'warning', 'vip'].includes(s)) {
       return 'warning';
     }
     if (['cancelled', 'canceled', 'failed', 'refunded', 'out_of_stock', 'out of stock', 'danger', 'inactive'].includes(s)) {
       return 'danger';
     }
-    if (['processing', 'in_transit', 'in transit', 'shipped', 'info'].includes(s)) {
+    if (['processing', 'in_transit', 'in transit', 'shipped', 'info', 'new'].includes(s)) {
       return 'info';
     }
     return 'neutral';

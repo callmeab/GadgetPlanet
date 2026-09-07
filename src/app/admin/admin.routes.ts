@@ -67,10 +67,18 @@ export const ADMIN_ROUTES: Routes = [
       {
         path: 'customers',
         loadComponent: () =>
-          import('./features/dashboard/admin-dashboard.component').then(
-            m => m.AdminDashboardComponent
+          import('./features/customers/admin-customers.component').then(
+            m => m.AdminCustomersComponent
           ),
         title: 'Customers — GadgetPlanet Admin',
+      },
+      {
+        path: 'customers/:id',
+        loadComponent: () =>
+          import(
+            './features/customers/customer-detail/admin-customer-detail.component'
+          ).then(m => m.AdminCustomerDetailComponent),
+        title: 'Customer Details — GadgetPlanet Admin',
       },
       {
         path: 'categories',

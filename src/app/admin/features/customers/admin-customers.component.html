@@ -1,0 +1,783 @@
+<div class="admin-customers-page">
+  <!-- 1. Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="title-with-badge">
+        <h1 class="page-title">Customers</h1>
+        <span class="count-badge">{{ customers().length }}</span>
+      </div>
+      <p class="page-subtitle">
+        Manage customer accounts, lifetime spending, order history, and contact details.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn btn-secondary btn-export"
+        (click)="exportCustomersToCsv()"
+        title="Export filtered customers to CSV"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon">
+          <path d="M4 14v2a2 2 0 002 2h8a2 2 0 002-2v-2M7 10l3 3 3-3M10 3v10"/>
+        </svg>
+        <span>Export CSV</span>
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary btn-add"
+        (click)="openAddModal()"
+        title="Add a new customer account"
+      >
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon">
+          <line x1="10" y1="4" x2="10" y2="16"/>
+          <line x1="4" y1="10" x2="16" y2="10"/>
+        </svg>
+        <span>Add Customer</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. Status Filter Tabs at Top -->
+  <nav class="customer-tabs-nav" aria-label="Customer status filter tabs">
+    <div class="tabs-track">
+      @for (tab of tabs; track tab) {
+        <button
+          type="button"
+          class="tab-btn"
+          [class.tab-active]="activeTab() === tab"
+          (click)="setTab(tab)"
+        >
+          <span>{{ tab }}</span>
+          <span class="tab-count-badge" [class.badge-active]="activeTab() === tab">
+            {{ tabCounts()[tab] }}
+          </span>
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- 3. Search & Quick Filters Bar -->
+  <section class="filters-card">
+    <div class="filters-row">
+      <!-- Search Input -->
+      <div class="search-field">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+          <circle cx="9" cy="9" r="6"/>
+          <line x1="13.5" y1="13.5" x2="18" y2="18"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by name, email, phone, or city..."
+          [value]="searchQuery()"
+          (input)="onSearchChange($any($event.target).value)"
+          id="customerSearchInput"
+        />
+        @if (searchQuery()) {
+          <button
+            type="button"
+            class="clear-search-btn"
+            (click)="onSearchChange('')"
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Active Filter Summary -->
+    <div class="filters-summary-row">
+      <div class="results-count">
+        Showing <strong>{{ totalItems() }}</strong> of {{ customers().length }} customers
+      </div>
+
+      @if (hasActiveFilters()) {
+        <div class="active-chips">
+          @if (searchQuery()) {
+            <span class="filter-chip">
+              Search: "{{ searchQuery() }}"
+              <button type="button" (click)="onSearchChange('')">&times;</button>
+            </span>
+          }
+          @if (activeTab() !== 'All') {
+            <span class="filter-chip">
+              Status: {{ activeTab() }}
+              <button type="button" (click)="setTab('All')">&times;</button>
+            </span>
+          }
+          <button type="button" class="btn-clear-all" (click)="resetFilters()">
+            Clear all
+          </button>
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- 4. Bulk Actions Bar (Appears when rows selected) -->
+  @if (selectedCount() > 0) {
+    <div class="bulk-actions-bar" role="toolbar" aria-label="Bulk actions">
+      <div class="bulk-info">
+        <span class="bulk-count-badge">{{ selectedCount() }}</span>
+        <span class="bulk-label">customer{{ selectedCount() > 1 ? 's' : '' }} selected</span>
+      </div>
+
+      <div class="bulk-buttons">
+        <!-- Status change dropdown -->
+        <div class="bulk-status-dropdown-container">
+          <button
+            type="button"
+            class="btn btn-sm btn-bulk-action"
+            (click)="toggleBulkStatusDropdown($event)"
+            aria-haspopup="true"
+            [attr.aria-expanded]="isBulkStatusDropdownOpen()"
+          >
+            <span>Set Status</span>
+            <svg viewBox="0 0 20 20" fill="currentColor" class="dropdown-chevron">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+
+          @if (isBulkStatusDropdownOpen()) {
+            <div class="dropdown-menu-panel bulk-menu">
+              <button type="button" class="dropdown-item" (click)="applyBulkStatus('Active')">
+                <span class="status-indicator-dot dot-active"></span> Mark as Active
+              </button>
+              <button type="button" class="dropdown-item" (click)="applyBulkStatus('VIP')">
+                <span class="status-indicator-dot dot-vip"></span> Mark as VIP
+              </button>
+              <button type="button" class="dropdown-item" (click)="applyBulkStatus('Inactive')">
+                <span class="status-indicator-dot dot-inactive"></span> Mark as Inactive
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Bulk Delete Button -->
+        <button
+          type="button"
+          class="btn btn-sm btn-bulk-danger"
+          (click)="openDeleteConfirm()"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="btn-icon-sm">
+            <path d="M4 6h12M8 6V4a1 1 0 011-1h2a1 1 0 011 1v2m2 0v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6h10z"/>
+          </svg>
+          <span>Delete ({{ selectedCount() }})</span>
+        </button>
+
+        <!-- Clear Selection Button -->
+        <button
+          type="button"
+          class="btn btn-sm btn-bulk-clear"
+          (click)="clearSelection()"
+        >
+          Deselect all
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- 5. Main Content Area: Desktop Table & Mobile Cards -->
+  <div class="table-container-card">
+    @if (paginatedCustomers().length > 0) {
+      <!-- Desktop Table (Hidden on Mobile) -->
+      <div class="table-responsive desktop-only-table">
+        <table class="data-table" aria-label="Customers list table">
+          <thead>
+            <tr>
+              <!-- Checkbox Column -->
+              <th class="th-checkbox">
+                <input
+                  type="checkbox"
+                  class="admin-checkbox"
+                  [checked]="isAllSelected()"
+                  [indeterminate]="isPartiallySelected()"
+                  (change)="toggleSelectAll()"
+                  aria-label="Select all customers on page"
+                />
+              </th>
+
+              <!-- Customer Name Column -->
+              <th class="th-sortable th-customer" (click)="setSort('name')">
+                <div class="th-content">
+                  <span>Customer</span>
+                  <span class="sort-icon" [class.sort-active]="sortColumn() === 'name'">
+                    @if (sortColumn() === 'name') {
+                      {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                    } @else {
+                      ↕
+                    }
+                  </span>
+                </div>
+              </th>
+
+              <!-- Contact Column -->
+              <th class="th-contact">Contact Details</th>
+
+              <!-- Location Column -->
+              <th class="th-location">Location</th>
+
+              <!-- Orders Column -->
+              <th class="th-sortable th-orders" (click)="setSort('totalOrders')">
+                <div class="th-content">
+                  <span>Orders</span>
+                  <span class="sort-icon" [class.sort-active]="sortColumn() === 'totalOrders'">
+                    @if (sortColumn() === 'totalOrders') {
+                      {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                    } @else {
+                      ↕
+                    }
+                  </span>
+                </div>
+              </th>
+
+              <!-- Total Spent Column -->
+              <th class="th-sortable th-spent" (click)="setSort('totalSpent')">
+                <div class="th-content">
+                  <span>Total Spent</span>
+                  <span class="sort-icon" [class.sort-active]="sortColumn() === 'totalSpent'">
+                    @if (sortColumn() === 'totalSpent') {
+                      {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                    } @else {
+                      ↕
+                    }
+                  </span>
+                </div>
+              </th>
+
+              <!-- Joined Date Column -->
+              <th class="th-sortable th-date" (click)="setSort('joinedDate')">
+                <div class="th-content">
+                  <span>Joined Date</span>
+                  <span class="sort-icon" [class.sort-active]="sortColumn() === 'joinedDate'">
+                    @if (sortColumn() === 'joinedDate') {
+                      {{ sortDirection() === 'asc' ? '▲' : '▼' }}
+                    } @else {
+                      ↕
+                    }
+                  </span>
+                </div>
+              </th>
+
+              <!-- Status Column -->
+              <th class="th-status">Status</th>
+
+              <!-- Actions Column -->
+              <th class="th-actions text-right">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (customer of paginatedCustomers(); track customer.id) {
+              <tr
+                class="table-row"
+                [class.row-selected]="selectedIds().has(customer.id)"
+                (click)="viewCustomerDetail(customer.id)"
+              >
+                <!-- Checkbox -->
+                <td class="td-checkbox" (click)="$event.stopPropagation()">
+                  <input
+                    type="checkbox"
+                    class="admin-checkbox"
+                    [checked]="selectedIds().has(customer.id)"
+                    (change)="toggleSelect(customer.id, $event)"
+                    [attr.aria-label]="'Select customer ' + customer.name"
+                  />
+                </td>
+
+                <!-- Customer with Avatar -->
+                <td class="td-customer">
+                  <div class="customer-info-group">
+                    <div
+                      class="customer-avatar"
+                      [style.backgroundColor]="getAvatarColor(customer.name).bg"
+                      [style.color]="getAvatarColor(customer.name).text"
+                    >
+                      {{ getInitials(customer.name) }}
+                    </div>
+                    <div class="customer-text">
+                      <a
+                        [routerLink]="['/admin/customers', customer.id]"
+                        class="customer-name-link"
+                        (click)="$event.stopPropagation()"
+                      >
+                        {{ customer.name }}
+                      </a>
+                      <span class="customer-id-sub">{{ customer.id }}</span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Contact Info -->
+                <td class="td-contact">
+                  <div class="contact-details">
+                    <div class="contact-line">
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="contact-icon">
+                        <path d="M2 5l8 6 8-6M2 5v10h16V5H2z"/>
+                      </svg>
+                      <a
+                        href="mailto:{{ customer.email }}"
+                        class="contact-link"
+                        (click)="$event.stopPropagation()"
+                      >
+                        {{ customer.email }}
+                      </a>
+                    </div>
+                    <div class="contact-line phone-sub">
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="contact-icon">
+                        <path d="M2 3a1 1 0 011-1h3.5a1 1 0 011 .76l.7 3.5a1 1 0 01-.28.94l-2.2 2.2a11.04 11.04 0 005.58 5.58l2.2-2.2a1 1 0 01.94-.28l3.5.7a1 1 0 01.76 1V17a1 1 0 01-1 1A16 16 0 012 3z"/>
+                      </svg>
+                      <span>{{ customer.phone }}</span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Location -->
+                <td class="td-location">
+                  <span class="location-text">{{ getDefaultCity(customer) }}</span>
+                </td>
+
+                <!-- Orders Count -->
+                <td class="td-orders">
+                  <span class="orders-count-badge">
+                    {{ customer.totalOrders }} {{ customer.totalOrders === 1 ? 'order' : 'orders' }}
+                  </span>
+                </td>
+
+                <!-- Total Spent -->
+                <td class="td-spent">
+                  <span class="spent-value">{{ customer.totalSpent | currency }}</span>
+                </td>
+
+                <!-- Joined Date -->
+                <td class="td-date">
+                  <span class="date-text">{{ customer.joinedDate | date:'mediumDate' }}</span>
+                </td>
+
+                <!-- Status Pill -->
+                <td class="td-status">
+                  <gp-admin-status-pill [status]="customer.status" size="sm"></gp-admin-status-pill>
+                </td>
+
+                <!-- Actions -->
+                <td class="td-actions actions-cell text-right" (click)="$event.stopPropagation()">
+                  <div class="action-buttons-group">
+                    <button
+                      type="button"
+                      class="btn-icon-action"
+                      (click)="viewCustomerDetail(customer.id)"
+                      title="View Customer Profile"
+                      aria-label="View Customer Profile"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16">
+                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                        <path d="M2 10s3.5-6 8-6 8 6 8 6-3.5 6-8 6-8-6-8-6z"/>
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn-icon-action"
+                      (click)="openEditModal(customer, $event)"
+                      title="Edit Customer"
+                      aria-label="Edit Customer"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16">
+                        <path d="M11 4H4a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-7M16 2.5a2.12 2.12 0 013 3L10 14l-4 1 1-4 9-8.5z"/>
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn-icon-action text-danger"
+                      (click)="openDeleteConfirm(customer, $event)"
+                      title="Delete Customer"
+                      aria-label="Delete Customer"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16">
+                        <path d="M4 6h12M8 6V4a1 1 0 011-1h2a1 1 0 011 1v2m2 0v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6h10z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Stacked Cards (<768px) -->
+      <div class="customer-cards-list mobile-only-cards" aria-label="Customer list mobile cards">
+        @for (customer of paginatedCustomers(); track customer.id) {
+          <article
+            class="customer-card-item"
+            [class.card-selected]="selectedIds().has(customer.id)"
+            (click)="viewCustomerDetail(customer.id)"
+          >
+            <!-- Card Header: Checkbox + Avatar + Name + Status -->
+            <div class="card-top-row">
+              <div class="card-identity" (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
+                  class="admin-checkbox"
+                  [checked]="selectedIds().has(customer.id)"
+                  (change)="toggleSelect(customer.id, $event)"
+                  [attr.aria-label]="'Select customer ' + customer.name"
+                />
+                <div
+                  class="customer-avatar sm-avatar"
+                  [style.backgroundColor]="getAvatarColor(customer.name).bg"
+                  [style.color]="getAvatarColor(customer.name).text"
+                >
+                  {{ getInitials(customer.name) }}
+                </div>
+                <div class="card-name-block">
+                  <h3 class="card-customer-name">{{ customer.name }}</h3>
+                  <span class="card-customer-id">{{ customer.id }}</span>
+                </div>
+              </div>
+
+              <div class="card-status-wrapper">
+                <gp-admin-status-pill [status]="customer.status" size="sm"></gp-admin-status-pill>
+              </div>
+            </div>
+
+            <!-- Card Body: Contact & Location -->
+            <div class="card-details-row">
+              <div class="card-detail-item">
+                <span class="detail-label">Email</span>
+                <span class="detail-val truncate">{{ customer.email }}</span>
+              </div>
+              <div class="card-detail-item">
+                <span class="detail-label">Phone</span>
+                <span class="detail-val">{{ customer.phone }}</span>
+              </div>
+            </div>
+
+            <!-- Card Metrics: Orders & Lifetime Spend -->
+            <div class="card-metrics-grid">
+              <div class="metric-box">
+                <span class="metric-title">Orders</span>
+                <span class="metric-num">{{ customer.totalOrders }}</span>
+              </div>
+              <div class="metric-box">
+                <span class="metric-title">Total Spent</span>
+                <span class="metric-num text-success">{{ customer.totalSpent | currency }}</span>
+              </div>
+              <div class="metric-box">
+                <span class="metric-title">Joined</span>
+                <span class="metric-num">{{ customer.joinedDate | date:'shortDate' }}</span>
+              </div>
+            </div>
+
+            <!-- Card Actions Row (Min 44px touch targets) -->
+            <div class="card-actions-bar" (click)="$event.stopPropagation()">
+              <button
+                type="button"
+                class="btn-card-action"
+                (click)="viewCustomerDetail(customer.id)"
+              >
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                  <path d="M2 10s3.5-6 8-6 8 6 8 6-3.5 6-8 6-8-6-8-6z"/>
+                </svg>
+                <span>View Details</span>
+              </button>
+
+              <button
+                type="button"
+                class="btn-card-action"
+                (click)="openEditModal(customer, $event)"
+              >
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16">
+                  <path d="M11 4H4a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-7M16 2.5a2.12 2.12 0 013 3L10 14l-4 1 1-4 9-8.5z"/>
+                </svg>
+                <span>Edit</span>
+              </button>
+
+              <button
+                type="button"
+                class="btn-card-action text-danger"
+                (click)="openDeleteConfirm(customer, $event)"
+              >
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16">
+                  <path d="M4 6h12M8 6V4a1 1 0 011-1h2a1 1 0 011 1v2m2 0v10a2 2 0 01-2 2H7a2 2 0 01-2-2V6h10z"/>
+                </svg>
+                <span>Delete</span>
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <!-- 6. Pagination Footer -->
+      <footer class="table-pagination-footer">
+        <div class="pagination-info">
+          <span>Showing <strong>{{ startIndex() }}</strong>–<strong>{{ endIndex() }}</strong> of <strong>{{ totalItems() }}</strong> customers</span>
+
+          <div class="page-size-selector">
+            <label for="customerPageSizeSelect" class="sr-only">Items per page</label>
+            <select
+              id="customerPageSizeSelect"
+              class="page-size-select"
+              [value]="pageSize()"
+              (change)="onPageSizeChange($any($event.target).value)"
+            >
+              @for (opt of pageSizeOptions; track opt) {
+                <option [value]="opt">{{ opt }} per page</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="page-nav-btn"
+            [disabled]="currentPage() <= 1"
+            (click)="setPage(currentPage() - 1)"
+            aria-label="Previous page"
+          >
+            &larr; Prev
+          </button>
+
+          <div class="page-numbers">
+            @for (p of [].constructor(totalPages()); track $index) {
+              <button
+                type="button"
+                class="page-num-btn"
+                [class.active-page]="currentPage() === ($index + 1)"
+                (click)="setPage($index + 1)"
+              >
+                {{ $index + 1 }}
+              </button>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="page-nav-btn"
+            [disabled]="currentPage() >= totalPages()"
+            (click)="setPage(currentPage() + 1)"
+            aria-label="Next page"
+          >
+            Next &rarr;
+          </button>
+        </div>
+      </footer>
+    } @else {
+      <!-- 7. Empty State -->
+      <div class="empty-state-card">
+        <div class="empty-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="empty-svg">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75"/>
+          </svg>
+        </div>
+        <h2 class="empty-title">No customers found</h2>
+        <p class="empty-desc">
+          @if (hasActiveFilters()) {
+            No customer accounts matched your current search filters. Try clearing or relaxing your filters.
+          } @else {
+            You haven't added any customers yet. Add your first customer or wait for customers to place orders on your store.
+          }
+        </p>
+        <div class="empty-actions">
+          @if (hasActiveFilters()) {
+            <button type="button" class="btn btn-secondary" (click)="resetFilters()">
+              Clear Filters
+            </button>
+          } @else {
+            <button type="button" class="btn btn-primary" (click)="openAddModal()">
+              Add First Customer
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- 8. Add / Edit Customer Modal -->
+  <gp-admin-modal
+    [isOpen]="isCustomerModalOpen()"
+    [title]="isEditMode() ? 'Edit Customer' : 'Add New Customer'"
+    [subtitle]="isEditMode() ? 'Update account details, contact info, and tags' : 'Register a new customer profile in your store catalog'"
+    size="lg"
+    (closed)="closeCustomerModal()"
+  >
+    <div class="customer-form">
+      <div class="form-grid-2col">
+        <!-- Full Name -->
+        <div class="form-group">
+          <label class="form-label" for="custNameInput">Full Name *</label>
+          <input
+            id="custNameInput"
+            type="text"
+            class="form-input"
+            [class.input-error]="formErrors()['name']"
+            placeholder="e.g. Bilal Ahmed"
+            [value]="formName()"
+            (input)="formName.set($any($event.target).value)"
+          />
+          @if (formErrors()['name']) {
+            <span class="field-error">{{ formErrors()['name'] }}</span>
+          }
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="custEmailInput">Email Address *</label>
+          <input
+            id="custEmailInput"
+            type="email"
+            class="form-input"
+            [class.input-error]="formErrors()['email']"
+            placeholder="e.g. bilal@example.com"
+            [value]="formEmail()"
+            (input)="formEmail.set($any($event.target).value)"
+          />
+          @if (formErrors()['email']) {
+            <span class="field-error">{{ formErrors()['email'] }}</span>
+          }
+        </div>
+
+        <!-- Phone -->
+        <div class="form-group">
+          <label class="form-label" for="custPhoneInput">Phone Number</label>
+          <input
+            id="custPhoneInput"
+            type="tel"
+            class="form-input"
+            placeholder="e.g. +92 300 1234567"
+            [value]="formPhone()"
+            (input)="formPhone.set($any($event.target).value)"
+          />
+        </div>
+
+        <!-- Status -->
+        <div class="form-group">
+          <label class="form-label" for="custStatusSelect">Account Status</label>
+          <select
+            id="custStatusSelect"
+            class="form-select"
+            [value]="formStatus()"
+            (change)="formStatus.set($any($event.target).value)"
+          >
+            <option value="Active">Active</option>
+            <option value="VIP">VIP</option>
+            <option value="New">New</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="form-group">
+        <label class="form-label" for="custTagsInput">Tags (comma-separated)</label>
+        <input
+          id="custTagsInput"
+          type="text"
+          class="form-input"
+          placeholder="e.g. VIP, Wholesaler, Audio Enthusiast"
+          [value]="formTags()"
+          (input)="formTags.set($any($event.target).value)"
+        />
+        <span class="form-help">Separate tags with commas to categorize customers for targeted marketing.</span>
+      </div>
+
+      <!-- Address Section Header -->
+      <div class="section-divider">
+        <span class="divider-title">Primary Address (Optional)</span>
+      </div>
+
+      <div class="form-grid-2col">
+        <!-- Street -->
+        <div class="form-group full-width">
+          <label class="form-label" for="custStreetInput">Street Address</label>
+          <input
+            id="custStreetInput"
+            type="text"
+            class="form-input"
+            placeholder="e.g. House 14, Street 9, Sector F-7/1"
+            [value]="formStreet()"
+            (input)="formStreet.set($any($event.target).value)"
+          />
+        </div>
+
+        <!-- City -->
+        <div class="form-group">
+          <label class="form-label" for="custCityInput">City</label>
+          <input
+            id="custCityInput"
+            type="text"
+            class="form-input"
+            placeholder="e.g. Islamabad"
+            [value]="formCity()"
+            (input)="formCity.set($any($event.target).value)"
+          />
+        </div>
+
+        <!-- Postal Code -->
+        <div class="form-group">
+          <label class="form-label" for="custPostalInput">Postal Code</label>
+          <input
+            id="custPostalInput"
+            type="text"
+            class="form-input"
+            placeholder="e.g. 44000"
+            [value]="formPostalCode()"
+            (input)="formPostalCode.set($any($event.target).value)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div modalFooter class="modal-footer-actions">
+      <button type="button" class="btn btn-secondary" (click)="closeCustomerModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-primary" (click)="saveCustomerForm()">
+        {{ isEditMode() ? 'Save Changes' : 'Create Customer' }}
+      </button>
+    </div>
+  </gp-admin-modal>
+
+  <!-- 9. Delete Confirmation Modal -->
+  <gp-admin-modal
+    [isOpen]="isDeleteModalOpen()"
+    title="Confirm Customer Deletion"
+    size="sm"
+    (closed)="closeDeleteModal()"
+  >
+    <div class="delete-dialog-content">
+      <div class="warning-icon-wrapper">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="warning-svg">
+          <path d="M10 3L2 17h16L10 3zM10 9v4m0 2h.01"/>
+        </svg>
+      </div>
+      @if (customerToDelete()) {
+        <p class="delete-msg">
+          Are you sure you want to delete customer <strong>{{ customerToDelete()?.name }}</strong> ({{ customerToDelete()?.email }})?
+        </p>
+      } @else {
+        <p class="delete-msg">
+          Are you sure you want to permanently delete <strong>{{ selectedCount() }}</strong> selected customer{{ selectedCount() > 1 ? 's' : '' }}?
+        </p>
+      }
+      <p class="delete-submsg">This action cannot be undone and will remove all associated address and note records.</p>
+    </div>
+
+    <div modalFooter class="modal-footer-actions">
+      <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
+        Cancel
+      </button>
+      <button type="button" class="btn btn-danger" (click)="executeDelete()">
+        Confirm Delete
+      </button>
+    </div>
+  </gp-admin-modal>
+</div>

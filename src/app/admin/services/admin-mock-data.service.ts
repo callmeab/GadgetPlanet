@@ -54,6 +54,33 @@ export interface AdminOrder {
   timeline?: AdminOrderTimelineEvent[];
 }
 
+export interface CustomerAddress {
+  id: string;
+  isDefault: boolean;
+  label: string; // e.g. "Home", "Office"
+  recipientName: string;
+  street: string;
+  city: string;
+  country: string;
+  postalCode: string;
+  phone?: string;
+}
+
+export interface AdminCustomer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  avatarUrl?: string;
+  joinedDate: string;
+  status: 'Active' | 'VIP' | 'New' | 'Inactive';
+  totalOrders: number;
+  totalSpent: number;
+  tags: string[];
+  notes?: string;
+  addresses: CustomerAddress[];
+}
+
 export interface ProductVariantOption {
   name: string;
   values: string[];
@@ -691,8 +718,258 @@ export class AdminMockDataService {
         return {
           ...p,
           stock: newStock,
-          status: newStock > 5 ? 'Active' : (newStock > 0 ? 'Low Stock' : 'Out of Stock')
+          status: newStock > 0 && p.status === 'Out of Stock' ? 'Active' : p.status
         };
+      })
+    );
+  }
+
+  // Customers Mock Data (12+ realistic customer profiles)
+  readonly customers = signal<AdminCustomer[]>([
+    {
+      id: 'c1',
+      name: 'Ahmad Khan',
+      email: 'ahmad.khan@example.com',
+      phone: '+92 300 1234567',
+      joinedDate: '2025-11-12',
+      status: 'VIP',
+      totalOrders: 5,
+      totalSpent: 1420.50,
+      tags: ['VIP', 'Audio Enthusiast', 'High Value'],
+      notes: 'Prefers TCS delivery, leave package at front desk with security guard.',
+      addresses: [
+        { id: 'a1', isDefault: true, label: 'Home', recipientName: 'Ahmad Khan', street: 'House 45, Street 12, F-8/2', city: 'Islamabad', country: 'Pakistan', postalCode: '44000', phone: '+92 300 1234567' },
+        { id: 'a2', isDefault: false, label: 'Office', recipientName: 'Ahmad Khan (Work)', street: 'Software Tech Park, Sector I-9/3', city: 'Islamabad', country: 'Pakistan', postalCode: '44000', phone: '+92 300 1234567' }
+      ]
+    },
+    {
+      id: 'c2',
+      name: 'Fatima Zahra',
+      email: 'f.zahra@example.com',
+      phone: '+92 321 7654321',
+      joinedDate: '2026-02-14',
+      status: 'Active',
+      totalOrders: 3,
+      totalSpent: 489.00,
+      tags: ['Peripherals', 'Repeat Buyer'],
+      notes: 'Requested weekend-only deliveries.',
+      addresses: [
+        { id: 'a3', isDefault: true, label: 'Home', recipientName: 'Fatima Zahra', street: 'Apartment 3B, DHA Phase 5', city: 'Lahore', country: 'Pakistan', postalCode: '54792', phone: '+92 321 7654321' }
+      ]
+    },
+    {
+      id: 'c3',
+      name: 'Bilal Tariq',
+      email: 'bilal.tariq@example.com',
+      phone: '+92 333 9876543',
+      joinedDate: '2025-08-20',
+      status: 'VIP',
+      totalOrders: 6,
+      totalSpent: 2150.00,
+      tags: ['VIP', 'Mechanical Keyboards', 'Workspace Pro'],
+      notes: 'Frequently orders premium Keychron accessories and docks.',
+      addresses: [
+        { id: 'a4', isDefault: true, label: 'Office', recipientName: 'Bilal Tariq', street: 'Plot 108, Block C, Gulshan-e-Iqbal', city: 'Karachi', country: 'Pakistan', postalCode: '75300', phone: '+92 333 9876543' }
+      ]
+    },
+    {
+      id: 'c4',
+      name: 'Zainab Bibi',
+      email: 'zainab.b@example.com',
+      phone: '+92 345 5551234',
+      joinedDate: '2026-05-10',
+      status: 'Active',
+      totalOrders: 2,
+      totalSpent: 210.00,
+      tags: ['Mobile Accessories'],
+      addresses: [
+        { id: 'a5', isDefault: true, label: 'Home', recipientName: 'Zainab Bibi', street: 'Street 4, Sector G-11/3', city: 'Islamabad', country: 'Pakistan', postalCode: '44000', phone: '+92 345 5551234' }
+      ]
+    },
+    {
+      id: 'c5',
+      name: 'Hamza Ali',
+      email: 'hamza.ali@example.com',
+      phone: '+92 312 4443322',
+      joinedDate: '2026-01-25',
+      status: 'Active',
+      totalOrders: 4,
+      totalSpent: 980.00,
+      tags: ['Content Creator', 'Photography'],
+      addresses: [
+        { id: 'a6', isDefault: true, label: 'Studio', recipientName: 'Hamza Ali Studios', street: 'Model Town, Block B', city: 'Lahore', country: 'Pakistan', postalCode: '54700', phone: '+92 312 4443322' }
+      ]
+    },
+    {
+      id: 'c6',
+      name: 'Sara Sheikh',
+      email: 'sara.s@example.com',
+      phone: '+92 301 9988776',
+      joinedDate: '2026-03-01',
+      status: 'Inactive',
+      totalOrders: 1,
+      totalSpent: 45.00,
+      tags: ['Cables'],
+      notes: 'One returned/cancelled order.',
+      addresses: [
+        { id: 'a7', isDefault: true, label: 'Home', recipientName: 'Sara Sheikh', street: 'Clifton Block 2', city: 'Karachi', country: 'Pakistan', postalCode: '75600', phone: '+92 301 9988776' }
+      ]
+    },
+    {
+      id: 'c7',
+      name: 'Usman Ghani',
+      email: 'usman.ghani@example.com',
+      phone: '+92 334 1122334',
+      joinedDate: '2026-04-18',
+      status: 'Active',
+      totalOrders: 3,
+      totalSpent: 620.00,
+      tags: ['Gaming', 'Razer Fan'],
+      addresses: [
+        { id: 'a8', isDefault: true, label: 'Home', recipientName: 'Usman Ghani', street: 'Bahria Town Phase 7', city: 'Rawalpindi', country: 'Pakistan', postalCode: '46000', phone: '+92 334 1122334' }
+      ]
+    },
+    {
+      id: 'c8',
+      name: 'Ayesha Siddiqui',
+      email: 'ayesha.s@example.com',
+      phone: '+92 313 7788990',
+      joinedDate: '2025-06-15',
+      status: 'VIP',
+      totalOrders: 8,
+      totalSpent: 3450.00,
+      tags: ['VIP', 'Tablet Accessories', 'Apple Ecosystem'],
+      notes: 'Consistently buys flagship accessories.',
+      addresses: [
+        { id: 'a9', isDefault: true, label: 'Home', recipientName: 'Ayesha Siddiqui', street: 'Hayatabad Phase 4', city: 'Peshawar', country: 'Pakistan', postalCode: '25000', phone: '+92 313 7788990' }
+      ]
+    },
+    {
+      id: 'c9',
+      name: 'Omer Farooq',
+      email: 'omer.f@example.com',
+      phone: '+92 322 3344556',
+      joinedDate: '2026-06-22',
+      status: 'Active',
+      totalOrders: 2,
+      totalSpent: 185.00,
+      tags: ['Wearables'],
+      addresses: [
+        { id: 'a10', isDefault: true, label: 'Home', recipientName: 'Omer Farooq', street: 'Satellite Town', city: 'Gujranwala', country: 'Pakistan', postalCode: '52250', phone: '+92 322 3344556' }
+      ]
+    },
+    {
+      id: 'c10',
+      name: 'Hina Javed',
+      email: 'hina.javed@example.com',
+      phone: '+92 302 6655443',
+      joinedDate: '2026-08-30',
+      status: 'New',
+      totalOrders: 1,
+      totalSpent: 280.00,
+      tags: ['Podcasting', 'First Time Buyer'],
+      addresses: [
+        { id: 'a11', isDefault: true, label: 'Home', recipientName: 'Hina Javed', street: 'Cantt Area', city: 'Sialkot', country: 'Pakistan', postalCode: '51310', phone: '+92 302 6655443' }
+      ]
+    },
+    {
+      id: 'c11',
+      name: 'Daniyal Mirza',
+      email: 'daniyal.m@example.com',
+      phone: '+92 344 8877665',
+      joinedDate: '2026-09-01',
+      status: 'New',
+      totalOrders: 1,
+      totalSpent: 62.00,
+      tags: ['Power Banks'],
+      addresses: [
+        { id: 'a12', isDefault: true, label: 'Home', recipientName: 'Daniyal Mirza', street: 'Wapda Town', city: 'Multan', country: 'Pakistan', postalCode: '60000', phone: '+92 344 8877665' }
+      ]
+    },
+    {
+      id: 'c12',
+      name: 'Khadija Rehman',
+      email: 'khadija.r@example.com',
+      phone: '+92 300 4455667',
+      joinedDate: '2026-07-08',
+      status: 'Active',
+      totalOrders: 2,
+      totalSpent: 460.00,
+      tags: ['Audio', 'E-readers'],
+      addresses: [
+        { id: 'a13', isDefault: true, label: 'Home', recipientName: 'Khadija Rehman', street: 'University Town', city: 'Peshawar', country: 'Pakistan', postalCode: '25000', phone: '+92 300 4455667' }
+      ]
+    }
+  ]);
+
+  // Customer Query & Mutation Methods
+  getCustomerById(id: string): AdminCustomer | undefined {
+    return this.customers().find(c => c.id === id);
+  }
+
+  getCustomerOrders(customerEmail: string): AdminOrder[] {
+    const normalized = customerEmail.toLowerCase().trim();
+    return this.orders().filter(o => o.customerEmail.toLowerCase().trim() === normalized);
+  }
+
+  addCustomer(customer: Omit<AdminCustomer, 'id' | 'totalOrders' | 'totalSpent'>): void {
+    const newCust: AdminCustomer = {
+      ...customer,
+      id: `c-${Date.now()}`,
+      totalOrders: 0,
+      totalSpent: 0
+    };
+    this.customers.update(list => [newCust, ...list]);
+  }
+
+  updateCustomer(id: string, updates: Partial<AdminCustomer>): void {
+    this.customers.update(list =>
+      list.map(c => (c.id === id ? { ...c, ...updates } : c))
+    );
+  }
+
+  deleteCustomer(id: string): void {
+    this.customers.update(list => list.filter(c => c.id !== id));
+  }
+
+  deleteMultipleCustomers(ids: string[]): void {
+    const idSet = new Set(ids);
+    this.customers.update(list => list.filter(c => !idSet.has(c.id)));
+  }
+
+  addCustomerTag(customerId: string, tag: string): void {
+    const cleanTag = tag.trim();
+    if (!cleanTag) return;
+    this.customers.update(list =>
+      list.map(c => {
+        if (c.id !== customerId) return c;
+        if (c.tags.includes(cleanTag)) return c;
+        return { ...c, tags: [...c.tags, cleanTag] };
+      })
+    );
+  }
+
+  removeCustomerTag(customerId: string, tag: string): void {
+    this.customers.update(list =>
+      list.map(c => {
+        if (c.id !== customerId) return c;
+        return { ...c, tags: c.tags.filter(t => t !== tag) };
+      })
+    );
+  }
+
+  addCustomerAddress(customerId: string, address: Omit<CustomerAddress, 'id'>): void {
+    const newAddress: CustomerAddress = {
+      ...address,
+      id: `addr-${Date.now()}`
+    };
+    this.customers.update(list =>
+      list.map(c => {
+        if (c.id !== customerId) return c;
+        const updatedAddresses = address.isDefault
+          ? c.addresses.map(a => ({ ...a, isDefault: false }))
+          : [...c.addresses];
+        return { ...c, addresses: [...updatedAddresses, newAddress] };
       })
     );
   }

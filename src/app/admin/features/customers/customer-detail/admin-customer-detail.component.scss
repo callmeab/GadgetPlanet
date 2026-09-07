@@ -1,0 +1,870 @@
+@use '../../../styles/admin-variables' as *;
+
+.admin-customer-detail-page {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// ── 1. Breadcrumb & Navigation ──────────────────────────────
+.detail-nav-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: $admin-text-secondary;
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: $admin-text-secondary;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color $admin-transition-fast;
+
+    .back-icon {
+      width: 16px;
+      height: 16px;
+    }
+
+    &:hover {
+      color: $admin-primary;
+    }
+  }
+
+  .breadcrumb-separator {
+    color: $admin-text-muted;
+  }
+
+  .breadcrumb-current {
+    color: $admin-text-primary;
+    font-weight: 600;
+  }
+}
+
+// ── 2. Header Section ───────────────────────────────────────
+.detail-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $admin-space-4;
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: $admin-space-4 $admin-space-5;
+  box-shadow: $admin-shadow-xs;
+
+  .header-main-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .customer-avatar-lg {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+    }
+
+    .header-text-block {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .name-status-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+
+        .customer-title {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: $admin-text-primary;
+          margin: 0;
+          letter-spacing: -0.02em;
+        }
+      }
+
+      .meta-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8125rem;
+        color: $admin-text-secondary;
+
+        .customer-id-tag {
+          font-family: monospace;
+          background: $admin-bg-muted;
+          padding: 1px 6px;
+          border-radius: 4px;
+          font-size: 0.75rem;
+        }
+
+        .meta-dot {
+          color: $admin-text-muted;
+        }
+      }
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+// ── Buttons ─────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: $admin-inner-radius;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+  user-select: none;
+  text-decoration: none;
+  white-space: nowrap;
+
+  .btn-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  &.btn-primary {
+    background: $admin-primary;
+    color: #ffffff;
+
+    &:hover {
+      background: $admin-primary-hover;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    }
+  }
+
+  &.btn-secondary {
+    background: $admin-bg-surface;
+    color: $admin-text-primary;
+    border-color: $admin-border;
+
+    &:hover {
+      background: $admin-bg-muted;
+      border-color: #D1D5DB;
+    }
+  }
+
+  &.btn-danger-outline {
+    background: transparent;
+    color: #DC2626;
+    border-color: #FECACA;
+
+    &:hover {
+      background: rgba(220, 38, 38, 0.08);
+      border-color: #DC2626;
+    }
+  }
+
+  &.btn-danger {
+    background: #DC2626;
+    color: #ffffff;
+
+    &:hover {
+      background: #B91C1C;
+    }
+  }
+
+  &.btn-sm {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 0.8125rem;
+  }
+}
+
+// ── 3. 3-KPI Stats Cards Row ────────────────────────────────
+.stats-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $admin-space-4;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: $admin-bg-surface;
+    border: 1px solid $admin-border;
+    border-radius: $admin-card-radius;
+    padding: $admin-space-4 $admin-space-5;
+    box-shadow: $admin-shadow-xs;
+    transition: transform $admin-transition-fast, box-shadow $admin-transition-fast;
+
+    &:hover {
+      box-shadow: $admin-shadow-sm;
+      transform: translateY(-1px);
+    }
+
+    .stat-icon-wrapper {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      .stat-svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      &.icon-orders {
+        background: rgba(37, 99, 235, 0.1);
+        color: $admin-primary;
+      }
+
+      &.icon-ltv {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+      }
+
+      &.icon-aov {
+        background: rgba(124, 58, 237, 0.1);
+        color: #7C3AED;
+      }
+    }
+
+    .stat-body {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $admin-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .stat-value-group {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex-wrap: wrap;
+
+        .stat-num {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: $admin-text-primary;
+          line-height: 1.2;
+
+          &.text-success {
+            color: #059669;
+          }
+        }
+
+        .stat-sub {
+          font-size: 0.75rem;
+          color: $admin-text-muted;
+        }
+      }
+    }
+  }
+}
+
+// ── 4. Two-Column Layout Grid ───────────────────────────────
+.customer-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: $admin-space-4;
+  align-items: start;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Common Card Panel Styles ────────────────────────────────
+.card-panel {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  box-shadow: $admin-shadow-xs;
+  overflow: hidden;
+
+  .card-panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid $admin-border;
+
+    .panel-header-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .panel-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: $admin-text-primary;
+        margin: 0;
+      }
+
+      .panel-count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1px 8px;
+        border-radius: 999px;
+        background: $admin-bg-muted;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $admin-text-secondary;
+      }
+    }
+
+    .panel-subtitle {
+      font-size: 0.8125rem;
+      color: $admin-text-secondary;
+      margin: 4px 0 0 0;
+    }
+
+    &.address-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+}
+
+// ── Main Column (Left) ──────────────────────────────────────
+.main-column {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+}
+
+// Order History Panel
+.order-history-panel {
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    text-align: left;
+
+    thead {
+      background: $admin-bg-page;
+      border-bottom: 1px solid $admin-border;
+
+      th {
+        padding: 10px 14px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $admin-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+
+        &.text-right {
+          text-align: right;
+          padding-right: 18px;
+        }
+      }
+    }
+
+    tbody {
+      .table-row {
+        border-bottom: 1px solid $admin-border-subtle;
+        transition: background-color $admin-transition-fast;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background-color: #F8FAFC;
+        }
+
+        td {
+          padding: 12px 14px;
+          vertical-align: middle;
+          color: $admin-text-primary;
+
+          &.text-right {
+            text-align: right;
+            padding-right: 18px;
+          }
+        }
+      }
+    }
+  }
+
+  .td-order-num {
+    .order-link {
+      font-weight: 600;
+      color: $admin-primary;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .td-date,
+  .td-items {
+    font-size: 0.8125rem;
+    color: $admin-text-secondary;
+  }
+
+  .empty-orders-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 36px 20px;
+
+    .empty-mini-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: $admin-bg-muted;
+      color: $admin-text-muted;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .empty-orders-text {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: $admin-text-primary;
+      margin: 0 0 4px 0;
+    }
+
+    .empty-orders-sub {
+      font-size: 0.8125rem;
+      color: $admin-text-secondary;
+      margin: 0;
+    }
+  }
+}
+
+// Staff Notes Panel
+.staff-notes-panel {
+  .notes-body {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .notes-textarea {
+      width: 100%;
+      padding: 12px;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      border: 1px solid $admin-border;
+      border-radius: $admin-inner-radius;
+      background: #ffffff;
+      color: $admin-text-primary;
+      resize: vertical;
+      font-family: inherit;
+      transition: all $admin-transition-fast;
+
+      &:focus {
+        outline: none;
+        border-color: $admin-primary;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+
+      &::placeholder {
+        color: $admin-text-muted;
+      }
+    }
+
+    .notes-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+
+      .notes-help {
+        font-size: 0.75rem;
+        color: $admin-text-muted;
+      }
+    }
+  }
+}
+
+// ── Sidebar Column (Right) ──────────────────────────────────
+.sidebar-column {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+}
+
+// Contact Panel
+.contact-panel {
+  .contact-card-content {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+
+    .contact-entry {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .contact-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $admin-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .contact-link {
+        font-size: 0.875rem;
+        color: $admin-primary;
+        text-decoration: none;
+        word-break: break-all;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
+      .status-quick-select {
+        height: 36px;
+        padding: 0 10px;
+        font-size: 0.8125rem;
+        border: 1px solid $admin-border;
+        border-radius: $admin-inner-radius;
+        background: $admin-bg-page;
+        color: $admin-text-primary;
+        font-weight: 500;
+        cursor: pointer;
+        width: 100%;
+        transition: border-color $admin-transition-fast;
+
+        &:focus {
+          outline: none;
+          border-color: $admin-primary;
+        }
+      }
+    }
+  }
+}
+
+// Tags Panel
+.tags-panel {
+  .tags-body {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .tags-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 28px;
+
+      .tag-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        background: rgba(37, 99, 235, 0.08);
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: $admin-primary;
+
+        .btn-remove-tag {
+          border: none;
+          background: transparent;
+          color: $admin-primary;
+          cursor: pointer;
+          font-size: 0.875rem;
+          line-height: 1;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          &:hover {
+            color: #DC2626;
+          }
+        }
+      }
+
+      .no-tags-msg {
+        font-size: 0.8125rem;
+        color: $admin-text-muted;
+        font-style: italic;
+      }
+    }
+
+    .add-tag-field {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .tag-input {
+        flex: 1;
+        height: 34px;
+        padding: 0 10px;
+        font-size: 0.8125rem;
+        border: 1px solid $admin-border;
+        border-radius: $admin-inner-radius;
+        background: #ffffff;
+        color: $admin-text-primary;
+
+        &:focus {
+          outline: none;
+          border-color: $admin-primary;
+        }
+      }
+    }
+  }
+}
+
+// Addresses Panel
+.addresses-panel {
+  .addresses-list {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .address-item-card {
+      padding: 12px;
+      border: 1px solid $admin-border;
+      border-radius: $admin-inner-radius;
+      background: $admin-bg-page;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      &.is-default-address {
+        border-color: rgba(37, 99, 235, 0.3);
+        background: rgba(37, 99, 235, 0.02);
+      }
+
+      .address-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .address-label-wrap {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+
+          .address-label-badge {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: $admin-text-secondary;
+          }
+
+          .default-badge {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.1);
+            color: #059669;
+            padding: 1px 6px;
+            border-radius: 999px;
+          }
+        }
+      }
+
+      .address-card-body {
+        font-size: 0.8125rem;
+        line-height: 1.4;
+
+        .recipient-name {
+          font-weight: 600;
+          color: $admin-text-primary;
+          margin: 0;
+        }
+
+        .address-line {
+          color: $admin-text-secondary;
+          margin: 1px 0;
+        }
+
+        .address-phone {
+          color: $admin-text-muted;
+          margin: 2px 0 0 0;
+          font-size: 0.75rem;
+        }
+      }
+    }
+
+    .no-addresses-block {
+      text-align: center;
+      padding: 16px 0;
+
+      .no-addresses-text {
+        font-size: 0.8125rem;
+        color: $admin-text-muted;
+        margin-bottom: 8px;
+      }
+    }
+  }
+}
+
+// ── Modals & Dialog Styles ──────────────────────────────────
+.edit-customer-form,
+.address-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  .form-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+
+    @media (max-width: 540px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .form-label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: $admin-text-primary;
+    }
+
+    .form-input,
+    .form-select {
+      height: 38px;
+      padding: 0 12px;
+      font-size: 0.875rem;
+      border: 1px solid $admin-border;
+      border-radius: $admin-inner-radius;
+      background: #ffffff;
+      color: $admin-text-primary;
+      transition: all $admin-transition-fast;
+
+      &:focus {
+        outline: none;
+        border-color: $admin-primary;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+
+      &.input-error {
+        border-color: #EF4444;
+      }
+    }
+
+    .field-error {
+      font-size: 0.75rem;
+      color: #EF4444;
+      font-weight: 500;
+    }
+  }
+
+  .checkbox-group {
+    margin-top: 4px;
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8125rem;
+      color: $admin-text-primary;
+      cursor: pointer;
+    }
+  }
+}
+
+.admin-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: $admin-primary;
+}
+
+.modal-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+.delete-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 0;
+
+  .warning-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.1);
+    color: #DC2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+
+    .warning-svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .delete-msg {
+    font-size: 0.9375rem;
+    color: $admin-text-primary;
+    margin: 0 0 6px 0;
+    line-height: 1.4;
+  }
+
+  .delete-submsg {
+    font-size: 0.8125rem;
+    color: $admin-text-muted;
+    margin: 0;
+  }
+}

@@ -1,0 +1,1141 @@
+@use '../../styles/admin-variables' as *;
+
+.admin-customers-page {
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-4;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+// ── 1. Page Header ──────────────────────────────────────────
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $admin-space-4;
+
+  .header-left {
+    .title-with-badge {
+      display: flex;
+      align-items: center;
+      gap: $admin-space-3;
+
+      .page-title {
+        font-size: 1.625rem;
+        font-weight: 700;
+        color: $admin-text-primary;
+        margin: 0;
+        letter-spacing: -0.02em;
+      }
+
+      .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        border-radius: 999px;
+        background: $admin-bg-muted;
+        color: $admin-text-secondary;
+        border: 1px solid $admin-border;
+      }
+    }
+
+    .page-subtitle {
+      font-size: 0.875rem;
+      color: $admin-text-secondary;
+      margin: 4px 0 0 0;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-3;
+  }
+}
+
+// ── Buttons ─────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: $admin-inner-radius;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all $admin-transition-fast;
+  user-select: none;
+  white-space: nowrap;
+
+  .btn-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  &.btn-primary {
+    background: $admin-primary;
+    color: #ffffff;
+
+    &:hover {
+      background: $admin-primary-hover;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+    }
+  }
+
+  &.btn-secondary {
+    background: $admin-bg-surface;
+    color: $admin-text-primary;
+    border-color: $admin-border;
+
+    &:hover {
+      background: $admin-bg-muted;
+      border-color: #D1D5DB;
+    }
+  }
+
+  &.btn-danger {
+    background: #DC2626;
+    color: #ffffff;
+
+    &:hover {
+      background: #B91C1C;
+    }
+  }
+
+  &.btn-sm {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 0.8125rem;
+  }
+}
+
+// ── 2. Status Filter Tabs Nav ───────────────────────────────
+.customer-tabs-nav {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: 4px;
+  box-shadow: $admin-shadow-xs;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  .tabs-track {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: max-content;
+  }
+
+  .tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: $admin-text-secondary;
+    background: transparent;
+    border: none;
+    border-radius: $admin-inner-radius;
+    cursor: pointer;
+    transition: all $admin-transition-fast;
+
+    &:hover {
+      color: $admin-text-primary;
+      background: $admin-bg-muted;
+    }
+
+    &.tab-active {
+      color: $admin-primary;
+      background: rgba(37, 99, 235, 0.08);
+      font-weight: 600;
+    }
+
+    .tab-count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px 6px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      border-radius: 999px;
+      background: $admin-bg-muted;
+      color: $admin-text-muted;
+
+      &.badge-active {
+        background: $admin-primary;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+// ── 3. Filters & Search Card ────────────────────────────────
+.filters-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: $admin-space-4;
+  box-shadow: $admin-shadow-xs;
+  display: flex;
+  flex-direction: column;
+  gap: $admin-space-3;
+
+  .filters-row {
+    display: flex;
+    align-items: center;
+    gap: $admin-space-3;
+    width: 100%;
+  }
+
+  .search-field {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      width: 16px;
+      height: 16px;
+      color: $admin-text-muted;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 38px;
+      padding: 0 36px 0 38px;
+      font-size: 0.875rem;
+      border: 1px solid $admin-border;
+      border-radius: $admin-inner-radius;
+      background: $admin-bg-page;
+      color: $admin-text-primary;
+      transition: all $admin-transition-fast;
+
+      &:focus {
+        outline: none;
+        border-color: $admin-primary;
+        background: $admin-bg-surface;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+
+      &::placeholder {
+        color: $admin-text-muted;
+      }
+    }
+
+    .clear-search-btn {
+      position: absolute;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border: none;
+      background: transparent;
+      color: $admin-text-muted;
+      font-size: 1.25rem;
+      cursor: pointer;
+      border-radius: 50%;
+
+      &:hover {
+        background: $admin-bg-muted;
+        color: $admin-text-primary;
+      }
+    }
+  }
+
+  .filters-summary-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: $admin-space-2;
+    padding-top: $admin-space-2;
+    border-top: 1px solid $admin-border-subtle;
+    font-size: 0.8125rem;
+    color: $admin-text-secondary;
+
+    .active-chips {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+
+      .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 8px;
+        background: $admin-bg-muted;
+        border: 1px solid $admin-border;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        color: $admin-text-primary;
+
+        button {
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          font-size: 0.875rem;
+          line-height: 1;
+          color: $admin-text-muted;
+
+          &:hover {
+            color: #DC2626;
+          }
+        }
+      }
+
+      .btn-clear-all {
+        border: none;
+        background: transparent;
+        color: $admin-primary;
+        font-size: 0.75rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: underline;
+
+        &:hover {
+          color: $admin-primary-hover;
+        }
+      }
+    }
+  }
+}
+
+// ── 4. Bulk Actions Bar ─────────────────────────────────────
+.bulk-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $admin-space-3;
+  padding: 10px 16px;
+  background: #1E293B;
+  color: #F8FAFC;
+  border-radius: $admin-card-radius;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  animation: slideDown 0.2s ease-out;
+
+  .bulk-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .bulk-count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: $admin-primary;
+      color: #ffffff;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .bulk-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+  }
+
+  .bulk-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .btn-bulk-action {
+      background: #334155;
+      color: #F8FAFC;
+      border-color: #475569;
+
+      &:hover {
+        background: #475569;
+      }
+    }
+
+    .btn-bulk-danger {
+      background: rgba(220, 38, 38, 0.2);
+      color: #FCA5A5;
+      border-color: rgba(220, 38, 38, 0.4);
+
+      &:hover {
+        background: #DC2626;
+        color: #ffffff;
+      }
+    }
+
+    .btn-bulk-clear {
+      background: transparent;
+      color: #94A3B8;
+      border-color: transparent;
+
+      &:hover {
+        color: #F8FAFC;
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .bulk-status-dropdown-container {
+    position: relative;
+  }
+
+  .dropdown-menu-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 50;
+    min-width: 180px;
+    background: #ffffff;
+    border: 1px solid $admin-border;
+    border-radius: $admin-inner-radius;
+    box-shadow: $admin-shadow-lg;
+    padding: 4px;
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      font-size: 0.8125rem;
+      color: $admin-text-primary;
+      cursor: pointer;
+      border-radius: 4px;
+      text-align: left;
+
+      &:hover {
+        background: $admin-bg-muted;
+      }
+
+      .status-indicator-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+
+        &.dot-active { background: #10B981; }
+        &.dot-vip { background: #F59E0B; }
+        &.dot-inactive { background: #EF4444; }
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// ── 5. Main Table Card & Desktop Table ───────────────────────
+.table-container-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  box-shadow: $admin-shadow-xs;
+  overflow: hidden;
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    text-align: left;
+
+    thead {
+      background: $admin-bg-page;
+      border-bottom: 1px solid $admin-border;
+
+      th {
+        padding: 10px 14px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: $admin-text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+        user-select: none;
+
+        &.th-checkbox {
+          width: 44px;
+          text-align: center;
+          padding-left: 16px;
+        }
+
+        &.th-sortable {
+          cursor: pointer;
+          transition: color $admin-transition-fast;
+
+          &:hover {
+            color: $admin-text-primary;
+          }
+
+          .th-content {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+          }
+
+          .sort-icon {
+            font-size: 0.6875rem;
+            color: $admin-text-muted;
+
+            &.sort-active {
+              color: $admin-primary;
+            }
+          }
+        }
+
+        &.text-right {
+          text-align: right;
+          padding-right: 20px;
+        }
+      }
+    }
+
+    tbody {
+      .table-row {
+        border-bottom: 1px solid $admin-border-subtle;
+        cursor: pointer;
+        transition: background-color $admin-transition-fast;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background-color: #F8FAFC;
+        }
+
+        &.row-selected {
+          background-color: rgba(37, 99, 235, 0.04);
+        }
+
+        td {
+          padding: 12px 14px;
+          vertical-align: middle;
+          color: $admin-text-primary;
+
+          &.td-checkbox {
+            text-align: center;
+            padding-left: 16px;
+          }
+
+          &.text-right {
+            text-align: right;
+            padding-right: 20px;
+          }
+        }
+      }
+    }
+  }
+}
+
+// ── Checkboxes ──────────────────────────────────────────────
+.admin-checkbox {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: $admin-primary;
+}
+
+// ── Customer Avatar & Info Group ────────────────────────────
+.customer-info-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .customer-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+
+    &.sm-avatar {
+      width: 32px;
+      height: 32px;
+      font-size: 0.75rem;
+    }
+  }
+
+  .customer-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .customer-name-link {
+      font-weight: 600;
+      color: $admin-text-primary;
+      text-decoration: none;
+      transition: color $admin-transition-fast;
+
+      &:hover {
+        color: $admin-primary;
+        text-decoration: underline;
+      }
+    }
+
+    .customer-id-sub {
+      font-size: 0.6875rem;
+      color: $admin-text-muted;
+      font-family: monospace;
+    }
+  }
+}
+
+// ── Contact Details Cell ────────────────────────────────────
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  .contact-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8125rem;
+
+    .contact-icon {
+      width: 14px;
+      height: 14px;
+      color: $admin-text-muted;
+      flex-shrink: 0;
+    }
+
+    .contact-link {
+      color: $admin-text-primary;
+      text-decoration: none;
+
+      &:hover {
+        color: $admin-primary;
+        text-decoration: underline;
+      }
+    }
+
+    &.phone-sub {
+      color: $admin-text-secondary;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// ── Other Cell Styles ───────────────────────────────────────
+.location-text {
+  font-size: 0.8125rem;
+  color: $admin-text-secondary;
+}
+
+.orders-count-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  background: $admin-bg-muted;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $admin-text-primary;
+}
+
+.spent-value {
+  font-weight: 600;
+  color: #059669;
+}
+
+.date-text {
+  font-size: 0.8125rem;
+  color: $admin-text-secondary;
+}
+
+// ── Actions Cell ────────────────────────────────────────────
+.action-buttons-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  .btn-icon-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    color: $admin-text-secondary;
+    cursor: pointer;
+    transition: all $admin-transition-fast;
+
+    &:hover {
+      background: $admin-bg-muted;
+      color: $admin-text-primary;
+    }
+
+    &.text-danger:hover {
+      background: rgba(220, 38, 38, 0.1);
+      color: #DC2626;
+    }
+  }
+}
+
+// ── 6. Mobile Stacked Cards (<768px) ────────────────────────
+.mobile-only-cards {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-only-table {
+    display: none;
+  }
+
+  .mobile-only-cards {
+    display: flex;
+    flex-direction: column;
+    padding: $admin-space-3;
+    gap: $admin-space-3;
+  }
+
+  .customer-card-item {
+    background: #ffffff;
+    border: 1px solid $admin-border;
+    border-radius: $admin-card-radius;
+    padding: $admin-space-4;
+    display: flex;
+    flex-direction: column;
+    gap: $admin-space-3;
+    transition: box-shadow $admin-transition-fast;
+
+    &:active {
+      background: #F8FAFC;
+    }
+
+    &.card-selected {
+      border-color: $admin-primary;
+      background: rgba(37, 99, 235, 0.02);
+    }
+
+    .card-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+
+      .card-identity {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .card-name-block {
+          display: flex;
+          flex-direction: column;
+
+          .card-customer-name {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: $admin-text-primary;
+            margin: 0;
+          }
+
+          .card-customer-id {
+            font-size: 0.6875rem;
+            color: $admin-text-muted;
+            font-family: monospace;
+          }
+        }
+      }
+    }
+
+    .card-details-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 0.8125rem;
+      background: $admin-bg-page;
+      padding: 8px 12px;
+      border-radius: $admin-inner-radius;
+
+      .card-detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .detail-label {
+          font-size: 0.6875rem;
+          color: $admin-text-muted;
+          text-transform: uppercase;
+        }
+
+        .detail-val {
+          font-weight: 500;
+          color: $admin-text-primary;
+        }
+      }
+    }
+
+    .card-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+      padding: 6px 0;
+      border-top: 1px solid $admin-border-subtle;
+      border-bottom: 1px solid $admin-border-subtle;
+
+      .metric-box {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .metric-title {
+          font-size: 0.6875rem;
+          color: $admin-text-muted;
+          text-transform: uppercase;
+        }
+
+        .metric-num {
+          font-size: 0.875rem;
+          font-weight: 700;
+          color: $admin-text-primary;
+
+          &.text-success {
+            color: #059669;
+          }
+        }
+      }
+    }
+
+    .card-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .btn-card-action {
+        flex: 1;
+        min-height: 44px; /* Ensure 44px touch target */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        background: $admin-bg-surface;
+        border: 1px solid $admin-border;
+        border-radius: $admin-inner-radius;
+        color: $admin-text-primary;
+        cursor: pointer;
+
+        &:active {
+          background: $admin-bg-muted;
+        }
+
+        &.text-danger {
+          color: #DC2626;
+
+          &:active {
+            background: rgba(220, 38, 38, 0.08);
+          }
+        }
+      }
+    }
+  }
+}
+
+// ── 7. Pagination Footer ────────────────────────────────────
+.table-pagination-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $admin-space-3;
+  padding: 12px 16px;
+  background: $admin-bg-surface;
+  border-top: 1px solid $admin-border;
+
+  .pagination-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.8125rem;
+    color: $admin-text-secondary;
+
+    .page-size-select {
+      height: 32px;
+      padding: 0 8px;
+      font-size: 0.8125rem;
+      border: 1px solid $admin-border;
+      border-radius: $admin-inner-radius;
+      background: $admin-bg-surface;
+      color: $admin-text-primary;
+      cursor: pointer;
+    }
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .page-nav-btn {
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid $admin-border;
+      background: $admin-bg-surface;
+      color: $admin-text-primary;
+      border-radius: $admin-inner-radius;
+      font-size: 0.8125rem;
+      cursor: pointer;
+      transition: all $admin-transition-fast;
+
+      &:hover:not(:disabled) {
+        background: $admin-bg-muted;
+        border-color: #D1D5DB;
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .page-numbers {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+
+      .page-num-btn {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 6px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: $admin-text-secondary;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        border-radius: $admin-inner-radius;
+        cursor: pointer;
+
+        &:hover {
+          background: $admin-bg-muted;
+          color: $admin-text-primary;
+        }
+
+        &.active-page {
+          background: $admin-primary;
+          color: #ffffff;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+// ── 8. Empty State Card ─────────────────────────────────────
+.empty-state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 48px 24px;
+
+  .empty-icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: $admin-bg-muted;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+
+    .empty-svg {
+      width: 32px;
+      height: 32px;
+      color: $admin-text-muted;
+    }
+  }
+
+  .empty-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: $admin-text-primary;
+    margin: 0 0 8px 0;
+  }
+
+  .empty-desc {
+    font-size: 0.875rem;
+    color: $admin-text-secondary;
+    max-width: 440px;
+    margin: 0 0 20px 0;
+    line-height: 1.5;
+  }
+}
+
+// ── 9. Forms & Dialogs inside Modal ─────────────────────────
+.customer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .form-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: $admin-text-primary;
+    }
+
+    .form-input,
+    .form-select {
+      height: 38px;
+      padding: 0 12px;
+      font-size: 0.875rem;
+      border: 1px solid $admin-border;
+      border-radius: $admin-inner-radius;
+      background: #ffffff;
+      color: $admin-text-primary;
+      transition: all $admin-transition-fast;
+
+      &:focus {
+        outline: none;
+        border-color: $admin-primary;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      }
+
+      &.input-error {
+        border-color: #EF4444;
+      }
+    }
+
+    .form-help {
+      font-size: 0.75rem;
+      color: $admin-text-muted;
+      margin-top: 2px;
+    }
+
+    .field-error {
+      font-size: 0.75rem;
+      color: #EF4444;
+      font-weight: 500;
+    }
+  }
+
+  .section-divider {
+    display: flex;
+    align-items: center;
+    margin: 8px 0 0 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid $admin-border;
+
+    .divider-title {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: $admin-text-primary;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+  }
+}
+
+.modal-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+.delete-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 0;
+
+  .warning-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.1);
+    color: #DC2626;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+
+    .warning-svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .delete-msg {
+    font-size: 0.9375rem;
+    color: $admin-text-primary;
+    margin: 0 0 6px 0;
+    line-height: 1.4;
+  }
+
+  .delete-submsg {
+    font-size: 0.8125rem;
+    color: $admin-text-muted;
+    margin: 0;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
