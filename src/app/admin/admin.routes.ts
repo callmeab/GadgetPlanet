@@ -4,6 +4,14 @@ import { AdminLayoutComponent } from './layout/admin-layout.component';
 
 export const ADMIN_ROUTES: Routes = [
   {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/admin-login.component').then(
+        m => m.AdminLoginComponent
+      ),
+    title: 'Admin Sign In — GadgetPlanet',
+  },
+  {
     path: '',
     component: AdminLayoutComponent,
     canActivate: [adminAuthGuard],

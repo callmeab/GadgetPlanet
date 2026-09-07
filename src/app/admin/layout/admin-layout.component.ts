@@ -225,7 +225,7 @@ export class AdminLayoutComponent {
   onLogout(): void {
     this.isProfileMenuOpen.set(false);
     this.toastService.info('You have logged out of the Admin session', 'Session Ended');
-    this.router.navigate(['/login']);
+    this.router.navigate(['/admin/login']);
   }
 
   // ── Click Outside Listener ───────────────────────────────────
