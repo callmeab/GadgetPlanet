@@ -194,6 +194,111 @@ export interface CustomerReportRow {
   status: 'Active' | 'VIP' | 'New' | 'Inactive';
 }
 
+export interface AdminGeneralSettings {
+  storeName: string;
+  supportEmail: string;
+  phone: string;
+  websiteUrl: string;
+  currency: string;
+  timezone: string;
+  dateFormat: string;
+  streetAddress: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  orderPrefix: string;
+  maintenanceMode: boolean;
+}
+
+export interface AdminShippingCourier {
+  id: string;
+  name: string;
+  code: string;
+  enabled: boolean;
+  trackingSupported: boolean;
+  apiKeyStatus: 'connected' | 'configured' | 'disconnected';
+  deliveryTime: string;
+}
+
+export interface AdminShippingSettings {
+  standardDeliveryRate: number;
+  standardDeliveryEstimate: string;
+  expressDeliveryRate: number;
+  expressDeliveryEstimate: string;
+  freeShippingEnabled: boolean;
+  freeShippingThreshold: number;
+  warehouseAddress: string;
+  warehouseCity: string;
+  internationalShipping: boolean;
+  weightUnit: 'kg' | 'lbs';
+  dimensionUnit: 'cm' | 'in';
+  couriers: AdminShippingCourier[];
+}
+
+export interface AdminPaymentSettings {
+  codEnabled: boolean;
+  codAdditionalFee: number;
+  codInstructions: string;
+  cardPaymentsEnabled: boolean;
+  stripeTestMode: boolean;
+  stripePublishableKey: string;
+  stripeSecretKeyMasked: string;
+  jazzCashEnabled: boolean;
+  jazzCashMerchantId: string;
+  easypaisaEnabled: boolean;
+  easypaisaStoreId: string;
+  bankTransferEnabled: boolean;
+  bankName: string;
+  bankAccountTitle: string;
+  bankIban: string;
+  bankInstructions: string;
+  captureMode: 'automatic' | 'manual';
+}
+
+export interface AdminTaxSettings {
+  taxCalculationEnabled: boolean;
+  pricesIncludeTax: boolean;
+  chargeTaxOnShipping: boolean;
+  standardTaxRate: number;
+  reducedTaxRate: number;
+  digitalServicesTaxRate: number;
+  taxRegistrationNumber: string;
+  taxBusinessName: string;
+}
+
+export type AdminUserRole = 'Super Admin' | 'Store Manager' | 'Support Agent' | 'Inventory Manager';
+export type AdminUserStatus = 'Active' | 'Invited' | 'Suspended';
+
+export interface AdminTeamUser {
+  id: string;
+  name: string;
+  email: string;
+  role: AdminUserRole;
+  status: AdminUserStatus;
+  lastActive: string;
+  avatarUrl?: string;
+  phone?: string;
+}
+
+export interface AdminNotificationSettings {
+  notifyCustomerOrderPlaced: boolean;
+  notifyCustomerOrderShipped: boolean;
+  notifyCustomerOrderDelivered: boolean;
+  notifyCustomerOrderCancelled: boolean;
+  notifyCustomerReviewRequest: boolean;
+  adminAlertNewOrder: boolean;
+  adminAlertLowStock: boolean;
+  adminAlertNewReview: boolean;
+  adminAlertDailyDigest: boolean;
+  adminNotificationEmail: string;
+  smsNotificationsEnabled: boolean;
+  smsSenderId: string;
+  senderFromName: string;
+  senderReplyToEmail: string;
+  emailFooterText: string;
+}
+
 export interface ProductVariantOption {
   name: string;
   values: string[];
@@ -2550,6 +2655,266 @@ export class AdminMockDataService {
       acquisitionChart,
       rows,
     };
+  }
+
+  // ==========================================
+  // SETTINGS STATE & METHODS
+  // ==========================================
+
+  private generalSettingsState = signal<AdminGeneralSettings>({
+    storeName: 'GadgetPlanet Store',
+    supportEmail: 'support@gadgetplanet.com',
+    phone: '+92 (300) 847-2910',
+    websiteUrl: 'https://gadgetplanet.pk',
+    currency: 'USD ($)',
+    timezone: 'UTC+05:00 (Islamabad, Karachi)',
+    dateFormat: 'YYYY-MM-DD',
+    streetAddress: 'Plot 42-B, Commercial Zone, Phase 5, DHA',
+    city: 'Lahore',
+    state: 'Punjab',
+    postalCode: '54000',
+    country: 'Pakistan',
+    orderPrefix: 'ORD-',
+    maintenanceMode: false,
+  });
+
+  private shippingSettingsState = signal<AdminShippingSettings>({
+    standardDeliveryRate: 4.99,
+    standardDeliveryEstimate: '2-4 business days',
+    expressDeliveryRate: 9.99,
+    expressDeliveryEstimate: '1-2 business days',
+    freeShippingEnabled: true,
+    freeShippingThreshold: 50.00,
+    warehouseAddress: 'Building 12, Logistic Hub, Sundar Industrial Estate',
+    warehouseCity: 'Lahore',
+    internationalShipping: false,
+    weightUnit: 'kg',
+    dimensionUnit: 'cm',
+    couriers: [
+      {
+        id: 'c-tcs',
+        name: 'TCS Express',
+        code: 'TCS',
+        enabled: true,
+        trackingSupported: true,
+        apiKeyStatus: 'connected',
+        deliveryTime: '24-48 Hours',
+      },
+      {
+        id: 'c-leopard',
+        name: 'Leopard Courier',
+        code: 'LCS',
+        enabled: true,
+        trackingSupported: true,
+        apiKeyStatus: 'connected',
+        deliveryTime: '2-3 Business Days',
+      },
+      {
+        id: 'c-dhl',
+        name: 'DHL Express Worldwide',
+        code: 'DHL',
+        enabled: false,
+        trackingSupported: true,
+        apiKeyStatus: 'configured',
+        deliveryTime: '3-5 Business Days',
+      },
+      {
+        id: 'c-fedex',
+        name: 'FedEx Priority',
+        code: 'FEDEX',
+        enabled: false,
+        trackingSupported: true,
+        apiKeyStatus: 'disconnected',
+        deliveryTime: '2-4 Business Days',
+      },
+    ],
+  });
+
+  private paymentSettingsState = signal<AdminPaymentSettings>({
+    codEnabled: true,
+    codAdditionalFee: 0,
+    codInstructions: 'Please keep exact cash ready upon parcel delivery.',
+    cardPaymentsEnabled: true,
+    stripeTestMode: true,
+    stripePublishableKey: 'pk_test_51Mz842KL90qA284bVnx719QzLa...',
+    stripeSecretKeyMasked: 'sk_test_•••••••••••••••••••••••••••••••••••••',
+    jazzCashEnabled: true,
+    jazzCashMerchantId: 'MC-8492019',
+    easypaisaEnabled: true,
+    easypaisaStoreId: 'EP-559281',
+    bankTransferEnabled: true,
+    bankName: 'Meezan Bank Ltd',
+    bankAccountTitle: 'GadgetPlanet E-Commerce SMC-Pvt Ltd',
+    bankIban: 'PK82MEZN0001092837192831',
+    bankInstructions: 'Please upload or WhatsApp payment screenshot with your Order ID reference.',
+    captureMode: 'automatic',
+  });
+
+  private taxSettingsState = signal<AdminTaxSettings>({
+    taxCalculationEnabled: true,
+    pricesIncludeTax: true,
+    chargeTaxOnShipping: false,
+    standardTaxRate: 17.0,
+    reducedTaxRate: 5.0,
+    digitalServicesTaxRate: 13.0,
+    taxRegistrationNumber: 'NTN-7492810-4',
+    taxBusinessName: 'GadgetPlanet Retail Private Limited',
+  });
+
+  private teamUsersState = signal<AdminTeamUser[]>([
+    {
+      id: 'usr-1',
+      name: 'Ali Raza',
+      email: 'ali.raza@gadgetplanet.com',
+      role: 'Super Admin',
+      status: 'Active',
+      lastActive: 'Just now',
+      phone: '+92 300 1122334',
+    },
+    {
+      id: 'usr-2',
+      name: 'Sara Khan',
+      email: 'sara.khan@gadgetplanet.com',
+      role: 'Store Manager',
+      status: 'Active',
+      lastActive: '25 mins ago',
+      phone: '+92 321 4455667',
+    },
+    {
+      id: 'usr-3',
+      name: 'Usman Ghani',
+      email: 'usman.ghani@gadgetplanet.com',
+      role: 'Inventory Manager',
+      status: 'Active',
+      lastActive: '2 hours ago',
+      phone: '+92 333 7788990',
+    },
+    {
+      id: 'usr-4',
+      name: 'Fatima Noor',
+      email: 'fatima.noor@gadgetplanet.com',
+      role: 'Support Agent',
+      status: 'Active',
+      lastActive: 'Yesterday',
+      phone: '+92 345 9900112',
+    },
+    {
+      id: 'usr-5',
+      name: 'Zainab Qureshi',
+      email: 'zainab.q@gadgetplanet.com',
+      role: 'Support Agent',
+      status: 'Invited',
+      lastActive: 'Pending activation',
+      phone: '+92 312 3344556',
+    },
+  ]);
+
+  private notificationSettingsState = signal<AdminNotificationSettings>({
+    notifyCustomerOrderPlaced: true,
+    notifyCustomerOrderShipped: true,
+    notifyCustomerOrderDelivered: true,
+    notifyCustomerOrderCancelled: true,
+    notifyCustomerReviewRequest: true,
+    adminAlertNewOrder: true,
+    adminAlertLowStock: true,
+    adminAlertNewReview: true,
+    adminAlertDailyDigest: false,
+    adminNotificationEmail: 'admin-alerts@gadgetplanet.com',
+    smsNotificationsEnabled: true,
+    smsSenderId: 'GADGETPLNT',
+    senderFromName: 'GadgetPlanet Store',
+    senderReplyToEmail: 'support@gadgetplanet.com',
+    emailFooterText: 'GadgetPlanet Tech Hub — Premium Electronics & Accessories Delivered Nationwide.',
+  });
+
+  // Settings getters & updates
+  getGeneralSettings(): AdminGeneralSettings {
+    return { ...this.generalSettingsState() };
+  }
+
+  updateGeneralSettings(data: Partial<AdminGeneralSettings>): AdminGeneralSettings {
+    const updated = { ...this.generalSettingsState(), ...data };
+    this.generalSettingsState.set(updated);
+    return { ...updated };
+  }
+
+  getShippingSettings(): AdminShippingSettings {
+    const s = this.shippingSettingsState();
+    return { ...s, couriers: s.couriers.map(c => ({ ...c })) };
+  }
+
+  updateShippingSettings(data: Partial<AdminShippingSettings>): AdminShippingSettings {
+    const current = this.shippingSettingsState();
+    const updated = { ...current, ...data };
+    if (data.couriers) {
+      updated.couriers = data.couriers.map(c => ({ ...c }));
+    }
+    this.shippingSettingsState.set(updated);
+    return this.getShippingSettings();
+  }
+
+  getPaymentSettings(): AdminPaymentSettings {
+    return { ...this.paymentSettingsState() };
+  }
+
+  updatePaymentSettings(data: Partial<AdminPaymentSettings>): AdminPaymentSettings {
+    const updated = { ...this.paymentSettingsState(), ...data };
+    this.paymentSettingsState.set(updated);
+    return { ...updated };
+  }
+
+  getTaxSettings(): AdminTaxSettings {
+    return { ...this.taxSettingsState() };
+  }
+
+  updateTaxSettings(data: Partial<AdminTaxSettings>): AdminTaxSettings {
+    const updated = { ...this.taxSettingsState(), ...data };
+    this.taxSettingsState.set(updated);
+    return { ...updated };
+  }
+
+  getAdminUsers(): AdminTeamUser[] {
+    return this.teamUsersState().map(u => ({ ...u }));
+  }
+
+  addAdminUser(userData: Omit<AdminTeamUser, 'id' | 'lastActive'>): AdminTeamUser {
+    const newUser: AdminTeamUser = {
+      ...userData,
+      id: `usr-${Date.now()}`,
+      lastActive: 'Just invited',
+    };
+    this.teamUsersState.update(users => [...users, newUser]);
+    return { ...newUser };
+  }
+
+  updateAdminUser(id: string, partial: Partial<AdminTeamUser>): AdminTeamUser | null {
+    let result: AdminTeamUser | null = null;
+    this.teamUsersState.update(users =>
+      users.map(u => {
+        if (u.id === id) {
+          result = { ...u, ...partial };
+          return result;
+        }
+        return u;
+      })
+    );
+    return result;
+  }
+
+  deleteAdminUser(id: string): boolean {
+    const before = this.teamUsersState().length;
+    this.teamUsersState.update(users => users.filter(u => u.id !== id));
+    return this.teamUsersState().length < before;
+  }
+
+  getNotificationSettings(): AdminNotificationSettings {
+    return { ...this.notificationSettingsState() };
+  }
+
+  updateNotificationSettings(data: Partial<AdminNotificationSettings>): AdminNotificationSettings {
+    const updated = { ...this.notificationSettingsState(), ...data };
+    this.notificationSettingsState.set(updated);
+    return { ...updated };
   }
 }
 

@@ -1,0 +1,1417 @@
+<div class="admin-settings-container">
+  <!-- Page Header -->
+  <header class="settings-header">
+    <div class="header-left">
+      <div class="title-row">
+        <h1 class="page-title">Store Settings</h1>
+        <span class="header-badge">{{ activeTabItem().label }}</span>
+      </div>
+      <p class="page-subtitle">
+        Manage store identity, delivery parameters, payment gateways, tax compliance, staff roles, and automated notifications.
+      </p>
+    </div>
+  </header>
+
+  <!-- Mobile Sub-Nav Dropdown Selector (<768px) -->
+  <div class="mobile-subnav-bar">
+    <label for="mobileSettingsTab" class="mobile-subnav-label">
+      <svg class="icon-nav" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+      </svg>
+      <span>Active Section:</span>
+    </label>
+    <div class="select-wrapper">
+      <select
+        id="mobileSettingsTab"
+        class="mobile-tab-select"
+        [value]="activeTab()"
+        (change)="onMobileSelectChange($event)">
+        @for (tab of tabs; track tab.id) {
+          <option [value]="tab.id">{{ tab.label }}</option>
+        }
+      </select>
+      <svg class="select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Settings Main Layout (Desktop: 2-column sidebar | Mobile: stacked content) -->
+  <div class="settings-layout">
+    <!-- Desktop Left Sub-Nav Sidebar -->
+    <aside class="settings-sidebar">
+      <nav class="settings-nav" aria-label="Settings sections">
+        @for (tab of tabs; track tab.id) {
+          <button
+            type="button"
+            class="nav-tab-btn"
+            [class.active]="activeTab() === tab.id"
+            (click)="selectTab(tab.id)">
+            <span class="tab-icon-wrap">
+              @switch (tab.icon) {
+                @case ('store') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                }
+                @case ('truck') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="3" width="15" height="13"/>
+                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
+                    <circle cx="5.5" cy="18.5" r="2.5"/>
+                    <circle cx="18.5" cy="18.5" r="2.5"/>
+                  </svg>
+                }
+                @case ('card') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                    <line x1="1" y1="10" x2="23" y2="10"/>
+                  </svg>
+                }
+                @case ('receipt') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/>
+                    <line x1="8" y1="7" x2="16" y2="7"/>
+                    <line x1="8" y1="11" x2="16" y2="11"/>
+                    <line x1="8" y1="15" x2="12" y2="15"/>
+                  </svg>
+                }
+                @case ('users') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                }
+                @case ('bell') {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                }
+              }
+            </span>
+            <div class="tab-text">
+              <span class="tab-label">{{ tab.label }}</span>
+              <span class="tab-desc">{{ tab.description }}</span>
+            </div>
+            <div class="active-indicator"></div>
+          </button>
+        }
+      </nav>
+    </aside>
+
+    <!-- Right Content Panel -->
+    <main class="settings-content-panel">
+      <!-- TAB 1: GENERAL STORE INFO -->
+      @if (activeTab() === 'general') {
+        <div class="settings-section-group">
+          <!-- Store Identity Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Store Identity</h2>
+              <p class="card-desc">Basic details about your online store visible to customers and search engines.</p>
+            </div>
+            <div class="card-body form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="storeName">Store Name</label>
+                <input
+                  id="storeName"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="generalForm().storeName"
+                  (input)="markDirty()"
+                  placeholder="GadgetPlanet Store" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="websiteUrl">Public Website URL</label>
+                <input
+                  id="websiteUrl"
+                  type="url"
+                  class="form-control"
+                  [(ngModel)]="generalForm().websiteUrl"
+                  (input)="markDirty()"
+                  placeholder="https://gadgetplanet.pk" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="supportEmail">Customer Support Email</label>
+                <input
+                  id="supportEmail"
+                  type="email"
+                  class="form-control"
+                  [(ngModel)]="generalForm().supportEmail"
+                  (input)="markDirty()"
+                  placeholder="support@gadgetplanet.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="storePhone">Customer Support Phone</label>
+                <input
+                  id="storePhone"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="generalForm().phone"
+                  (input)="markDirty()"
+                  placeholder="+92 (300) 847-2910" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Regional & Localization Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Regional & Localization</h2>
+              <p class="card-desc">Currency, timezone, and calendar formats used across your store.</p>
+            </div>
+            <div class="card-body form-grid-3">
+              <div class="form-group">
+                <label class="form-label" for="currency">Store Currency</label>
+                <select
+                  id="currency"
+                  class="form-select"
+                  [(ngModel)]="generalForm().currency"
+                  (change)="markDirty()">
+                  <option value="USD ($)">USD ($) — United States Dollar</option>
+                  <option value="PKR (Rs.)">PKR (Rs.) — Pakistani Rupee</option>
+                  <option value="EUR (€)">EUR (€) — Euro</option>
+                  <option value="GBP (£)">GBP (£) — British Pound</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="timezone">Store Timezone</label>
+                <select
+                  id="timezone"
+                  class="form-select"
+                  [(ngModel)]="generalForm().timezone"
+                  (change)="markDirty()">
+                  <option value="UTC+05:00 (Islamabad, Karachi)">UTC+05:00 (Islamabad, Karachi)</option>
+                  <option value="UTC+00:00 (London, GMT)">UTC+00:00 (London, GMT)</option>
+                  <option value="UTC-05:00 (Eastern Time)">UTC-05:00 (Eastern Time)</option>
+                  <option value="UTC-08:00 (Pacific Time)">UTC-08:00 (Pacific Time)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="dateFormat">Date Display Format</label>
+                <select
+                  id="dateFormat"
+                  class="form-select"
+                  [(ngModel)]="generalForm().dateFormat"
+                  (change)="markDirty()">
+                  <option value="YYYY-MM-DD">YYYY-MM-DD (2026-09-07)</option>
+                  <option value="DD/MM/YYYY">DD/MM/YYYY (07/09/2026)</option>
+                  <option value="MMM D, YYYY">MMM D, YYYY (Sep 7, 2026)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Physical Store Address Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Store Physical Address</h2>
+              <p class="card-desc">Official headquarters and registered business address for invoices.</p>
+            </div>
+            <div class="card-body">
+              <div class="form-group mb-3">
+                <label class="form-label" for="streetAddress">Street Address</label>
+                <input
+                  id="streetAddress"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="generalForm().streetAddress"
+                  (input)="markDirty()"
+                  placeholder="Plot 42-B, Commercial Zone, Phase 5, DHA" />
+              </div>
+              <div class="form-grid-4">
+                <div class="form-group">
+                  <label class="form-label" for="city">City</label>
+                  <input
+                    id="city"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="generalForm().city"
+                    (input)="markDirty()"
+                    placeholder="Lahore" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="state">State / Province</label>
+                  <input
+                    id="state"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="generalForm().state"
+                    (input)="markDirty()"
+                    placeholder="Punjab" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="postalCode">Postal Code</label>
+                  <input
+                    id="postalCode"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="generalForm().postalCode"
+                    (input)="markDirty()"
+                    placeholder="54000" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="country">Country</label>
+                  <input
+                    id="country"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="generalForm().country"
+                    (input)="markDirty()"
+                    placeholder="Pakistan" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Operations & Maintenance Mode Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Operations & Storefront Status</h2>
+              <p class="card-desc">Control order sequencing and public storefront visibility.</p>
+            </div>
+            <div class="card-body form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="orderPrefix">Order ID Prefix</label>
+                <div class="input-prefix-wrap">
+                  <input
+                    id="orderPrefix"
+                    type="text"
+                    class="form-control font-mono"
+                    [(ngModel)]="generalForm().orderPrefix"
+                    (input)="markDirty()"
+                    placeholder="ORD-" />
+                  <span class="preview-text">Preview: <strong>{{ generalForm().orderPrefix }}10492</strong></span>
+                </div>
+              </div>
+              <div class="toggle-control-box">
+                <div class="toggle-text">
+                  <span class="toggle-title">Maintenance Mode</span>
+                  <span class="toggle-caption">
+                    When active, public visitors see a "Under Scheduled Maintenance" splash screen.
+                  </span>
+                </div>
+                <label class="switch-toggle" for="maintenanceToggle">
+                  <input
+                    id="maintenanceToggle"
+                    type="checkbox"
+                    [(ngModel)]="generalForm().maintenanceMode"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- TAB 2: SHIPPING SETTINGS -->
+      @if (activeTab() === 'shipping') {
+        <div class="settings-section-group">
+          <!-- Delivery Rates Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Domestic Delivery Rates</h2>
+              <p class="card-desc">Configure checkout shipping rates and estimated fulfillment timetables.</p>
+            </div>
+            <div class="card-body form-grid-2">
+              <div class="rate-config-card">
+                <div class="rate-header">
+                  <span class="rate-badge">Standard Delivery</span>
+                  <span class="rate-price">${{ shippingForm().standardDeliveryRate | number:'1.2-2' }}</span>
+                </div>
+                <div class="form-group mb-2">
+                  <label class="form-label" for="stdRate">Flat Rate Fee ($)</label>
+                  <input
+                    id="stdRate"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="form-control"
+                    [(ngModel)]="shippingForm().standardDeliveryRate"
+                    (input)="markDirty()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="stdEst">Delivery Timeframe</label>
+                  <input
+                    id="stdEst"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="shippingForm().standardDeliveryEstimate"
+                    (input)="markDirty()"
+                    placeholder="2-4 business days" />
+                </div>
+              </div>
+
+              <div class="rate-config-card">
+                <div class="rate-header">
+                  <span class="rate-badge express">Express Courier</span>
+                  <span class="rate-price">${{ shippingForm().expressDeliveryRate | number:'1.2-2' }}</span>
+                </div>
+                <div class="form-group mb-2">
+                  <label class="form-label" for="expRate">Flat Rate Fee ($)</label>
+                  <input
+                    id="expRate"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    class="form-control"
+                    [(ngModel)]="shippingForm().expressDeliveryRate"
+                    (input)="markDirty()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="expEst">Delivery Timeframe</label>
+                  <input
+                    id="expEst"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="shippingForm().expressDeliveryEstimate"
+                    (input)="markDirty()"
+                    placeholder="1-2 business days" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Free Shipping Rule Row -->
+            <div class="card-body-nested">
+              <div class="toggle-control-box">
+                <div class="toggle-text">
+                  <span class="toggle-title">Free Shipping Threshold</span>
+                  <span class="toggle-caption">Automatically waive domestic delivery fees when cart subtotal meets target.</span>
+                </div>
+                <label class="switch-toggle" for="freeShippingToggle">
+                  <input
+                    id="freeShippingToggle"
+                    type="checkbox"
+                    [(ngModel)]="shippingForm().freeShippingEnabled"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              @if (shippingForm().freeShippingEnabled) {
+                <div class="form-group mt-3" style="max-width: 320px;">
+                  <label class="form-label" for="freeThreshold">Minimum Order Amount for Free Shipping ($)</label>
+                  <input
+                    id="freeThreshold"
+                    type="number"
+                    step="1"
+                    min="1"
+                    class="form-control"
+                    [(ngModel)]="shippingForm().freeShippingThreshold"
+                    (input)="markDirty()" />
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Integrated Couriers Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Courier & Dispatch Integrations</h2>
+              <p class="card-desc">Enable third-party logistics partners for automated tracking number generation.</p>
+            </div>
+            <div class="card-body courier-list">
+              @for (courier of shippingForm().couriers; track courier.id; let i = $index) {
+                <div class="courier-item" [class.enabled]="courier.enabled">
+                  <div class="courier-info">
+                    <div class="courier-title-row">
+                      <span class="courier-name">{{ courier.name }}</span>
+                      <span class="courier-code">{{ courier.code }}</span>
+                      <span
+                        class="status-chip"
+                        [class.connected]="courier.apiKeyStatus === 'connected'"
+                        [class.configured]="courier.apiKeyStatus === 'configured'"
+                        [class.disconnected]="courier.apiKeyStatus === 'disconnected'">
+                        {{ courier.apiKeyStatus | titlecase }}
+                      </span>
+                    </div>
+                    <div class="courier-meta">
+                      <span>Est: {{ courier.deliveryTime }}</span>
+                      <span class="bullet">•</span>
+                      <span>Real-time API Tracking: {{ courier.trackingSupported ? 'Supported' : 'Manual' }}</span>
+                    </div>
+                  </div>
+                  <div class="courier-action">
+                    <label class="switch-toggle" [attr.for]="'courier-toggle-' + courier.id">
+                      <input
+                        [id]="'courier-toggle-' + courier.id"
+                        type="checkbox"
+                        [checked]="courier.enabled"
+                        (change)="toggleCourier(i)" />
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Origin Warehouse & Units Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Fulfillment Origin & Packaging</h2>
+              <p class="card-desc">Default shipping address for parcel pickups and global physical units.</p>
+            </div>
+            <div class="card-body form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="whAddress">Warehouse Pickup Address</label>
+                <input
+                  id="whAddress"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="shippingForm().warehouseAddress"
+                  (input)="markDirty()" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="whCity">Fulfillment City</label>
+                <input
+                  id="whCity"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="shippingForm().warehouseCity"
+                  (input)="markDirty()" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="weightUnit">Default Weight Unit</label>
+                <select
+                  id="weightUnit"
+                  class="form-select"
+                  [(ngModel)]="shippingForm().weightUnit"
+                  (change)="markDirty()">
+                  <option value="kg">Kilograms (kg)</option>
+                  <option value="lbs">Pounds (lbs)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="dimUnit">Default Dimension Unit</label>
+                <select
+                  id="dimUnit"
+                  class="form-select"
+                  [(ngModel)]="shippingForm().dimensionUnit"
+                  (change)="markDirty()">
+                  <option value="cm">Centimeters (cm)</option>
+                  <option value="in">Inches (in)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- TAB 3: PAYMENT METHODS -->
+      @if (activeTab() === 'payment') {
+        <div class="settings-section-group">
+          <!-- Cash on Delivery Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <div class="header-with-toggle">
+                <div>
+                  <h2 class="card-title">Cash on Delivery (COD)</h2>
+                  <p class="card-desc">Allow customers to pay in cash upon courier parcel arrival.</p>
+                </div>
+                <label class="switch-toggle" for="codToggle">
+                  <input
+                    id="codToggle"
+                    type="checkbox"
+                    [(ngModel)]="paymentForm().codEnabled"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+            @if (paymentForm().codEnabled) {
+              <div class="card-body form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="codFee">Additional COD Surcharge ($)</label>
+                  <input
+                    id="codFee"
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    class="form-control"
+                    [(ngModel)]="paymentForm().codAdditionalFee"
+                    (input)="markDirty()" />
+                  <span class="form-hint">Set to 0 for free COD handling.</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="codInst">Customer Checkout Instructions</label>
+                  <input
+                    id="codInst"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="paymentForm().codInstructions"
+                    (input)="markDirty()" />
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Credit & Debit Cards (Stripe) Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <div class="header-with-toggle">
+                <div>
+                  <h2 class="card-title">Credit & Debit Cards (Stripe)</h2>
+                  <p class="card-desc">Accept Visa, Mastercard, American Express, and UnionPay globally.</p>
+                </div>
+                <label class="switch-toggle" for="stripeToggle">
+                  <input
+                    id="stripeToggle"
+                    type="checkbox"
+                    [(ngModel)]="paymentForm().cardPaymentsEnabled"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+            @if (paymentForm().cardPaymentsEnabled) {
+              <div class="card-body">
+                <div class="toggle-control-box mb-3">
+                  <div class="toggle-text">
+                    <span class="toggle-title">Sandbox / Test Mode</span>
+                    <span class="toggle-caption">Simulate card charges with test card numbers without real funds.</span>
+                  </div>
+                  <label class="switch-toggle" for="testModeToggle">
+                    <input
+                      id="testModeToggle"
+                      type="checkbox"
+                      [(ngModel)]="paymentForm().stripeTestMode"
+                      (change)="markDirty()" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label class="form-label" for="pubKey">Stripe Publishable Key</label>
+                    <input
+                      id="pubKey"
+                      type="text"
+                      class="form-control font-mono"
+                      [(ngModel)]="paymentForm().stripePublishableKey"
+                      (input)="markDirty()" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="secKey">Stripe Secret Key</label>
+                    <div class="password-input-wrap">
+                      <input
+                        id="secKey"
+                        [type]="showStripeKey() ? 'text' : 'password'"
+                        class="form-control font-mono"
+                        [(ngModel)]="paymentForm().stripeSecretKeyMasked"
+                        (input)="markDirty()" />
+                      <button
+                        type="button"
+                        class="btn-eye"
+                        (click)="togglePasswordVisibility()"
+                        [attr.aria-label]="showStripeKey() ? 'Hide key' : 'Show key'">
+                        @if (showStripeKey()) {
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                          </svg>
+                        } @else {
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                          </svg>
+                        }
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Mobile Wallets (JazzCash & Easypaisa) Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Mobile Wallets (JazzCash & Easypaisa)</h2>
+              <p class="card-desc">Accept instant mobile account and QR payments across Pakistan.</p>
+            </div>
+            <div class="card-body form-grid-2">
+              <div class="wallet-box">
+                <div class="header-with-toggle mb-2">
+                  <span class="wallet-badge jc">JazzCash Gateway</span>
+                  <label class="switch-toggle" for="jcToggle">
+                    <input
+                      id="jcToggle"
+                      type="checkbox"
+                      [(ngModel)]="paymentForm().jazzCashEnabled"
+                      (change)="markDirty()" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="jcMerchant">JazzCash Merchant ID</label>
+                  <input
+                    id="jcMerchant"
+                    type="text"
+                    class="form-control font-mono"
+                    [(ngModel)]="paymentForm().jazzCashMerchantId"
+                    (input)="markDirty()" />
+                </div>
+              </div>
+
+              <div class="wallet-box">
+                <div class="header-with-toggle mb-2">
+                  <span class="wallet-badge ep">Easypaisa Online</span>
+                  <label class="switch-toggle" for="epToggle">
+                    <input
+                      id="epToggle"
+                      type="checkbox"
+                      [(ngModel)]="paymentForm().easypaisaEnabled"
+                      (change)="markDirty()" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="epStore">Easypaisa Store ID</label>
+                  <input
+                    id="epStore"
+                    type="text"
+                    class="form-control font-mono"
+                    [(ngModel)]="paymentForm().easypaisaStoreId"
+                    (input)="markDirty()" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Direct Bank Wire Transfer Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <div class="header-with-toggle">
+                <div>
+                  <h2 class="card-title">Direct Bank Wire Transfer</h2>
+                  <p class="card-desc">Allow corporate buyers and large orders to pay via IBAN wire transfer.</p>
+                </div>
+                <label class="switch-toggle" for="bankToggle">
+                  <input
+                    id="bankToggle"
+                    type="checkbox"
+                    [(ngModel)]="paymentForm().bankTransferEnabled"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+            @if (paymentForm().bankTransferEnabled) {
+              <div class="card-body form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="bankName">Bank Name</label>
+                  <input
+                    id="bankName"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="paymentForm().bankName"
+                    (input)="markDirty()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="accountTitle">Account Title</label>
+                  <input
+                    id="accountTitle"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="paymentForm().bankAccountTitle"
+                    (input)="markDirty()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="iban">International Bank Account Number (IBAN)</label>
+                  <input
+                    id="iban"
+                    type="text"
+                    class="form-control font-mono"
+                    [(ngModel)]="paymentForm().bankIban"
+                    (input)="markDirty()" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="bankInstructions">Payment Instructions</label>
+                  <input
+                    id="bankInstructions"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="paymentForm().bankInstructions"
+                    (input)="markDirty()" />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- TAB 4: TAX SETTINGS -->
+      @if (activeTab() === 'tax') {
+        <div class="settings-section-group">
+          <!-- Tax Calculation Configuration Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <div class="header-with-toggle">
+                <div>
+                  <h2 class="card-title">Tax Calculation & Pricing</h2>
+                  <p class="card-desc">Control automated GST / VAT charges on store orders.</p>
+                </div>
+                <label class="switch-toggle" for="taxToggle">
+                  <input
+                    id="taxToggle"
+                    type="checkbox"
+                    [(ngModel)]="taxForm().taxCalculationEnabled"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+            @if (taxForm().taxCalculationEnabled) {
+              <div class="card-body">
+                <div class="toggle-control-box mb-3">
+                  <div class="toggle-text">
+                    <span class="toggle-title">Catalog Prices Include Tax (VAT-Inclusive)</span>
+                    <span class="toggle-caption">All listed store prices already incorporate sales tax in checkout subtotals.</span>
+                  </div>
+                  <label class="switch-toggle" for="inclusiveTaxToggle">
+                    <input
+                      id="inclusiveTaxToggle"
+                      type="checkbox"
+                      [(ngModel)]="taxForm().pricesIncludeTax"
+                      (change)="markDirty()" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-control-box">
+                  <div class="toggle-text">
+                    <span class="toggle-title">Charge Tax on Courier Shipping Fees</span>
+                    <span class="toggle-caption">Apply the standard tax rate to delivery charges during checkout.</span>
+                  </div>
+                  <label class="switch-toggle" for="shippingTaxToggle">
+                    <input
+                      id="shippingTaxToggle"
+                      type="checkbox"
+                      [(ngModel)]="taxForm().chargeTaxOnShipping"
+                      (change)="markDirty()" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Tax Rates Card -->
+          @if (taxForm().taxCalculationEnabled) {
+            <div class="settings-card">
+              <div class="card-header">
+                <h2 class="card-title">Standard Tax Rates</h2>
+                <p class="card-desc">Percentage rates charged according to product category classifications.</p>
+              </div>
+              <div class="card-body form-grid-3">
+                <div class="form-group">
+                  <label class="form-label" for="stdTaxRate">Standard Rate (%)</label>
+                  <div class="input-suffix-wrap">
+                    <input
+                      id="stdTaxRate"
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      max="100"
+                      class="form-control"
+                      [(ngModel)]="taxForm().standardTaxRate"
+                      (input)="markDirty()" />
+                    <span class="suffix-text">%</span>
+                  </div>
+                  <span class="form-hint">Applies to general consumer electronics.</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="redTaxRate">Reduced Rate (%)</label>
+                  <div class="input-suffix-wrap">
+                    <input
+                      id="redTaxRate"
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      max="100"
+                      class="form-control"
+                      [(ngModel)]="taxForm().reducedTaxRate"
+                      (input)="markDirty()" />
+                    <span class="suffix-text">%</span>
+                  </div>
+                  <span class="form-hint">Applies to educational & medical accessories.</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="digTaxRate">Digital Services Rate (%)</label>
+                  <div class="input-suffix-wrap">
+                    <input
+                      id="digTaxRate"
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      max="100"
+                      class="form-control"
+                      [(ngModel)]="taxForm().digitalServicesTaxRate"
+                      (input)="markDirty()" />
+                    <span class="suffix-text">%</span>
+                  </div>
+                  <span class="form-hint">Software warranties & extended support.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tax Registration Details Card -->
+            <div class="settings-card">
+              <div class="card-header">
+                <h2 class="card-title">Legal Registration & Invoice Details</h2>
+                <p class="card-desc">Government tax IDs printed on digital and physical packing receipts.</p>
+              </div>
+              <div class="card-body form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="ntnNumber">National Tax Number (NTN) / STRN</label>
+                  <input
+                    id="ntnNumber"
+                    type="text"
+                    class="form-control font-mono"
+                    [(ngModel)]="taxForm().taxRegistrationNumber"
+                    (input)="markDirty()"
+                    placeholder="NTN-7492810-4" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="taxBizName">Registered Taxpayer Legal Entity Name</label>
+                  <input
+                    id="taxBizName"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="taxForm().taxBusinessName"
+                    (input)="markDirty()"
+                    placeholder="GadgetPlanet Retail Private Limited" />
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- TAB 5: ADMIN USERS & ROLES -->
+      @if (activeTab() === 'users') {
+        <div class="settings-section-group">
+          <!-- Team Members Card -->
+          <div class="settings-card">
+            <div class="card-header flex-between">
+              <div>
+                <h2 class="card-title">Team Members & Access</h2>
+                <p class="card-desc">Manage administrative staff accounts and their system permissions.</p>
+              </div>
+              <button
+                type="button"
+                class="btn-primary-action"
+                (click)="openInviteModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/>
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                <span>+ Invite Admin</span>
+              </button>
+            </div>
+
+            <!-- Desktop Table View (>=768px) -->
+            <div class="desktop-user-table-wrap">
+              <table class="user-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Last Active</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (user of teamUsers(); track user.id) {
+                    <tr>
+                      <td>
+                        <div class="user-profile-cell">
+                          <div class="user-avatar">{{ getUserInitials(user.name) }}</div>
+                          <div class="user-info">
+                            <span class="user-name">{{ user.name }}</span>
+                            <span class="user-email">{{ user.email }}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span
+                          class="role-badge"
+                          [class.role-super]="user.role === 'Super Admin'"
+                          [class.role-manager]="user.role === 'Store Manager'"
+                          [class.role-inventory]="user.role === 'Inventory Manager'"
+                          [class.role-support]="user.role === 'Support Agent'">
+                          {{ user.role }}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          class="status-chip"
+                          [class.active]="user.status === 'Active'"
+                          [class.invited]="user.status === 'Invited'"
+                          [class.suspended]="user.status === 'Suspended'">
+                          {{ user.status }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="activity-text">{{ user.lastActive }}</span>
+                      </td>
+                      <td class="text-right">
+                        <div class="user-actions">
+                          @if (user.role !== 'Super Admin') {
+                            <button
+                              type="button"
+                              class="btn-text-action"
+                              (click)="toggleUserStatus(user)">
+                              {{ user.status === 'Active' ? 'Suspend' : 'Activate' }}
+                            </button>
+                            <button
+                              type="button"
+                              class="btn-icon-danger"
+                              (click)="deleteUser(user)"
+                              aria-label="Remove user">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                              </svg>
+                            </button>
+                          } @else {
+                            <span class="text-muted small">Owner</span>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Mobile Stacked User Cards (<768px) -->
+            <div class="mobile-user-list">
+              @for (user of teamUsers(); track user.id) {
+                <div class="user-card-item">
+                  <div class="user-card-top">
+                    <div class="user-avatar">{{ getUserInitials(user.name) }}</div>
+                    <div class="user-card-meta">
+                      <span class="user-name">{{ user.name }}</span>
+                      <span class="user-email">{{ user.email }}</span>
+                    </div>
+                    <span
+                      class="status-chip"
+                      [class.active]="user.status === 'Active'"
+                      [class.invited]="user.status === 'Invited'"
+                      [class.suspended]="user.status === 'Suspended'">
+                      {{ user.status }}
+                    </span>
+                  </div>
+                  <div class="user-card-mid">
+                    <span
+                      class="role-badge"
+                      [class.role-super]="user.role === 'Super Admin'"
+                      [class.role-manager]="user.role === 'Store Manager'"
+                      [class.role-inventory]="user.role === 'Inventory Manager'"
+                      [class.role-support]="user.role === 'Support Agent'">
+                      {{ user.role }}
+                    </span>
+                    <span class="activity-text">Active: {{ user.lastActive }}</span>
+                  </div>
+                  @if (user.role !== 'Super Admin') {
+                    <div class="user-card-actions">
+                      <button
+                        type="button"
+                        class="btn-mobile-secondary"
+                        (click)="toggleUserStatus(user)">
+                        {{ user.status === 'Active' ? 'Suspend Account' : 'Activate Account' }}
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-mobile-danger"
+                        (click)="deleteUser(user)">
+                        Remove
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Role Permissions Overview Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Role Permissions Summary</h2>
+              <p class="card-desc">Access privileges mapped across the administrative workspace.</p>
+            </div>
+            <div class="card-body form-grid-2">
+              <div class="role-summary-box">
+                <div class="role-box-title super">Super Admin</div>
+                <p class="role-box-desc">Unrestricted master access: products, orders, financial reports, payment credentials, and team user management.</p>
+              </div>
+              <div class="role-summary-box">
+                <div class="role-box-title manager">Store Manager</div>
+                <p class="role-box-desc">Catalog management, order fulfillment, discount creation, customer profiles, and analytics reports.</p>
+              </div>
+              <div class="role-summary-box">
+                <div class="role-box-title inventory">Inventory Manager</div>
+                <p class="role-box-desc">Stock quantity editing, SKU variants, purchase orders, restock threshold monitoring, and CSV imports.</p>
+              </div>
+              <div class="role-summary-box">
+                <div class="role-box-title support">Support Agent</div>
+                <p class="role-box-desc">Customer order tracking, customer review responses, order status updates, and support notes.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- TAB 6: NOTIFICATIONS -->
+      @if (activeTab() === 'notifications') {
+        <div class="settings-section-group">
+          <!-- Customer Email Notifications Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Customer Transactional Emails</h2>
+              <p class="card-desc">Automated emails dispatched to buyers at critical order lifecycle events.</p>
+            </div>
+            <div class="card-body notification-toggles">
+              <div class="toggle-control-box">
+                <div class="toggle-text">
+                  <span class="toggle-title">Order Confirmation Email</span>
+                  <span class="toggle-caption">Dispatched immediately after checkout with items breakdown and invoice receipt.</span>
+                </div>
+                <label class="switch-toggle" for="notifOrderPlaced">
+                  <input
+                    id="notifOrderPlaced"
+                    type="checkbox"
+                    [(ngModel)]="notificationForm().notifyCustomerOrderPlaced"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <div class="toggle-control-box">
+                <div class="toggle-text">
+                  <span class="toggle-title">Order Shipped & Courier Tracking</span>
+                  <span class="toggle-caption">Includes courier name, tracking number, and track package button link.</span>
+                </div>
+                <label class="switch-toggle" for="notifOrderShipped">
+                  <input
+                    id="notifOrderShipped"
+                    type="checkbox"
+                    [(ngModel)]="notificationForm().notifyCustomerOrderShipped"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <div class="toggle-control-box">
+                <div class="toggle-text">
+                  <span class="toggle-title">Order Delivered Notification</span>
+                  <span class="toggle-caption">Sent upon successful courier delivery confirmation with customer care link.</span>
+                </div>
+                <label class="switch-toggle" for="notifOrderDelivered">
+                  <input
+                    id="notifOrderDelivered"
+                    type="checkbox"
+                    [(ngModel)]="notificationForm().notifyCustomerOrderDelivered"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <div class="toggle-control-box">
+                <div class="toggle-text">
+                  <span class="toggle-title">Order Cancellation & Refund Notice</span>
+                  <span class="toggle-caption">Sent when an order is cancelled or a refund is processed to the original payment method.</span>
+                </div>
+                <label class="switch-toggle" for="notifOrderCancelled">
+                  <input
+                    id="notifOrderCancelled"
+                    type="checkbox"
+                    [(ngModel)]="notificationForm().notifyCustomerOrderCancelled"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+
+              <div class="toggle-control-box">
+                <div class="toggle-text">
+                  <span class="toggle-title">Post-Delivery Review Request</span>
+                  <span class="toggle-caption">Sent 5 days after delivery inviting the customer to leave verified product feedback.</span>
+                </div>
+                <label class="switch-toggle" for="notifReview">
+                  <input
+                    id="notifReview"
+                    type="checkbox"
+                    [(ngModel)]="notificationForm().notifyCustomerReviewRequest"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Internal Staff Alerts Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Staff & Administrative Alerts</h2>
+              <p class="card-desc">Real-time alerts sent to your store operations team.</p>
+            </div>
+            <div class="card-body">
+              <div class="form-group mb-3" style="max-width: 440px;">
+                <label class="form-label" for="alertEmail">Administrative Alert Recipient Email</label>
+                <input
+                  id="alertEmail"
+                  type="email"
+                  class="form-control"
+                  [(ngModel)]="notificationForm().adminNotificationEmail"
+                  (input)="markDirty()"
+                  placeholder="admin-alerts@gadgetplanet.com" />
+              </div>
+
+              <div class="notification-toggles">
+                <div class="toggle-control-box">
+                  <div class="toggle-text">
+                    <span class="toggle-title">New Order Alert</span>
+                    <span class="toggle-caption">Instant notification whenever a new order is completed by a shopper.</span>
+                  </div>
+                  <label class="switch-toggle" for="alertNewOrder">
+                    <input
+                      id="alertNewOrder"
+                      type="checkbox"
+                      [(ngModel)]="notificationForm().adminAlertNewOrder"
+                      (change)="markDirty()" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-control-box">
+                  <div class="toggle-text">
+                    <span class="toggle-title">Low Stock Threshold Warning</span>
+                    <span class="toggle-caption">Alert when any product SKU drops below its configured restock limit.</span>
+                  </div>
+                  <label class="switch-toggle" for="alertLowStock">
+                    <input
+                      id="alertLowStock"
+                      type="checkbox"
+                      [(ngModel)]="notificationForm().adminAlertLowStock"
+                      (change)="markDirty()" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-control-box">
+                  <div class="toggle-text">
+                    <span class="toggle-title">New Customer Review Submitted</span>
+                    <span class="toggle-caption">Prompt staff to inspect and approve customer reviews awaiting moderation.</span>
+                  </div>
+                  <label class="switch-toggle" for="alertReview">
+                    <input
+                      id="alertReview"
+                      type="checkbox"
+                      [(ngModel)]="notificationForm().adminAlertNewReview"
+                      (change)="markDirty()" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+
+                <div class="toggle-control-box">
+                  <div class="toggle-text">
+                    <span class="toggle-title">Daily Sales & Orders Digest</span>
+                    <span class="toggle-caption">Receive an automated executive summary email every midnight.</span>
+                  </div>
+                  <label class="switch-toggle" for="alertDigest">
+                    <input
+                      id="alertDigest"
+                      type="checkbox"
+                      [(ngModel)]="notificationForm().adminAlertDailyDigest"
+                      (change)="markDirty()" />
+                    <span class="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SMS Notifications Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <div class="header-with-toggle">
+                <div>
+                  <h2 class="card-title">SMS & Messaging Gateway</h2>
+                  <p class="card-desc">Send dispatch updates directly to customer phone numbers.</p>
+                </div>
+                <label class="switch-toggle" for="smsToggle">
+                  <input
+                    id="smsToggle"
+                    type="checkbox"
+                    [(ngModel)]="notificationForm().smsNotificationsEnabled"
+                    (change)="markDirty()" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+            @if (notificationForm().smsNotificationsEnabled) {
+              <div class="card-body form-grid-2">
+                <div class="form-group">
+                  <label class="form-label" for="smsSender">Alpha-Numeric Sender ID</label>
+                  <input
+                    id="smsSender"
+                    type="text"
+                    maxlength="11"
+                    class="form-control font-mono"
+                    [(ngModel)]="notificationForm().smsSenderId"
+                    (input)="markDirty()"
+                    placeholder="GADGETPLNT" />
+                  <span class="form-hint">Maximum 11 alphanumeric characters approved by PTA.</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Sender Branding Card -->
+          <div class="settings-card">
+            <div class="card-header">
+              <h2 class="card-title">Sender Identity & Branding</h2>
+              <p class="card-desc">Configure sender metadata shown in the recipient's inbox header.</p>
+            </div>
+            <div class="card-body form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="fromName">Sender "From" Name</label>
+                <input
+                  id="fromName"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="notificationForm().senderFromName"
+                  (input)="markDirty()"
+                  placeholder="GadgetPlanet Store" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="replyTo">Reply-To Email Address</label>
+                <input
+                  id="replyTo"
+                  type="email"
+                  class="form-control"
+                  [(ngModel)]="notificationForm().senderReplyToEmail"
+                  (input)="markDirty()"
+                  placeholder="support@gadgetplanet.com" />
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label" for="footerText">Default Email Footer Disclaimer</label>
+                <input
+                  id="footerText"
+                  type="text"
+                  class="form-control"
+                  [(ngModel)]="notificationForm().emailFooterText"
+                  (input)="markDirty()" />
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Sticky Save Bar -->
+      <div class="sticky-save-bar" [class.dirty]="isDirty()">
+        <div class="save-bar-inner">
+          <div class="dirty-status">
+            @if (isDirty()) {
+              <span class="dirty-dot amber-pulse"></span>
+              <span class="dirty-label">Unsaved changes in {{ activeTabItem().shortLabel }}</span>
+            } @else {
+              <span class="clean-check">✓</span>
+              <span class="clean-label">All changes saved</span>
+            }
+          </div>
+
+          <div class="save-bar-actions">
+            <button
+              type="button"
+              class="btn-discard"
+              [disabled]="!isDirty() || isSaving()"
+              (click)="discardChanges()">
+              Discard
+            </button>
+            <button
+              type="button"
+              class="btn-save-primary"
+              [disabled]="!isDirty() || isSaving()"
+              (click)="saveChanges()">
+              @if (isSaving()) {
+                <span class="btn-spinner"></span>
+                <span>Saving...</span>
+              } @else {
+                <span>Save Changes</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Invite Team User Modal -->
+  @if (showInviteModal()) {
+    <gp-admin-modal
+      [isOpen]="showInviteModal()"
+      title="+ Invite Admin Team Member"
+      (closeModal)="closeInviteModal()">
+      <div class="invite-modal-body">
+        <div class="form-group mb-3">
+          <label class="form-label" for="invName">Full Name *</label>
+          <input
+            id="invName"
+            type="text"
+            class="form-control"
+            [(ngModel)]="inviteForm().name"
+            placeholder="e.g. Asad Mehmood" />
+        </div>
+        <div class="form-group mb-3">
+          <label class="form-label" for="invEmail">Work Email *</label>
+          <input
+            id="invEmail"
+            type="email"
+            class="form-control"
+            [(ngModel)]="inviteForm().email"
+            placeholder="e.g. asad.m@gadgetplanet.com" />
+        </div>
+        <div class="form-group mb-3">
+          <label class="form-label" for="invPhone">Phone Number</label>
+          <input
+            id="invPhone"
+            type="text"
+            class="form-control"
+            [(ngModel)]="inviteForm().phone"
+            placeholder="+92 (300) 000-0000" />
+        </div>
+        <div class="form-group mb-3">
+          <label class="form-label" for="invRole">Assigned Role</label>
+          <select
+            id="invRole"
+            class="form-select"
+            [(ngModel)]="inviteForm().role">
+            <option value="Store Manager">Store Manager (Products, Orders, Customers, Reports)</option>
+            <option value="Inventory Manager">Inventory Manager (Stock & Variants)</option>
+            <option value="Support Agent">Support Agent (Customer Orders & Reviews)</option>
+          </select>
+        </div>
+        <div class="invite-role-info">
+          <p class="small text-muted mb-0">
+            An email invitation with a secure setup link will be dispatched immediately. Access can be revoked anytime.
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" (click)="closeInviteModal()">Cancel</button>
+        <button type="button" class="btn-primary" (click)="submitInviteUser()">Send Invitation</button>
+      </div>
+    </gp-admin-modal>
+  }
+</div>

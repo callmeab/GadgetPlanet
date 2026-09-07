@@ -1,0 +1,1101 @@
+@use '../../styles/admin-variables' as *;
+
+.admin-settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-bottom: 90px; // space for sticky save bar
+}
+
+// ── Header ──────────────────────────────────────────────────
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: $admin-text-primary;
+  letter-spacing: -0.02em;
+}
+
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $admin-primary;
+  background: $admin-primary-subtle;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1px solid $admin-primary-border;
+}
+
+.page-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  color: $admin-text-secondary;
+  max-width: 720px;
+}
+
+// ── Mobile Sub-Nav Selector (<768px) ────────────────────────
+.mobile-subnav-bar {
+  display: none;
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: 12px 14px;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.mobile-subnav-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $admin-text-secondary;
+  white-space: nowrap;
+}
+
+.icon-nav {
+  width: 16px;
+  height: 16px;
+  color: $admin-primary;
+}
+
+.select-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.mobile-tab-select {
+  width: 100%;
+  appearance: none;
+  background: $admin-bg-muted;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  padding: 10px 32px 10px 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $admin-text-primary;
+  cursor: pointer;
+  min-height: 44px; // accessible touch target
+}
+
+.select-chevron {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: $admin-text-muted;
+  pointer-events: none;
+}
+
+// ── Main Layout (Sidebar + Content) ─────────────────────────
+.settings-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+// ── Sidebar Navigation ──────────────────────────────────────
+.settings-sidebar {
+  position: sticky;
+  top: 80px;
+}
+
+.settings-nav {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.nav-tab-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: $admin-inner-radius;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-height: 44px;
+
+  &:hover {
+    background: $admin-bg-muted;
+  }
+
+  &.active {
+    background: $admin-primary-subtle;
+
+    .tab-icon-wrap {
+      color: $admin-primary;
+      background: $admin-bg-surface;
+    }
+
+    .tab-label {
+      color: $admin-primary;
+      font-weight: 600;
+    }
+
+    .active-indicator {
+      opacity: 1;
+      transform: scaleY(1);
+    }
+  }
+}
+
+.tab-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: $admin-bg-muted;
+  color: $admin-text-secondary;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.tab-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.tab-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $admin-text-primary;
+  line-height: 1.25;
+}
+
+.tab-desc {
+  font-size: 0.75rem;
+  color: $admin-text-muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.active-indicator {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: $admin-primary;
+  border-radius: 0 4px 4px 0;
+  opacity: 0;
+  transform: scaleY(0.4);
+  transition: all 0.2s ease;
+}
+
+// ── Content Panel & Cards ───────────────────────────────────
+.settings-content-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-section-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-card {
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-card-radius;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.card-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid $admin-border-subtle;
+
+  &.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $admin-text-primary;
+}
+
+.card-desc {
+  margin: 4px 0 0;
+  font-size: 0.8125rem;
+  color: $admin-text-secondary;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+.card-body-nested {
+  padding: 16px 20px;
+  border-top: 1px solid $admin-border-subtle;
+  background: #FCFDFE;
+}
+
+// ── Form Grids & Layouts ────────────────────────────────────
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.form-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.form-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $admin-text-secondary;
+}
+
+.form-hint {
+  font-size: 0.75rem;
+  color: $admin-text-muted;
+}
+
+.form-control,
+.form-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  font-size: 0.875rem;
+  color: $admin-text-primary;
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  transition: all 0.15s ease;
+  min-height: 40px;
+
+  &:focus {
+    outline: none;
+    border-color: $admin-primary;
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.15);
+  }
+
+  &.font-mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.8125rem;
+  }
+}
+
+.input-prefix-wrap,
+.input-suffix-wrap,
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix-wrap {
+  .preview-text {
+    position: absolute;
+    right: 12px;
+    font-size: 0.75rem;
+    color: $admin-text-muted;
+    pointer-events: none;
+  }
+}
+
+.suffix-text {
+  position: absolute;
+  right: 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $admin-text-muted;
+  pointer-events: none;
+}
+
+.btn-eye {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  padding: 4px;
+  color: $admin-text-muted;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    color: $admin-text-primary;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ── iOS Switch Toggle ───────────────────────────────────────
+.switch-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #E2E8F0;
+    transition: 0.25s;
+    border-radius: 24px;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.25s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  input:checked + .slider {
+    background-color: $admin-primary;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+}
+
+.toggle-control-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  background: $admin-bg-muted;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+}
+
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toggle-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $admin-text-primary;
+}
+
+.toggle-caption {
+  font-size: 0.75rem;
+  color: $admin-text-secondary;
+}
+
+.header-with-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+// ── Rate Cards & Couriers ───────────────────────────────────
+.rate-config-card {
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  padding: 16px;
+  background: #FCFDFE;
+}
+
+.rate-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.rate-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: $admin-status-info-bg;
+  color: $admin-status-info-text;
+
+  &.express {
+    background: rgba(255, 107, 0, 0.1);
+    color: #C2410C;
+  }
+}
+
+.rate-price {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $admin-text-primary;
+}
+
+.courier-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.courier-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  background: $admin-bg-surface;
+  transition: all 0.15s ease;
+
+  &.enabled {
+    border-color: $admin-primary-border;
+    background: #FAFCFF;
+  }
+}
+
+.courier-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.courier-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $admin-text-primary;
+}
+
+.courier-code {
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: $admin-bg-muted;
+  color: $admin-text-secondary;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.courier-meta {
+  font-size: 0.75rem;
+  color: $admin-text-secondary;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-chip {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  text-transform: capitalize;
+
+  &.connected,
+  &.active {
+    background: $admin-status-success-bg;
+    color: $admin-status-success-text;
+  }
+
+  &.configured,
+  &.invited {
+    background: $admin-status-warning-bg;
+    color: $admin-status-warning-text;
+  }
+
+  &.disconnected,
+  &.suspended {
+    background: $admin-status-danger-bg;
+    color: $admin-status-danger-text;
+  }
+}
+
+// ── Payment Wallets ─────────────────────────────────────────
+.wallet-box {
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  padding: 14px;
+  background: #FCFDFE;
+}
+
+.wallet-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+
+  &.jc {
+    background: #FFF1F2;
+    color: #BE123C;
+  }
+
+  &.ep {
+    background: #F0FDF4;
+    color: #15803D;
+  }
+}
+
+// ── Team Members Table ──────────────────────────────────────
+.desktop-user-table-wrap {
+  overflow-x: auto;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th {
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $admin-text-secondary;
+    background: $admin-bg-muted;
+    border-bottom: 1px solid $admin-border;
+  }
+
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid $admin-border-subtle;
+    vertical-align: middle;
+  }
+}
+
+.user-profile-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: $admin-primary;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 600;
+  color: $admin-text-primary;
+}
+
+.user-email {
+  font-size: 0.75rem;
+  color: $admin-text-muted;
+}
+
+.role-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+
+  &.role-super {
+    background: #FAF5FF;
+    color: #6B21A8;
+  }
+
+  &.role-manager {
+    background: $admin-primary-subtle;
+    color: $admin-primary;
+  }
+
+  &.role-inventory {
+    background: #FEF3C7;
+    color: #92400E;
+  }
+
+  &.role-support {
+    background: #ECFDF5;
+    color: #065F46;
+  }
+}
+
+.activity-text {
+  font-size: 0.8125rem;
+  color: $admin-text-secondary;
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.btn-text-action {
+  background: none;
+  border: none;
+  color: $admin-primary;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  &:hover {
+    background: $admin-primary-subtle;
+  }
+}
+
+.btn-icon-danger {
+  background: none;
+  border: none;
+  color: #EF4444;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    background: #FEE2E2;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// ── Mobile User Cards (<768px) ──────────────────────────────
+.mobile-user-list {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.user-card-item {
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: $admin-bg-surface;
+}
+
+.user-card-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-card-meta {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.user-card-mid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.user-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-mobile-secondary,
+.btn-mobile-danger {
+  flex: 1;
+  padding: 8px;
+  border-radius: $admin-inner-radius;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  min-height: 44px; // touch target
+  cursor: pointer;
+}
+
+.btn-mobile-secondary {
+  border: 1px solid $admin-border;
+  background: $admin-bg-muted;
+  color: $admin-text-primary;
+}
+
+.btn-mobile-danger {
+  border: 1px solid #FECACA;
+  background: #FEF2F2;
+  color: #DC2626;
+}
+
+.role-summary-box {
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  padding: 14px;
+  background: #FCFDFE;
+}
+
+.role-box-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+
+  &.super { color: #6B21A8; }
+  &.manager { color: $admin-primary; }
+  &.inventory { color: #92400E; }
+  &.support { color: #065F46; }
+}
+
+.role-box-desc {
+  font-size: 0.8125rem;
+  color: $admin-text-secondary;
+  margin: 0;
+  line-height: 1.4;
+}
+
+// ── Notifications ───────────────────────────────────────────
+.notification-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// ── Sticky Save Bar ─────────────────────────────────────────
+.sticky-save-bar {
+  position: fixed;
+  bottom: 0;
+  left: $admin-sidebar-width;
+  right: 0;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid $admin-border;
+  padding: 12px 24px;
+  z-index: 100;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.save-bar-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dirty-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+}
+
+.dirty-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #F59E0B;
+
+  &.amber-pulse {
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+    animation: pulse 1.8s infinite;
+  }
+}
+
+.dirty-label {
+  font-weight: 600;
+  color: #B45309;
+}
+
+.clean-check {
+  color: #10B981;
+  font-weight: 700;
+}
+
+.clean-label {
+  color: $admin-text-secondary;
+}
+
+.save-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-discard {
+  padding: 9px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: $admin-text-secondary;
+  background: $admin-bg-surface;
+  border: 1px solid $admin-border;
+  border-radius: $admin-inner-radius;
+  cursor: pointer;
+  min-height: 40px;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: $admin-bg-muted;
+    color: $admin-text-primary;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-save-primary,
+.btn-primary-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  background: $admin-primary;
+  border: none;
+  border-radius: $admin-inner-radius;
+  cursor: pointer;
+  min-height: 40px;
+  transition: all 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: $admin-primary-hover;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(10, 132, 255, 0.25);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+// ── Modal Styles ────────────────────────────────────────────
+.invite-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-secondary,
+.btn-primary {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: $admin-inner-radius;
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.btn-secondary {
+  border: 1px solid $admin-border;
+  background: $admin-bg-surface;
+  color: $admin-text-primary;
+
+  &:hover {
+    background: $admin-bg-muted;
+  }
+}
+
+.btn-primary {
+  border: none;
+  background: $admin-primary;
+  color: white;
+
+  &:hover {
+    background: $admin-primary-hover;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+// ── Responsive Breakpoints ──────────────────────────────────
+@media (max-width: 992px) {
+  .settings-layout {
+    grid-template-columns: 220px 1fr;
+    gap: 16px;
+  }
+
+  .form-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-subnav-bar {
+    display: flex;
+  }
+
+  .settings-sidebar {
+    display: none;
+  }
+
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid-2,
+  .form-grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .desktop-user-table-wrap {
+    display: none;
+  }
+
+  .mobile-user-list {
+    display: flex;
+  }
+
+  .sticky-save-bar {
+    left: 0;
+    padding: 12px 16px;
+  }
+
+  .save-bar-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .save-bar-actions {
+    width: 100%;
+
+    button {
+      flex: 1;
+      min-height: 44px; // touch target
+    }
+  }
+}

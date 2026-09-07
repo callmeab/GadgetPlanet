@@ -131,10 +131,10 @@ export const ADMIN_ROUTES: Routes = [
       {
         path: 'settings',
         loadComponent: () =>
-          import('./features/dashboard/admin-dashboard.component').then(
-            m => m.AdminDashboardComponent
+          import('./features/settings/admin-settings.component').then(
+            m => m.AdminSettingsComponent
           ),
-        title: 'Settings — GadgetPlanet Admin',
+        title: 'Store Settings — GadgetPlanet Admin',
       },
     ],
   },
