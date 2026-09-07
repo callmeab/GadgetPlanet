@@ -1,0 +1,735 @@
+<div class="admin-reviews-page">
+  <!-- 1. Page Header -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="title-with-badge">
+        <h1 class="page-title">Customer Reviews</h1>
+        <span class="count-badge">{{ reviews().length }} Reviews</span>
+      </div>
+      <p class="page-subtitle">
+        Monitor product ratings, moderate customer feedback, approve pending submissions, and publish staff responses.
+      </p>
+    </div>
+  </header>
+
+  <!-- 2. KPI Metrics Bar -->
+  <section class="reviews-kpi-bar" aria-label="Reviews overview statistics">
+    <!-- Total Reviews -->
+    <div class="kpi-card">
+      <span class="kpi-label">Total Reviews</span>
+      <span class="kpi-num">{{ kpiMetrics().totalReviews }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- Average Rating -->
+    <div class="kpi-card">
+      <span class="kpi-label">Average Rating</span>
+      <div class="rating-kpi-row">
+        <span class="star-icon-gold">★</span>
+        <span class="kpi-num text-primary">{{ kpiMetrics().avgRating }}</span>
+        <span class="kpi-sub">/ 5.0</span>
+      </div>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- Pending Moderation -->
+    <div class="kpi-card">
+      <span class="kpi-label">Pending Approval</span>
+      <span class="kpi-num text-warning">{{ kpiMetrics().pendingCount }}</span>
+    </div>
+    <div class="kpi-divider"></div>
+
+    <!-- Flagged Reviews -->
+    <div class="kpi-card">
+      <span class="kpi-label">Flagged / Reported</span>
+      <span class="kpi-num text-danger">{{ kpiMetrics().flaggedCount }}</span>
+    </div>
+  </section>
+
+  <!-- 3. Status Tabs Navigation -->
+  <nav class="reviews-tabs-nav" aria-label="Review status filter tabs">
+    <div class="tabs-track">
+      @for (tab of statusTabs; track tab) {
+        <button
+          type="button"
+          class="tab-btn"
+          [class.tab-active]="activeStatusTab() === tab"
+          (click)="setStatusTab(tab)"
+        >
+          <span>{{ tab }}</span>
+          <span
+            class="tab-count-badge"
+            [class.badge-active]="activeStatusTab() === tab"
+            [class.badge-warning]="tab === 'Pending' && tabCounts()[tab] > 0"
+            [class.badge-danger]="tab === 'Flagged' && tabCounts()[tab] > 0"
+          >
+            {{ tabCounts()[tab] }}
+          </span>
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- 4. Search & Filters Card -->
+  <section class="filters-card">
+    <div class="filters-row">
+      <!-- Search Field -->
+      <div class="search-field">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="search-icon">
+          <circle cx="9" cy="9" r="6"/>
+          <line x1="13.5" y1="13.5" x2="18" y2="18"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search customer, product name, or review content..."
+          [value]="searchQuery()"
+          (input)="onSearchInput($any($event.target).value)"
+          id="reviewSearchInput"
+        />
+        @if (searchQuery()) {
+          <button
+            type="button"
+            class="clear-search-btn"
+            (click)="onSearchInput('')"
+            aria-label="Clear search"
+          >
+            &times;
+          </button>
+        }
+      </div>
+
+      <!-- Rating Filter Dropdown -->
+      <div class="filter-group">
+        <label for="ratingSelect" class="sr-only">Filter by Rating</label>
+        <select
+          id="ratingSelect"
+          class="filter-select"
+          [value]="ratingFilter()"
+          (change)="onRatingFilterChange($any($event.target).value)"
+        >
+          <option value="all">All Star Ratings</option>
+          <option value="5">★★★★★ (5 Stars)</option>
+          <option value="4">★★★★☆ (4 Stars)</option>
+          <option value="3">★★★☆☆ (3 Stars)</option>
+          <option value="2">★★☆☆☆ (2 Stars)</option>
+          <option value="1">★☆☆☆☆ (1 Star)</option>
+        </select>
+      </div>
+
+      <!-- Reset Filters Button -->
+      @if (searchQuery() || ratingFilter() !== 'all' || activeStatusTab() !== 'All') {
+        <button
+          type="button"
+          class="btn-reset-filters"
+          (click)="clearFilters()"
+        >
+          Reset Filters
+        </button>
+      }
+    </div>
+
+    <div class="filters-summary-row">
+      <span>
+        Showing <strong>{{ filteredReviews().length }}</strong> of {{ reviews().length }} reviews
+      </span>
+    </div>
+  </section>
+
+  <!-- 5. Bulk Actions Toolbar -->
+  @if (selectedCount() > 0) {
+    <section class="bulk-action-bar" aria-label="Bulk moderation toolbar">
+      <div class="bulk-info">
+        <span class="selected-badge">{{ selectedCount() }}</span>
+        <span>reviews selected</span>
+        <button type="button" class="btn-deselect" (click)="deselectAll()">Deselect all</button>
+      </div>
+      <div class="bulk-controls">
+        <button type="button" class="btn-bulk btn-bulk-success" (click)="bulkApprove()">
+          Approve & Publish
+        </button>
+        <button type="button" class="btn-bulk btn-bulk-warning" (click)="bulkFlag()">
+          Flag Selected
+        </button>
+        <button type="button" class="btn-bulk btn-bulk-danger" (click)="bulkDelete()">
+          Delete Selected
+        </button>
+      </div>
+    </section>
+  }
+
+  <!-- 6. Main Content Area -->
+  <section class="table-container-card">
+    @if (filteredReviews().length > 0) {
+      <!-- ── Desktop DataTable (≥768px) ── -->
+      <div class="desktop-only-table table-responsive">
+        <table class="data-table" aria-label="Customer product reviews table">
+          <thead>
+            <tr>
+              <th class="th-checkbox">
+                <input
+                  type="checkbox"
+                  class="admin-checkbox"
+                  [checked]="isAllSelected()"
+                  [indeterminate]="isIndeterminate()"
+                  (change)="toggleSelectAll()"
+                  aria-label="Select all reviews on this page"
+                />
+              </th>
+              <th class="th-sortable" (click)="toggleSort('product')">
+                <div class="th-content">
+                  <span>Product</span>
+                  <span class="sort-icon" [class.sort-active]="sortField() === 'product'">
+                    {{ sortField() === 'product' ? (sortOrder() === 'asc' ? '↑' : '↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="th-sortable" (click)="toggleSort('customer')">
+                <div class="th-content">
+                  <span>Customer</span>
+                  <span class="sort-icon" [class.sort-active]="sortField() === 'customer'">
+                    {{ sortField() === 'customer' ? (sortOrder() === 'asc' ? '↑' : '↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="th-sortable" (click)="toggleSort('rating')">
+                <div class="th-content">
+                  <span>Rating</span>
+                  <span class="sort-icon" [class.sort-active]="sortField() === 'rating'">
+                    {{ sortField() === 'rating' ? (sortOrder() === 'asc' ? '↑' : '↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th>Review Summary</th>
+              <th class="th-sortable" (click)="toggleSort('date')">
+                <div class="th-content">
+                  <span>Date</span>
+                  <span class="sort-icon" [class.sort-active]="sortField() === 'date'">
+                    {{ sortField() === 'date' ? (sortOrder() === 'asc' ? '↑' : '↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="th-sortable text-center" (click)="toggleSort('status')">
+                <div class="th-content center-content">
+                  <span>Status</span>
+                  <span class="sort-icon" [class.sort-active]="sortField() === 'status'">
+                    {{ sortField() === 'status' ? (sortOrder() === 'asc' ? '↑' : '↓') : '↕' }}
+                  </span>
+                </div>
+              </th>
+              <th class="text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (review of paginatedReviews(); track review.id) {
+              <tr class="table-row" [class.row-selected]="selectedReviewIds().has(review.id)">
+                <!-- Checkbox -->
+                <td class="td-checkbox">
+                  <input
+                    type="checkbox"
+                    class="admin-checkbox"
+                    [checked]="selectedReviewIds().has(review.id)"
+                    (change)="toggleSelectOne(review.id)"
+                    aria-label="Select review"
+                  />
+                </td>
+
+                <!-- Product Column -->
+                <td>
+                  <div class="product-cell">
+                    <div class="thumb-wrap">
+                      <img [src]="review.productThumbnail" [alt]="review.productName" class="thumb-img" loading="lazy"/>
+                    </div>
+                    <div class="product-info-text">
+                      <span class="product-name" [title]="review.productName">{{ review.productName }}</span>
+                      @if (review.productCategory) {
+                        <span class="product-cat-chip">{{ review.productCategory }}</span>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Customer Column -->
+                <td>
+                  <div class="customer-cell">
+                    <div class="avatar-circle">
+                      <span>{{ getInitials(review.customerName) }}</span>
+                    </div>
+                    <div class="customer-info-text">
+                      <span class="customer-name">{{ review.customerName }}</span>
+                      @if (review.verifiedBuyer) {
+                        <span class="verified-badge" title="Verified purchase buyer">
+                          <svg viewBox="0 0 16 16" fill="currentColor" class="check-icon" width="12" height="12">
+                            <path d="M8 0a8 8 0 100 16A8 8 0 008 0zm3.78 6.28l-4.5 4.5a.75.75 0 01-1.06 0l-2-2a.75.75 0 011.06-1.06L6.75 9.19l3.97-3.97a.75.75 0 011.06 1.06z"/>
+                          </svg>
+                          <span>Verified</span>
+                        </span>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Rating Stars Column -->
+                <td>
+                  <div class="stars-rating-cell">
+                    <div class="stars-row" [title]="review.rating + ' out of 5 stars'">
+                      @for (star of getStars(5); track star) {
+                        <span class="star" [class.star-filled]="star <= review.rating">★</span>
+                      }
+                    </div>
+                    <span class="rating-num">{{ review.rating }}.0</span>
+                  </div>
+                </td>
+
+                <!-- Review Text Preview Column -->
+                <td>
+                  <div class="review-text-preview" (click)="openDetailModal(review, $event)">
+                    <strong class="review-title">{{ review.title }}</strong>
+                    <p class="review-comment-snippet">{{ review.comment }}</p>
+                    @if (review.adminReply) {
+                      <div class="staff-reply-badge">
+                        <span class="reply-dot"></span>
+                        <span>Staff Replied</span>
+                      </div>
+                    }
+                    @if (review.flagReason) {
+                      <div class="flag-reason-snippet">
+                        <span>⚠️ {{ review.flagReason }}</span>
+                      </div>
+                    }
+                  </div>
+                </td>
+
+                <!-- Date Column -->
+                <td>
+                  <span class="date-text">{{ review.date | date:'mediumDate' }}</span>
+                </td>
+
+                <!-- Status Column -->
+                <td class="text-center">
+                  <gp-admin-status-pill [status]="review.status" size="sm"></gp-admin-status-pill>
+                </td>
+
+                <!-- Actions Column -->
+                <td class="text-right">
+                  <div class="table-actions-row">
+                    <!-- Approve Button -->
+                    @if (review.status !== 'Published') {
+                      <button
+                        type="button"
+                        class="btn-row-action btn-approve"
+                        (click)="approveReview(review.id, $event)"
+                        title="Approve & Publish Review"
+                      >
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="row-icon text-success">
+                          <path d="M5 10l3 3 7-7"/>
+                        </svg>
+                      </button>
+                    }
+
+                    <!-- Reject / Flag Button -->
+                    @if (review.status !== 'Flagged') {
+                      <button
+                        type="button"
+                        class="btn-row-action btn-flag"
+                        (click)="flagReview(review.id, 'Flagged by administrator', $event)"
+                        title="Flag / Reject Review"
+                      >
+                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="row-icon text-warning">
+                          <path d="M4 18V4m0 0h11l-3 4 3 4H4"/>
+                        </svg>
+                      </button>
+                    }
+
+                    <!-- View Detail & Reply Button -->
+                    <button
+                      type="button"
+                      class="btn-row-action"
+                      (click)="openDetailModal(review, $event)"
+                      title="Inspect review & reply"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="row-icon">
+                        <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H6l-4 4V5z"/>
+                      </svg>
+                    </button>
+
+                    <!-- Delete Button -->
+                    <button
+                      type="button"
+                      class="btn-row-action btn-danger-action"
+                      (click)="promptDelete(review, $event)"
+                      title="Delete review"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="row-icon">
+                        <path d="M4 6h12M8 6V4a1 1 0 011-1h2a1 1 0 011 1v2M6 6v10a2 2 0 002 2h4a2 2 0 002-2V6"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ── Mobile Card-Based List (<768px) ── -->
+      <div class="mobile-only-cards">
+        @for (review of paginatedReviews(); track review.id) {
+          <article class="review-card-item">
+            <!-- Top Row: Customer & Status -->
+            <div class="card-header-row">
+              <div class="card-customer-info">
+                <input
+                  type="checkbox"
+                  class="admin-checkbox"
+                  [checked]="selectedReviewIds().has(review.id)"
+                  (change)="toggleSelectOne(review.id)"
+                  aria-label="Select review"
+                />
+                <div class="avatar-circle sm-avatar">
+                  <span>{{ getInitials(review.customerName) }}</span>
+                </div>
+                <div class="customer-name-group">
+                  <span class="customer-name">{{ review.customerName }}</span>
+                  @if (review.verifiedBuyer) {
+                    <span class="verified-badge sm">✓ Verified</span>
+                  }
+                </div>
+              </div>
+              <gp-admin-status-pill [status]="review.status" size="sm"></gp-admin-status-pill>
+            </div>
+
+            <!-- Product Bar -->
+            <div class="card-product-strip">
+              <img [src]="review.productThumbnail" [alt]="review.productName" class="strip-thumb"/>
+              <span class="strip-title">{{ review.productName }}</span>
+            </div>
+
+            <!-- Rating & Date Row -->
+            <div class="card-rating-row">
+              <div class="stars-row">
+                @for (star of getStars(5); track star) {
+                  <span class="star" [class.star-filled]="star <= review.rating">★</span>
+                }
+              </div>
+              <span class="rating-num-bold">{{ review.rating }}.0</span>
+              <span class="card-date-sub">• {{ review.date | date:'mediumDate' }}</span>
+            </div>
+
+            <!-- Review Text -->
+            <div class="card-comment-box" (click)="openDetailModal(review, $event)">
+              <h4 class="card-review-title">{{ review.title }}</h4>
+              <p class="card-review-comment">{{ review.comment }}</p>
+            </div>
+
+            @if (review.flagReason) {
+              <div class="flag-warning-banner">
+                <span>⚠️ {{ review.flagReason }}</span>
+              </div>
+            }
+
+            @if (review.adminReply) {
+              <div class="mobile-reply-preview">
+                <strong>Staff Reply:</strong> {{ review.adminReply.comment }}
+              </div>
+            }
+
+            <!-- Mobile Actions (Min 44x44px touch targets) -->
+            <div class="card-actions-bar">
+              @if (review.status !== 'Published') {
+                <button
+                  type="button"
+                  class="mobile-action-btn btn-success-bg"
+                  (click)="approveReview(review.id, $event)"
+                >
+                  Approve
+                </button>
+              }
+              @if (review.status !== 'Flagged') {
+                <button
+                  type="button"
+                  class="mobile-action-btn btn-warning-bg"
+                  (click)="flagReview(review.id, 'Flagged by administrator', $event)"
+                >
+                  Flag
+                </button>
+              }
+              <button
+                type="button"
+                class="mobile-action-btn"
+                (click)="openDetailModal(review, $event)"
+              >
+                Reply
+              </button>
+              <button
+                type="button"
+                class="mobile-action-btn btn-danger-text"
+                (click)="promptDelete(review, $event)"
+              >
+                Delete
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      <!-- ── Pagination Footer ── -->
+      <footer class="table-pagination-footer">
+        <div class="pagination-info">
+          <span>
+            Showing {{ paginationStartIndex() }} to {{ paginationEndIndex() }} of {{ filteredReviews().length }} reviews
+          </span>
+          <div class="page-size-picker">
+            <label for="reviewPageSize" class="sr-only">Reviews per page</label>
+            <select
+              id="reviewPageSize"
+              class="page-size-select"
+              [value]="pageSize()"
+              (change)="onPageSizeChange($any($event.target).value)"
+            >
+              @for (opt of pageSizeOptions; track opt) {
+                <option [value]="opt">{{ opt }} per page</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="page-nav-btn"
+            [disabled]="currentPage() === 1"
+            (click)="goToPage(currentPage() - 1)"
+            aria-label="Previous page"
+          >
+            Previous
+          </button>
+
+          <div class="page-numbers">
+            @for (pageNum of pageNumbers(); track pageNum) {
+              <button
+                type="button"
+                class="page-num-btn"
+                [class.active-page]="currentPage() === pageNum"
+                (click)="goToPage(pageNum)"
+              >
+                {{ pageNum }}
+              </button>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="page-nav-btn"
+            [disabled]="currentPage() === totalPages()"
+            (click)="goToPage(currentPage() + 1)"
+            aria-label="Next page"
+          >
+            Next
+          </button>
+        </div>
+      </footer>
+    } @else {
+      <!-- ── Empty State ── -->
+      <div class="empty-state-card">
+        <div class="empty-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
+            <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+          </svg>
+        </div>
+        <h3 class="empty-title">No reviews match your filters</h3>
+        <p class="empty-desc">
+          Try clearing your search keyword or switching your rating and status filters.
+        </p>
+        <button type="button" class="btn btn-secondary" (click)="clearFilters()">
+          Reset All Filters
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- ── 7. Review Detail & Staff Reply Modal ── -->
+  @if (selectedReview()) {
+    <gp-admin-modal
+      [isOpen]="isDetailModalOpen()"
+      title="Review Details & Moderation"
+      subtitle="Inspect customer submission, change review status, and publish official responses."
+      size="lg"
+      (closed)="closeDetailModal()"
+    >
+      <div class="review-modal-body">
+        <!-- Top Cards Row: Product Info & Customer Info -->
+        <div class="modal-cards-grid">
+          <!-- Product Card -->
+          <div class="modal-info-card">
+            <span class="card-label">Product</span>
+            <div class="product-summary-row">
+              <img [src]="selectedReview()?.productThumbnail" [alt]="selectedReview()?.productName" class="modal-thumb"/>
+              <div class="modal-product-text">
+                <span class="modal-product-title">{{ selectedReview()?.productName }}</span>
+                <span class="modal-product-cat">{{ selectedReview()?.productCategory }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Card -->
+          <div class="modal-info-card">
+            <span class="card-label">Customer</span>
+            <div class="customer-summary-row">
+              <div class="avatar-circle">
+                <span>{{ getInitials(selectedReview()?.customerName || '') }}</span>
+              </div>
+              <div class="modal-customer-text">
+                <span class="modal-customer-name">{{ selectedReview()?.customerName }}</span>
+                <span class="modal-customer-email">{{ selectedReview()?.customerEmail }}</span>
+                @if (selectedReview()?.verifiedBuyer) {
+                  <span class="verified-badge sm">✓ Verified Buyer</span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating & Submission Date -->
+        <div class="modal-rating-row">
+          <div class="stars-row lg">
+            @for (star of getStars(5); track star) {
+              <span class="star" [class.star-filled]="star <= (selectedReview()?.rating || 0)">★</span>
+            }
+          </div>
+          <span class="modal-rating-score">{{ selectedReview()?.rating }}.0 out of 5</span>
+          <span class="modal-submission-date">• Submitted {{ selectedReview()?.date | date:'medium' }}</span>
+        </div>
+
+        <!-- Flag Reason Alert (if flagged) -->
+        @if (selectedReview()?.flagReason) {
+          <div class="flag-alert-box" role="alert">
+            <svg viewBox="0 0 20 20" fill="currentColor" class="alert-icon" width="18" height="18">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+              <strong>Policy Flag Reason:</strong>
+              <p class="flag-desc">{{ selectedReview()?.flagReason }}</p>
+            </div>
+          </div>
+        }
+
+        <!-- Review Title & Comment -->
+        <div class="modal-review-content">
+          <h3 class="modal-review-title">{{ selectedReview()?.title }}</h3>
+          <p class="modal-review-comment">{{ selectedReview()?.comment }}</p>
+        </div>
+
+        <!-- Official Staff Reply Section -->
+        <div class="modal-staff-reply-section">
+          <div class="reply-section-header">
+            <h4 class="reply-section-title">Official Staff Response</h4>
+            @if (selectedReview()?.adminReply) {
+              <span class="reply-saved-badge">✓ Published</span>
+            }
+          </div>
+
+          @if (selectedReview()?.adminReply && !isReplying()) {
+            <div class="existing-reply-bubble">
+              <div class="reply-bubble-header">
+                <strong>{{ selectedReview()?.adminReply?.author }}</strong>
+                <span class="reply-date">{{ selectedReview()?.adminReply?.date | date:'mediumDate' }}</span>
+              </div>
+              <p class="reply-bubble-text">{{ selectedReview()?.adminReply?.comment }}</p>
+              <button type="button" class="btn-link-edit" (click)="isReplying.set(true)">
+                Edit Response
+              </button>
+            </div>
+          } @else {
+            <div class="reply-input-box">
+              <textarea
+                class="form-textarea"
+                rows="3"
+                placeholder="Write a polite, professional response on behalf of GadgetPlanet Support..."
+                [value]="replyDraft()"
+                (input)="replyDraft.set($any($event.target).value)"
+              ></textarea>
+              <div class="reply-actions-row">
+                @if (isReplying()) {
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="isReplying.set(false)">
+                    Cancel
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  [disabled]="!replyDraft().trim()"
+                  (click)="submitStaffReply()"
+                >
+                  {{ selectedReview()?.adminReply ? 'Update Response' : 'Publish Response' }}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Modal Moderation Footer -->
+        <div class="modal-footer-moderation">
+          <div class="moderation-status-controls">
+            @if (selectedReview()?.status !== 'Published') {
+              <button
+                type="button"
+                class="btn btn-bulk-success"
+                (click)="approveReview(selectedReview()!.id)"
+              >
+                ✓ Approve & Publish
+              </button>
+            }
+            @if (selectedReview()?.status !== 'Flagged') {
+              <button
+                type="button"
+                class="btn btn-bulk-warning"
+                (click)="flagReview(selectedReview()!.id, 'Flagged by administrator')"
+              >
+                ⚑ Flag Review
+              </button>
+            }
+            <button
+              type="button"
+              class="btn btn-danger"
+              (click)="promptDelete(selectedReview()!)"
+            >
+              Delete Review
+            </button>
+          </div>
+
+          <button type="button" class="btn btn-secondary" (click)="closeDetailModal()">
+            Close
+          </button>
+        </div>
+      </div>
+    </gp-admin-modal>
+  }
+
+  <!-- ── 8. Delete Confirmation Modal ── -->
+  @if (deleteTarget()) {
+    <gp-admin-modal
+      [isOpen]="true"
+      title="Delete Review"
+      subtitle="This review will be permanently removed."
+      size="sm"
+      (closed)="cancelDelete()"
+    >
+      <div class="delete-confirm-box">
+        <p class="delete-warning-text">
+          Are you sure you want to permanently delete the review
+          <strong>"{{ deleteTarget()?.title }}"</strong> by
+          <strong>{{ deleteTarget()?.customerName }}</strong>?
+        </p>
+        <div class="modal-footer-actions">
+          <button type="button" class="btn btn-secondary" (click)="cancelDelete()">
+            Cancel
+          </button>
+          <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+            Delete Permanently
+          </button>
+        </div>
+      </div>
+    </gp-admin-modal>
+  }
+</div>

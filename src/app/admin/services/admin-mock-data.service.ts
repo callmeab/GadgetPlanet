@@ -132,6 +132,34 @@ export interface AdminDiscount {
   createdAt: string;
 }
 
+export type ReviewStatus = 'Published' | 'Pending' | 'Flagged';
+
+export interface AdminReviewReply {
+  author: string;
+  comment: string;
+  date: string;
+}
+
+export interface AdminReview {
+  id: string;
+  productId: string;
+  productName: string;
+  productThumbnail: string;
+  productCategory?: string;
+  customerName: string;
+  customerEmail?: string;
+  customerAvatar?: string;
+  verifiedBuyer: boolean;
+  rating: number; // 1 to 5
+  title: string;
+  comment: string;
+  date: string; // ISO string
+  status: ReviewStatus;
+  flagReason?: string;
+  helpfulVotes?: number;
+  adminReply?: AdminReviewReply | null;
+}
+
 export interface ProductVariantOption {
   name: string;
   values: string[];
@@ -1901,6 +1929,311 @@ export class AdminMockDataService {
     this.discounts.update(list =>
       list.map(d => (idSet.has(d.id) ? { ...d, status } : d))
     );
+  }
+
+  // ── Customer Product Reviews Mock Data ─────────────────────
+  readonly reviews = signal<AdminReview[]>([
+    {
+      id: 'rev-1',
+      productId: 'p1',
+      productName: 'Sony WH-1000XM5 Wireless Headphones',
+      productThumbnail: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=120&q=80',
+      productCategory: 'Audio',
+      customerName: 'Hamza Tariq',
+      customerEmail: 'hamza.tariq@gmail.com',
+      verifiedBuyer: true,
+      rating: 5,
+      title: 'Outstanding ANC and crystal clear microphone!',
+      comment: 'The noise cancellation completely isolates airplane and traffic drone. Battery life easily reaches 30 hours with fast USB-C charge. Very comfortable for long coding sessions.',
+      date: '2026-09-05T14:20:00Z',
+      status: 'Published',
+      helpfulVotes: 32,
+      adminReply: {
+        author: 'GadgetPlanet Support',
+        comment: 'Thank you for your review, Hamza! We are delighted the XM5 active noise cancellation is serving you well during coding.',
+        date: '2026-09-05T16:45:00Z',
+      },
+    },
+    {
+      id: 'rev-2',
+      productId: 'p2',
+      productName: 'Apple Watch Ultra 2 GPS + Cellular',
+      productThumbnail: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=120&q=80',
+      productCategory: 'Wearables',
+      customerName: 'Ayesha Khan',
+      customerEmail: 'ayesha.k@outlook.com',
+      verifiedBuyer: true,
+      rating: 5,
+      title: 'Absolute powerhouse for marathon training',
+      comment: 'Titanium case is bulletproof. The dual-frequency GPS accurately tracked my trail run in the northern mountains without losing signal once. Action button shortcut is so convenient.',
+      date: '2026-09-04T10:15:00Z',
+      status: 'Published',
+      helpfulVotes: 19,
+    },
+    {
+      id: 'rev-3',
+      productId: 'p3',
+      productName: 'Keychron Q1 Pro Wireless Custom Keyboard',
+      productThumbnail: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=120&q=80',
+      productCategory: 'Peripherals',
+      customerName: 'Zubair Ahmed',
+      customerEmail: 'zubair.ahmed@techpk.com',
+      verifiedBuyer: true,
+      rating: 4,
+      title: 'Superb aluminum weight, smooth Banana switches',
+      comment: 'The CNC aluminum frame feels incredibly dense and premium. Bluetooth connection is rock-solid across my Mac and PC. Only minor gripe is the stock keycap puller was a bit tight.',
+      date: '2026-09-03T18:30:00Z',
+      status: 'Published',
+      helpfulVotes: 14,
+    },
+    {
+      id: 'rev-4',
+      productId: 'p4',
+      productName: 'Logitech MX Master 3S Performance Mouse',
+      productThumbnail: 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=120&q=80',
+      productCategory: 'Peripherals',
+      customerName: 'Fatima Noor',
+      customerEmail: 'f.noor@designlab.org',
+      verifiedBuyer: true,
+      rating: 5,
+      title: 'Quiet clicks and MagSpeed scroll are unmatched',
+      comment: 'Upgraded from the MX Master 2S. The 90% quieter clicks make a huge difference in open-plan offices. Thumb wheel for Figma and Excel horizontal scrolling is essential for my workflow.',
+      date: '2026-09-02T11:45:00Z',
+      status: 'Published',
+      helpfulVotes: 27,
+    },
+    {
+      id: 'rev-5',
+      productId: 'p5',
+      productName: 'Anker 737 Power Bank (PowerCore 24K)',
+      productThumbnail: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=120&q=80',
+      productCategory: 'Accessories',
+      customerName: 'Bilal Farooq',
+      customerEmail: 'bilal.farooq92@gmail.com',
+      verifiedBuyer: true,
+      rating: 5,
+      title: 'Smart digital display is super useful!',
+      comment: 'Charges my MacBook Pro 16 at full 140W speed without getting dangerously hot. The real-time input/output wattage display removes all guesswork. Great build quality.',
+      date: '2026-09-01T09:00:00Z',
+      status: 'Published',
+      helpfulVotes: 11,
+    },
+    {
+      id: 'rev-6',
+      productId: 'p1',
+      productName: 'Sony WH-1000XM5 Wireless Headphones',
+      productThumbnail: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=120&q=80',
+      productCategory: 'Audio',
+      customerName: 'Khurram Shahzad',
+      customerEmail: 'khurram.shahzad@yahoo.com',
+      verifiedBuyer: false,
+      rating: 3,
+      title: 'Sounds great but does not fold as compact as XM4',
+      comment: 'Audio fidelity and noise cancellation are top-tier, but the non-folding headband design makes the travel case bulky in my everyday backpack compared to the older XM4.',
+      date: '2026-09-06T08:10:00Z',
+      status: 'Pending',
+      helpfulVotes: 5,
+    },
+    {
+      id: 'rev-7',
+      productId: 'p6',
+      productName: 'Bose QuietComfort Ultra Earbuds',
+      productThumbnail: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=120&q=80',
+      productCategory: 'Audio',
+      customerName: 'Sana Malik',
+      customerEmail: 'sana.malik@outlook.com',
+      verifiedBuyer: true,
+      rating: 4,
+      title: 'Immersive audio spatial mode is impressive',
+      comment: 'Very snug fit in the ears during gym sessions. Bose Immersive Audio makes live acoustic recordings feel like being in the front row. Case could be slightly smaller.',
+      date: '2026-09-06T15:50:00Z',
+      status: 'Pending',
+      helpfulVotes: 3,
+    },
+    {
+      id: 'rev-8',
+      productId: 'p7',
+      productName: 'BenQ ScreenBar Halo Monitor Light',
+      productThumbnail: 'https://images.unsplash.com/photo-1593062096033-9a26b09da705?w=120&q=80',
+      productCategory: 'Workspace',
+      customerName: 'Umar Khalid',
+      customerEmail: 'ukhalid@engineer.com',
+      verifiedBuyer: true,
+      rating: 5,
+      title: 'Eliminated eye strain during night coding',
+      comment: 'The wireless controller disc is tactile and smooth. Backlight glow creates an ambient halo effect that softens contrast in dark rooms. Zero screen glare.',
+      date: '2026-09-05T19:12:00Z',
+      status: 'Pending',
+      helpfulVotes: 8,
+    },
+    {
+      id: 'rev-9',
+      productId: 'p8',
+      productName: 'Razer BlackWidow V4 Pro Mechanical Keyboard',
+      productThumbnail: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=120&q=80',
+      productCategory: 'Peripherals',
+      customerName: 'Waleed Raza',
+      customerEmail: 'waleed.raza@gamerzone.pk',
+      verifiedBuyer: true,
+      rating: 2,
+      title: 'Synapse software high CPU consumption',
+      comment: 'The yellow linear switches are fast and responsive for competitive shooters, but the Razer Synapse background app keeps consuming 15% CPU on my gaming rig.',
+      date: '2026-08-30T16:00:00Z',
+      status: 'Pending',
+      helpfulVotes: 9,
+    },
+    {
+      id: 'rev-10',
+      productId: 'p9',
+      productName: 'Xiaomi Smart Band 8 Pro',
+      productThumbnail: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=120&q=80',
+      productCategory: 'Wearables',
+      customerName: 'Maryam Siddiqui',
+      customerEmail: 'm.siddiqui@gmail.com',
+      verifiedBuyer: true,
+      rating: 4,
+      title: 'Unbeatable value for an AMOLED fitness tracker',
+      comment: 'Screen is bright enough even in direct midday sunlight. Sleep tracking accuracy matches my clinical pulse oximeter closely. Great battery endurance (10+ days).',
+      date: '2026-08-28T12:30:00Z',
+      status: 'Published',
+      helpfulVotes: 16,
+    },
+    {
+      id: 'rev-11',
+      productId: 'p3',
+      productName: 'Keychron Q1 Pro Wireless Custom Keyboard',
+      productThumbnail: 'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=120&q=80',
+      productCategory: 'Peripherals',
+      customerName: 'Anonymous Spammer',
+      customerEmail: 'promo999@junkmail.biz',
+      verifiedBuyer: false,
+      rating: 1,
+      title: 'Cheaper alternative keyboards available at www.cheapkeyboards-discount.biz',
+      comment: 'Why spend this much when you can get discount clones at http://cheapkeyboards-discount.biz with promo code FREEKEYS! Do not buy here!',
+      date: '2026-09-06T03:14:00Z',
+      status: 'Flagged',
+      flagReason: 'Automated Spam Detection: Promotional URL links',
+      helpfulVotes: 0,
+    },
+    {
+      id: 'rev-12',
+      productId: 'p10',
+      productName: 'Sony WF-1000XM5 True Wireless Earbuds',
+      productThumbnail: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=120&q=80',
+      productCategory: 'Audio',
+      customerName: 'Tariq Mehmood',
+      customerEmail: 'tmehmood@finance.com',
+      verifiedBuyer: false,
+      rating: 1,
+      title: 'Fake counterfeit product delivered by courier!',
+      comment: 'Worst store in the world!! Everything is counterfeit trash scam scam scam! I will report you to consumer court right now!',
+      date: '2026-09-04T22:45:00Z',
+      status: 'Flagged',
+      flagReason: 'Violates Review Policy: Unverified claim with abusive language',
+      helpfulVotes: 1,
+    },
+    {
+      id: 'rev-13',
+      productId: 'p15',
+      productName: 'Elgato Stream Deck MK.2 15 LCD Keys',
+      productThumbnail: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=120&q=80',
+      productCategory: 'Workspace',
+      customerName: 'Daniyal Hassan',
+      customerEmail: 'daniyal.hassan@creator.tv',
+      verifiedBuyer: true,
+      rating: 5,
+      title: 'Essential for live streaming and macro shortcuts',
+      comment: 'Customizing icon packs and chaining multi-action macros saves me hours when switching OBS scenes, triggering soundboard effects, and controlling smart lights.',
+      date: '2026-08-25T14:10:00Z',
+      status: 'Published',
+      helpfulVotes: 22,
+    },
+    {
+      id: 'rev-14',
+      productId: 'p11',
+      productName: 'Baseus Blade 100W Ultra-Thin Power Bank',
+      productThumbnail: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=120&q=80',
+      productCategory: 'Accessories',
+      customerName: 'Zoya Qureshi',
+      customerEmail: 'zoya.qureshi@startup.io',
+      verifiedBuyer: true,
+      rating: 4,
+      title: 'Slips easily into laptop sleeve without bulging',
+      comment: 'The flat rectangular profile is so much easier to travel with than brick-style power banks. Charged my Dell XPS from 10% to 80% in under an hour.',
+      date: '2026-08-22T10:00:00Z',
+      status: 'Published',
+      helpfulVotes: 15,
+    },
+    {
+      id: 'rev-15',
+      productId: 'p12',
+      productName: 'HyperX Cloud III Wireless Gaming Headset',
+      productThumbnail: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=120&q=80',
+      productCategory: 'Audio',
+      customerName: 'Rehan Baig',
+      customerEmail: 'rehan.baig@esports.pk',
+      verifiedBuyer: true,
+      rating: 5,
+      title: '120 hour battery life is real!',
+      comment: 'I charged it on Monday and played Valorant all week for 4-5 hours a day without plugging it back in once. Signature HyperX memory foam earcups never pinch my glasses.',
+      date: '2026-08-18T17:30:00Z',
+      status: 'Published',
+      helpfulVotes: 38,
+    },
+  ]);
+
+  // ── Review Moderation Methods ──────────────────────────────
+  approveReview(id: string): void {
+    this.reviews.update(list =>
+      list.map(r => (r.id === id ? { ...r, status: 'Published', flagReason: undefined } : r))
+    );
+  }
+
+  flagReview(id: string, reason: string = 'Flagged by administrator for policy review'): void {
+    this.reviews.update(list =>
+      list.map(r => (r.id === id ? { ...r, status: 'Flagged', flagReason: reason } : r))
+    );
+  }
+
+  deleteReview(id: string): void {
+    this.reviews.update(list => list.filter(r => r.id !== id));
+  }
+
+  replyToReview(id: string, replyText: string): void {
+    const trimmed = replyText.trim();
+    if (!trimmed) return;
+    this.reviews.update(list =>
+      list.map(r => {
+        if (r.id !== id) return r;
+        return {
+          ...r,
+          adminReply: {
+            author: 'GadgetPlanet Support',
+            comment: trimmed,
+            date: new Date().toISOString(),
+          },
+        };
+      })
+    );
+  }
+
+  bulkApproveReviews(ids: string[]): void {
+    const idSet = new Set(ids);
+    this.reviews.update(list =>
+      list.map(r => (idSet.has(r.id) ? { ...r, status: 'Published', flagReason: undefined } : r))
+    );
+  }
+
+  bulkFlagReviews(ids: string[], reason: string = 'Bulk flagged by administrator'): void {
+    const idSet = new Set(ids);
+    this.reviews.update(list =>
+      list.map(r => (idSet.has(r.id) ? { ...r, status: 'Flagged', flagReason: reason } : r))
+    );
+  }
+
+  bulkDeleteReviews(ids: string[]): void {
+    const idSet = new Set(ids);
+    this.reviews.update(list => list.filter(r => !idSet.has(r.id)));
   }
 }
 

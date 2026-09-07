@@ -107,8 +107,8 @@ export const ADMIN_ROUTES: Routes = [
       {
         path: 'reviews',
         loadComponent: () =>
-          import('./features/dashboard/admin-dashboard.component').then(
-            m => m.AdminDashboardComponent
+          import('./features/reviews/admin-reviews.component').then(
+            m => m.AdminReviewsComponent
           ),
         title: 'Customer Reviews — GadgetPlanet Admin',
       },
