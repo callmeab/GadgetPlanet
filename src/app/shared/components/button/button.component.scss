@@ -48,7 +48,7 @@
   // ── Variants ──
   &--primary {
     background: v.$gradient-primary;
-    color: #fff;
+    color: v.$color-text-inverse;
     box-shadow: v.$shadow-blue;
 
     &:hover {
@@ -59,7 +59,7 @@
 
   &--accent {
     background: v.$gradient-accent;
-    color: #fff;
+    color: v.$color-text-inverse;
     box-shadow: v.$shadow-orange;
 
     &:hover {
@@ -91,7 +91,7 @@
 
   &--danger {
     background: v.$color-error;
-    color: #fff;
+    color: v.$color-text-inverse;
     &:hover { filter: brightness(1.1); }
   }
 
@@ -114,10 +114,16 @@
 .btn-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: currentColor;
   border-radius: 50%;
   animation: btn-spin 0.7s linear infinite;
+
+  .gp-btn--secondary &,
+  .gp-btn--ghost & {
+    border-color: rgba(17, 24, 39, 0.18);
+    border-top-color: currentColor;
+  }
 }
 
 @keyframes btn-spin {

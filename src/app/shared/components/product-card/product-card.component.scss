@@ -49,7 +49,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: v.$color-text-primary;
+  color: v.$color-text-inverse;
   font-weight: v.$font-weight-bold;
   font-size: v.$font-size-sm;
   letter-spacing: v.$letter-spacing-wide;
@@ -72,7 +72,7 @@
   top: v.$space-3;
   right: v.$space-3;
   background: v.$color-error;
-  color: #fff;
+  color: v.$color-text-inverse;
   font-size: v.$font-size-xs;
   font-weight: v.$font-weight-bold;
   padding: 2px v.$space-2;
@@ -171,7 +171,7 @@
   backdrop-filter: blur(12px);
   border: 1px solid v.$color-primary;
   border-radius: v.$radius-full;
-  color: #fff;
+  color: v.$color-text-inverse;
   font-size: v.$font-size-xs;
   font-weight: v.$font-weight-bold;
   letter-spacing: v.$letter-spacing-wide;
@@ -185,7 +185,7 @@
 
   &:hover {
     background: v.$color-primary;
-    color: #fff;
+    color: v.$color-text-inverse;
     transform: scale(1.02);
     box-shadow: 0 4px 20px rgba(10, 132, 255, 0.55);
   }
@@ -197,7 +197,7 @@
 
     &:hover {
       background: v.$color-success;
-      color: #000;
+      color: v.$color-text-inverse;
       border-color: v.$color-success;
     }
   }

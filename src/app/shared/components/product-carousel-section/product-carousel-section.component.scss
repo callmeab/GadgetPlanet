@@ -89,7 +89,7 @@
 
   &--active {
     background: v.$color-primary;
-    color: #fff;
+    color: v.$color-text-inverse;
     box-shadow: 0 0 12px rgba(10, 132, 255, 0.45);
   }
 }
@@ -121,10 +121,11 @@
   transition: all v.$transition-fast;
 
   &:hover:not(:disabled) {
-    background: rgba(10, 132, 255, 0.22);
+    background: v.$color-primary;
     border-color: v.$color-primary;
-    color: #fff;
+    color: v.$color-text-inverse;
     transform: scale(1.05);
+    box-shadow: v.$shadow-blue;
   }
 
   &:disabled {
@@ -217,9 +218,9 @@
 .shimmer {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.03) 25%,
-    rgba(255, 255, 255, 0.09) 50%,
-    rgba(255, 255, 255, 0.03) 75%
+    v.$color-bg-muted 25%,
+    v.$color-bg-hover 50%,
+    v.$color-bg-muted 75%
   );
   background-size: 200% 100%;
   animation: shimmerAnimation 1.6s infinite;
